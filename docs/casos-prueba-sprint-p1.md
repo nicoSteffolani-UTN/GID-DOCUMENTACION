@@ -1,0 +1,27 @@
+# Casos de prueba — Sprint P1 (MVP académico)
+
+Matriz derivada de tests Jest en `src/server/src/`. Evidencia para Informe de Instancia 3, actualizada y trazada al catálogo definitivo de Épicas e Historias de Usuario (`US-01` a `US-80` en [`../../historias_de_usuario/`](../../historias_de_usuario/README.md)).
+
+| ID | Épica | Historia (Catálogo GID) | ID repo anterior | Precondición | Pasos | Resultado esperado | Test |
+|----|:-----:|-------------------------|:----------------:|--------------|-------|-------------------|------|
+| CP-P1-01 | E01 | [US-01](../../historias_de_usuario/US-01-ingreso-redireccion-cidi.md) / [US-05](../../historias_de_usuario/US-05-arnes-ingreso-simulado-temporal.md) | US-01 | Usuario demo en fixture (CiDi Nivel 2) | POST `/api/auth/mock-login` con CUIL/clave válidos | 200 + JWT + rol (`aspirante` / `vocal`) | `app.test.ts` |
+| CP-P1-02 | E01 | [US-01](../../historias_de_usuario/US-01-ingreso-redireccion-cidi.md) / [US-02](../../historias_de_usuario/US-02-verificacion-cidi-nivel-2.md) / [US-05](../../historias_de_usuario/US-05-arnes-ingreso-simulado-temporal.md) | US-01 | Credencial inválida o cuenta CiDi Nivel 1 | POST mock-login con clave errónea o CUIL Nivel 1 (`20987654321`) | 401 / 403 bloqueo de acceso | `app.test.ts` |
+| CP-P1-03 | E03 | [US-11](../../historias_de_usuario/US-11-carga-manual-antecedentes-pdf.md) / [US-13](../../historias_de_usuario/US-13-consulta-listado-estados-legajo.md) | US-03 | Aspirante autenticado | POST `/api/legajo` categoría títulos + adjunto PDF (≤ 1 MB) | 201 + antecedente en estado `PENDIENTE` | `mvp-chain.test.ts` |
+| CP-P1-04 | E03 | [US-11](../../historias_de_usuario/US-11-carga-manual-antecedentes-pdf.md) | US-03 | Aspirante autenticado | POST antecedente con campos obligatorios faltantes (ej. antigüedad sin cargo) | 400 con mensaje de validación | `mvp-chain.test.ts` |
+| CP-P1-05 | E03 | [US-12](../../historias_de_usuario/US-12-sincronizacion-automatica-antecedentes-sge.md) | US-03 | Antecedente provincial disponible | POST `/api/legajo/sincronizar-provincia` | importados > 0, origen `PROVINCIA` (idempotente) | `mvp-chain.test.ts` |
+| CP-P1-06 | E03 | [US-15](../../historias_de_usuario/US-15-baja-antecedentes-manuales-pendientes.md) | US-03 | Antecedente provincial o validado | DELETE antecedente de origen `PROVINCIA` | 400 bloqueado (solo permite baja de manuales pendientes) | `mvp-chain.test.ts` |
+| CP-P1-07 | E06 | [US-28](../../historias_de_usuario/US-28-confeccion-formulario-c-tope-3x5.md) | US-04 | Legajo con título | PUT `/api/formulario-c` con > 3 escuelas | 400 tope reglamentario de 3 establecimientos | `mvp-chain.test.ts` |
+| CP-P1-08 | E06 | [US-28](../../historias_de_usuario/US-28-confeccion-formulario-c-tope-3x5.md) | US-04 | Legajo con título | PUT `/api/formulario-c` con > 5 asignaturas/cargos por escuela | 400 tope reglamentario de 5 materias/cargos | `mvp-chain.test.ts` |
+| CP-P1-09 | E06 | [US-28](../../historias_de_usuario/US-28-confeccion-formulario-c-tope-3x5.md) / [US-30](../../historias_de_usuario/US-30-confirmacion-definitiva-formulario-c.md) | US-04 | Legajo con título | PUT `/api/formulario-c` inscripción habilitada (cód. 320) | 200 guardado y confirmado | `mvp-chain.test.ts` |
+| CP-P1-10 | E05 | [US-23](../../historias_de_usuario/US-23-validacion-tiempo-real-titulo-asignatura.md) | US-07 | Título matemática en legajo | POST validador habilitación asignatura 320 | `habilitado: true` (alcance Docente) | `mvp-chain.test.ts` |
+| CP-P1-11 | E05 | [US-23](../../historias_de_usuario/US-23-validacion-tiempo-real-titulo-asignatura.md) / [US-25](../../historias_de_usuario/US-25-advertencia-preventiva-materia-sin-alcance.md) | US-07 | Título matemática en legajo | POST validador habilitación asignatura 656 | `habilitado: false` (sin alcance) | `mvp-chain.test.ts` |
+| CP-P1-12 | E06 / S/E | [US-32](../../historias_de_usuario/US-32-bloqueo-modificacion-fuera-ventana-convocatoria.md) / [US-76](../../historias_de_usuario/US-76-parametrizacion-ventana-convocatoria-ciclo-lectivo.md) | TBD-07 | `INSCRIPCION_ABIERTA=false` | GET `/api/formulario-c/estado` + PUT `/api/formulario-c` | `abierta: false` + PUT rechazado con 400/403 | `mvp-chain.test.ts` |
+| CP-P1-13 | E05 | [US-22](../../historias_de_usuario/US-22-consulta-catalogo-titulos-busqueda-competencias.md) / [US-24](../../historias_de_usuario/US-24-busqueda-inversa-titulos-por-materia.md) | US-07 | Aspirante autenticado | GET `/api/validador/titulos` | Lista del catálogo de títulos y alcances | `mvp-chain.test.ts`, `validador.service.test.ts` |
+| CP-P1-14 | E05 / E06 | [US-25](../../historias_de_usuario/US-25-advertencia-preventiva-materia-sin-alcance.md) / [US-26](../../historias_de_usuario/US-26-marcado-automatico-sin-titulo-habilitante-vocal.md) | US-04/07 | Título matemática en legajo | PUT Form C con 320 y 656 (no habilitada) | 200; 656 marcada con `habilitado: false` («Sin título habilitante») para revisión del vocal | `mvp-chain.test.ts` |
+| CP-P1-15 | E06 | [US-27](../../historias_de_usuario/US-27-consulta-busqueda-padron-escuelas-oferta-curricular.md) / [US-28](../../historias_de_usuario/US-28-confeccion-formulario-c-tope-3x5.md) | US-04 | Aspirante autenticado | PUT Form C con asignatura fuera del catálogo de la escuela | 400 ítem no válido para el establecimiento | `mvp-chain.test.ts` |
+
+## Ejecución
+
+```bash
+cd src/server && npm test -- mvp-chain.test.ts app.test.ts
+```

@@ -1,0 +1,2109 @@
+openapi: 3.0.3
+info:
+  title: API Portal Docente — GID (G24)
+  version: 0.1.0
+  description: |
+    API REST del Portal Docente Provincial de Córdoba (Gestión Integral Docente, Proyecto Final ISI UTN-FRC, Grupo G24).
+    Monolito modular Express + TypeScript (ADR-002, ADR-004, ADR-006).
+
+    **Autenticación:** `POST /api/auth/mock-login` simula Ciudadano Digital (ADR-005) y devuelve un JWT. Las rutas privadas
+    requieren `Authorization: Bearer <token>`. El token incluye `sub` (CUIL), `nombre`, `rol` (`aspirante` | `vocal`) y `cidiNivel`.
+    Los datos del usuario siempre se toman del token: ninguna ruta acepta el CUIL del solicitante como parámetro.
+
+    **Fuentes de datos:** según `INTEGRATION_MODE` (`mock` | `sql` | `prod`) algunas respuestas provienen de fixtures o del
+    laboratorio Oracle MT4D en solo lectura. El contrato HTTP es el mismo en todos los modos (ver `src/server/README.md`).
+
+    **Errores:** todas las respuestas de error tienen la forma `{ "mensaje": "..." }` con texto en español.
+servers:
+  - url: http://localhost:3000
+    description: Desarrollo (npm run dev:server)
+  - url: http://localhost:8080
+    description: Docker producción (Nginx redirige /api al backend)
+tags:
+  - name: Sistema
+  - name: Autenticación
+    description: Login simulado de CiDi y sesión (US-01).
+  - name: Legajo
+    description: Antecedentes del aspirante (actualizar legajo, obtener antecedentes provinciales, estado y observaciones). Rol aspirante.
+  - name: Formulario C
+    description: Inscripción a cargos y horas (tope 3 escuelas × 5 ítems).
+  - name: Validador
+    description: Alcance de título — habilitación por asignatura/cargo (ADR-009).
+  - name: Puntaje
+    description: Puntaje de inscripción LOM (ADR-010). Rol aspirante.
+  - name: Mapa
+    description: Mapa territorial, semáforo LOM e intereses (ADR-008, ADR-016, ADR-019). Rol aspirante.
+  - name: Autogestión
+    description: Simulador de carrera docente (ADR-024, ADR-011) y recomendador de capacitaciones (ADR-012). Estimaciones, no el orden oficial. Rol aspirante.
+  - name: Perfil
+    description: Vista consolidada del docente (PD-23) con antigüedad y trayectoria (ADR-030). Rol aspirante.
+  - name: Asistente
+    description: Asistente docente (chatbot) que responde con los datos del portal y lleva a cada pantalla (ADR-022). Rol aspirante.
+  - name: Junta
+    description: Revisión de aspirantes por escuela asignada (ADR-014). Rol vocal.
+
+paths:
+  /api/health:
+    get:
+      tags: [Sistema]
+      summary: Estado de la API y de las integraciones
+      description: Público. Usado por CI y por los healthchecks de Docker. No expone secretos.
+      security: []
+      responses:
+        '200':
+          description: API operativa.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+
+  /api/auth/mock-login:
+    post:
+      tags: [Autenticación]
+      summary: Login simulado de Ciudadano Digital
+      description: |
+        Valida CUIL y contraseña contra usuarios ficticios y exige CiDi nivel 2. Con `cuentaPrueba: true` ingresa
+        como el docente real de `DOCENTE_PRUEBA_CUIL` (el CUIL lo completa la API). Tiene límite de intentos:
+        200 cada 15 minutos por IP en desarrollo y 30 en producción.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MockLoginBody' }
+      responses:
+        '200':
+          description: Login correcto.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginSuccessResponse' }
+        '401':
+          description: Faltan datos, credenciales inválidas o CiDi de nivel insuficiente.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                nivel:
+                  value: { mensaje: 'Tu cuenta CiDi no tiene nivel 2. Necesitás CiDi nivel 2 para acceder al portal de la junta.' }
+        '429':
+          description: Demasiados intentos.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/auth/cuenta-prueba:
+    get:
+      tags: [Autenticación]
+      summary: Docente real de prueba configurado
+      description: |
+        Indica si la API tiene un docente real del lab configurado (`DOCENTE_PRUEBA_CUIL`), para mostrar su botón en
+        el login. No devuelve el CUIL ni la contraseña.
+      security: []
+      responses:
+        '200':
+          description: Disponibilidad y nombre a mostrar.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [disponible, nombre]
+                properties:
+                  disponible: { type: boolean }
+                  nombre: { type: string, nullable: true }
+
+  /api/auth/me:
+    get:
+      tags: [Autenticación]
+      summary: Usuario de la sesión
+      responses:
+        '200':
+          description: Datos del usuario del token.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user: { $ref: '#/components/schemas/AuthUser' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/logout:
+    post:
+      tags: [Autenticación]
+      summary: Cierre de sesión
+      description: JWT sin estado; el cliente debe descartar el token. El endpoint solo confirma la intención.
+      responses:
+        '200':
+          description: Confirmación.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mensaje' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/legajo/categorias:
+    get:
+      tags: [Legajo]
+      summary: Categorías de antecedentes
+      responses:
+        '200':
+          description: Categorías y requisitos de adjunto.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [categorias]
+                properties:
+                  categorias:
+                    type: array
+                    items: { $ref: '#/components/schemas/CategoriaAntecedente' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/legajo:
+    get:
+      tags: [Legajo]
+      summary: Legajo del aspirante
+      description: Antecedentes del CUIL del token, con estado y observaciones de rechazo.
+      responses:
+        '200':
+          description: Legajo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LegajoResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+    post:
+      tags: [Legajo]
+      summary: Alta de antecedente
+      description: |
+        El antecedente se crea en estado `PENDIENTE` con origen `MANUAL`.
+        - `titulos` exige `tituloCodigo` y `tituloData` (institución, título, analítico, fin de estudio, promedio y certificado analítico anverso y reverso).
+        - `antiguedad` exige `antiguedadDocente.provincia` y `antiguedadDocente.cargo`.
+        - Las categorías con `requiere_adjunto`, `requiere_adjunto_si_externo` o `requiere_adjunto_si_no_provincial` exigen `archivo`.
+        - Cada adjunto debe pesar como máximo 1 MB (1.048.576 bytes); el cuerpo completo, como máximo 5 MB.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AltaAntecedenteBody' }
+      responses:
+        '201':
+          description: Antecedente creado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [antecedente]
+                properties:
+                  antecedente: { $ref: '#/components/schemas/AntecedenteItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+        '413': { $ref: '#/components/responses/PayloadTooLarge' }
+
+  /api/legajo/{id}:
+    delete:
+      tags: [Legajo]
+      summary: Baja de antecedente
+      description: Solo antecedentes de origen `MANUAL`; los de origen `PROVINCIA` no se pueden eliminar.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Eliminado.
+        '400':
+          description: Antecedente inexistente o de origen provincial.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/legajo/sincronizar-provincia:
+    post:
+      tags: [Legajo]
+      summary: Importar antecedentes provinciales
+      description: |
+        Trae los antecedentes que la Junta ya validó para el CUIL (en `prod`, títulos de `T_TITULOS_EMPLEADO` y el resto
+        de `T_ITEMS_VARIO_JD`; fuera de `prod`, de ejemplo; ver ADR-017) y agrega solo los que
+        todavía no estén en el legajo (por `idProvincia`), con origen `PROVINCIA`.
+      responses:
+        '200':
+          description: Resultado de la importación.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [importados, antecedentes]
+                properties:
+                  importados: { type: integer, minimum: 0 }
+                  antecedentes:
+                    type: array
+                    items: { $ref: '#/components/schemas/AntecedenteItem' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/formulario-c/estado:
+    get:
+      tags: [Formulario C]
+      summary: Ventana de inscripción
+      description: Refleja la variable `INSCRIPCION_ABIERTA`.
+      responses:
+        '200':
+          description: Estado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [inscripcionAbierta]
+                properties:
+                  inscripcionAbierta: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/formulario-c/escuelas:
+    get:
+      tags: [Formulario C]
+      summary: Búsqueda de escuelas
+      description: Filtra por nombre, CUE, código de empresa o ID exacto de la escuela. Sin `q` devuelve todo el padrón.
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+          example: EE0320014
+      responses:
+        '200':
+          description: Escuelas.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [escuelas]
+                properties:
+                  escuelas:
+                    type: array
+                    items: { $ref: '#/components/schemas/EscuelaResumen' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/formulario-c/catalogo:
+    get:
+      tags: [Formulario C]
+      summary: Materias y cargos de una escuela
+      parameters:
+        - name: escuelaId
+          in: query
+          required: true
+          schema: { type: string }
+          example: ESC-001
+      responses:
+        '200':
+          description: Catálogo.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/CatalogoItem' }
+        '400':
+          description: Escuela sin catálogo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/formulario-c/propuesta:
+    get:
+      tags: [Formulario C]
+      summary: Propuesta de inscripción (segura, justa y apuesta)
+      description: |
+        Propone hasta tres escuelas del mapa con promedio, en el padrón y con materias que habilitan los títulos del docente:
+        una segura, una justa y una apuesta (ADR-025). Prioriza vacantes abiertas, cercanía (si hay zona) y cantidad de
+        materias. En cada una sugiere hasta cinco materias o cargos. Solo lectura: no guarda nada. La zona es opcional,
+        pero si se manda debe venir completa (`lat`, `lng`, `radioKm`).
+      parameters:
+        - { name: lat, in: query, required: false, schema: { type: number } }
+        - { name: lng, in: query, required: false, schema: { type: number } }
+        - { name: radioKm, in: query, required: false, schema: { type: number, minimum: 0, exclusiveMinimum: true } }
+        - { name: zona, in: query, required: false, schema: { type: string }, description: Nombre de la zona para los textos. }
+        - { name: margen, in: query, required: false, schema: { type: number, minimum: 0, maximum: 20, default: 3 } }
+      responses:
+        '200':
+          description: Propuesta.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PropuestaFormularioC' }
+        '400':
+          description: Zona incompleta o inválida.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422':
+          description: No se puede proponer (sin títulos, sin puntaje o sin escuelas candidatas en la zona).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/formulario-c/revision:
+    post:
+      tags: [Formulario C]
+      summary: Revisión de la inscripción en pantalla (sin guardar)
+      description: |
+        Revisa la inscripción que el docente tiene en pantalla y devuelve hallazgos ordenados: alertas, sugerencias y lo que
+        está bien (ADR-025). Se toman hasta 3 escuelas y 5 ítems por escuela. No guarda nada.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [inscripciones]
+              properties:
+                margen: { type: number, minimum: 0, maximum: 20, default: 3 }
+                inscripciones:
+                  type: array
+                  items:
+                    type: object
+                    required: [escuelaId, items]
+                    properties:
+                      escuelaId: { type: string }
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          required: [codigo, tipo]
+                          properties:
+                            codigo: { type: string }
+                            tipo: { type: string, enum: [asignatura, cargo] }
+                            nombre: { type: string }
+      responses:
+        '200':
+          description: Revisión.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RevisionFormularioC' }
+        '400':
+          description: Falta `inscripciones` o no es una lista.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/formulario-c:
+    get:
+      tags: [Formulario C]
+      summary: Formulario C guardado
+      responses:
+        '200':
+          description: Inscripciones del CUIL del token (vacío si no guardó).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FormularioCData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [Formulario C]
+      summary: Guardar inscripciones
+      description: |
+        Reemplaza el formulario completo. Reglas:
+        - Inscripción abierta (`INSCRIPCION_ABIERTA=true`).
+        - Máximo 3 escuelas, sin repetir; cada escuela debe existir en el padrón.
+        - Máximo 5 ítems por escuela; cada ítem debe existir en el catálogo de la escuela (mismo `codigo` y `tipo`).
+        - Los ítems que ningún título del legajo habilita se aceptan igual: la junta los evalúa sin título habilitante (ADR-009).
+
+        El servidor normaliza `escuelaNombre` y el `nombre` de cada ítem desde el padrón y el catálogo, y devuelve cada ítem
+        con `habilitado` (y `tipoCompetencia` cuando habilita), calculados con los títulos actuales del legajo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FormularioCData' }
+      responses:
+        '200':
+          description: Formulario guardado (normalizado).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FormularioCData' }
+        '400':
+          description: Inscripción cerrada, tope excedido, escuela inválida o ítem fuera del catálogo de la escuela.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              examples:
+                tope: { value: { mensaje: 'Máximo 3 establecimientos por Formulario C.' } }
+                cerrada: { value: { mensaje: 'Inscripción cerrada.' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/validador/titulos:
+    get:
+      tags: [Validador]
+      summary: Catálogo de títulos y habilitaciones
+      responses:
+        '200':
+          description: Títulos con los códigos que habilitan.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [titulos]
+                properties:
+                  titulos:
+                    type: array
+                    items: { $ref: '#/components/schemas/TituloAlcanceRegla' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/validador/habilitacion:
+    post:
+      tags: [Validador]
+      summary: Evaluar habilitación por título
+      description: |
+        Si `titulos` viene vacío o no se envía, se usan los títulos cargados en el legajo del usuario del token.
+        La comparación de títulos ignora acentos, mayúsculas, espacios repetidos y puntos finales.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HabilitacionBody' }
+      responses:
+        '200':
+          description: Resultado de la evaluación.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HabilitacionResult' }
+        '400':
+          description: Falta `inscripcion.codigo`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/puntaje/inscripcion:
+    get:
+      tags: [Puntaje]
+      summary: Puntaje de inscripción del aspirante
+      description: |
+        Valoración LOM por escuela e ítem. Con `INTEGRATION_MODE=prod` el total proviene del laboratorio y el desglose
+        (`tituloBase`, `antiguedad`, `capacitaciones`) llega en 0 (ADR-010).
+      responses:
+        '200':
+          description: Valoración o aviso de no disponible.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PuntajeInscripcionResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/perfil:
+    get:
+      tags: [Perfil]
+      summary: Perfil consolidado del docente
+      description: |
+        Puntaje LOM, legajo, inscripción del Formulario C, intereses del mapa, alertas de vacantes, antigüedad docente y
+        trayectoria por escuela. En `INTEGRATION_MODE=prod` la antigüedad sale de `PEOPLENET.M4CBA_VW_CONC_DIR` y la trayectoria
+        de `PEOPLENET.M4CBA_VW_CONSE_CAR` (ADR-030); si el lab no responde, `antiguedad.disponible` llega en `false` y el resto
+        del perfil se muestra igual.
+      responses:
+        '200':
+          description: Perfil.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PerfilResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/mapa/escuelas:
+    get:
+      tags: [Mapa]
+      summary: Escuelas con semáforo LOM
+      description: |
+        Escuelas secundarias estatales (un punto por sede) con promedio LOM y el puntaje del aspirante (`tuPuntaje`, máximo de sus filas de
+        valoración) para el semáforo. `totalEscuelas` y `departamentos` se calculan sin filtros; `localidades` es en cascada
+        (las del `departamento` pedido) y `barrios` también (los de `departamento` + `localidad`). Los barrios que no son
+        nombres (`I`, `SD`, `-`, placeholders) llegan como null.
+        Con Oracle lab los promedios son históricos (ADR-019).
+      parameters:
+        - name: departamento
+          in: query
+          description: Coincidencia exacta, sin distinguir acentos ni mayúsculas.
+          schema: { type: string }
+        - name: localidad
+          in: query
+          description: Contiene; sin distinguir acentos ni mayúsculas.
+          schema: { type: string }
+        - name: barrio
+          in: query
+          description: Contiene; sin distinguir acentos ni mayúsculas.
+          schema: { type: string }
+        - name: nombre
+          in: query
+          description: Contiene en nombre o CUE; sin distinguir acentos ni mayúsculas.
+          schema: { type: string }
+      responses:
+        '200':
+          description: Escuelas y datos para filtros.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/EscuelasLomResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/mapa/interes:
+    get:
+      tags: [Mapa]
+      summary: Intereses registrados
+      responses:
+        '200':
+          description: Intereses del aspirante.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InteresesResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+    post:
+      tags: [Mapa]
+      summary: Registrar interés en una escuela
+      description: |
+        No es una inscripción en la Junta de Clasificación: solo sirve para recibir avisos de vacantes. Un interés por escuela,
+        sin tope; la escuela tiene que estar en el mapa. Se guarda con el nombre de la escuela madre aunque se marque desde un
+        anexo o una extensión áulica.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [escuelaId]
+              properties:
+                escuelaId: { type: string, example: EE0110080 }
+      responses:
+        '201':
+          description: Intereses actualizados.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InteresesResponse' }
+        '400':
+          description: Falta escuelaId, la escuela no existe o ya tiene interés registrado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/mapa/interes/{escuelaId}:
+    delete:
+      tags: [Mapa]
+      summary: Eliminar un interés
+      parameters:
+        - name: escuelaId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Intereses restantes.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InteresesResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+        '404':
+          description: El interés no existe.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/simulador/ascenso:
+    get:
+      tags: [Autogestión]
+      summary: Simulación de puntaje LOM
+      description: |
+        Escenarios sin cambios, con un curso y con dos cursos. Puntos por curso = horas × 0,017 (cursos de 20 h o más,
+        Dto. 257/19 Art. 10). El nombre de la ruta se conserva por compatibilidad (ADR-011). Sin valoración, la base es 45.
+      responses:
+        '200':
+          description: Simulación.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SimuladorResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/simulador/carrera:
+    get:
+      tags: [Autogestión]
+      summary: Punto de partida del simulador de carrera
+      description: |
+        Datos para que el navegador arme y recalcule escenarios (ADR-024). Solo lectura: no se guarda nada.
+        `puntaje.valor` es null si el docente todavía no tiene puntaje del que partir. El tope de antigüedad solo
+        se informa con puntaje estimado.
+      responses:
+        '200':
+          description: Punto de partida.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CarreraBase' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/simulador/carrera/titulo:
+    get:
+      tags: [Autogestión]
+      summary: Efecto de un título nuevo
+      parameters:
+        - { name: codigo, in: query, required: true, schema: { type: string }, description: Código o nombre del título del catálogo. }
+      responses:
+        '200':
+          description: Materias con vacantes que habilita y puntos de título que suma.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TituloSimulado' }
+        '400':
+          description: Falta el código, o el docente ya tiene ese título.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: El título no existe en el catálogo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/simulador/carrera/meta:
+    get:
+      tags: [Autogestión]
+      summary: Camino más corto hacia una meta (escuela, zona o materia)
+      description: |
+        Pide exactamente una meta: `escuelaId`, `zona` (localidad o departamento) o `materia` (códigos separados por coma).
+        Para una escuela hay un solo objetivo; para una zona o una materia hay hasta tres niveles (la próxima escuela,
+        la mitad, todas) sin repetir escuelas. Para cada nivel y para 0 a 5 años de espera, descuenta los puntos de
+        antigüedad y elige los cursos pendientes que cubren el resto. Si el tope de antigüedad ya no deja sumar más,
+        no repite caminos. El `margen` suma puntos de colchón al promedio histórico de cada escuela.
+        La materia se resuelve contra el catálogo de materias de cada escuela del padrón.
+      parameters:
+        - { name: escuelaId, in: query, required: false, schema: { type: string } }
+        - { name: zona, in: query, required: false, schema: { type: string }, description: Localidad o departamento. }
+        - { name: materia, in: query, required: false, schema: { type: string }, description: 'Códigos de la materia, separados por coma.' }
+        - { name: margen, in: query, required: false, schema: { type: number, minimum: 0, maximum: 20, default: 0 } }
+      responses:
+        '200':
+          description: Objetivos de la meta con sus caminos. `objetivos` queda vacío si ya llega a todas las escuelas.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MetaCarrera' }
+        '400':
+          description: Falta la meta, hay más de una, el margen no es un número, la meta no tiene escuelas con promedio o el docente no tiene puntaje.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: La escuela, la zona o la materia no existen.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/simulador/pendientes:
+    get:
+      tags: [Autogestión]
+      summary: Cuánto valen los antecedentes pendientes de revisión
+      description: |
+        Estima qué pasaría si la junta aceptara hoy todos los antecedentes pendientes (ADR-025): puntaje antes y después,
+        escuelas a cuyo promedio llegaría y materias nuevas. Por antecedente: títulos (materias nuevas y, con puntaje estimado,
+        lo que sube el mejor estimado), y el resto según el Dto. 257/19 con su artículo (ADR-027). Lo que no se puede leer queda sin estimar
+        (`puntos: null`). Solo lectura.
+      responses:
+        '200':
+          description: Estimación.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PendientesImpacto' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/simulador/ajuste-vacantes:
+    get:
+      tags: [Autogestión]
+      summary: Cuánto le conviene cada vacante publicada
+      description: |
+        Para cada vacante publicada: habilitación y condición según sus títulos, su puntaje en esa materia, el promedio de la
+        escuela, la diferencia, el nivel y un motivo (ADR-025). Ordenadas de la que más le conviene a la que menos.
+      parameters:
+        - { name: margen, in: query, required: false, schema: { type: number, minimum: 0, maximum: 20, default: 3 } }
+      responses:
+        '200':
+          description: Ajuste de cada vacante.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AjusteVacantes' }
+        '400':
+          description: El margen no es un número.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/capacitaciones/recomendaciones:
+    get:
+      tags: [Autogestión]
+      summary: Cursos recomendados
+      description: |
+        Sugiere cursos si el componente de capacitaciones del puntaje está por debajo del umbral de referencia o si el legajo
+        no tiene cursos cargados; si no, sugiere cursos generales.
+      responses:
+        '200':
+          description: Sugerencias.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CapacitacionesResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/capacitaciones/catalogo:
+    get:
+      tags: [Autogestión]
+      summary: Catálogo completo de cursos
+      description: Todos los cursos del catálogo SIPEC (nombre, resolución y horas), para buscar por tema. Los puntos son estimados.
+      responses:
+        '200':
+          description: Catálogo.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CapacitacionesCatalogoResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/asistente/inicio:
+    get:
+      tags: [Asistente]
+      summary: Saludo, avisos y opciones iniciales
+      description: Saluda al docente por su nombre, suma los avisos más importantes si los hay y devuelve las 8 opciones de inicio.
+      responses:
+        '200':
+          description: Primera respuesta del asistente.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AsistenteRespuesta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/asistente/avisos:
+    get:
+      tags: [Asistente]
+      summary: Avisos para el docente
+      description: |
+        Lo que el docente tiene para atender, de prioridad alta a baja: rechazos de la junta, inscripción sin escuelas o
+        con materias no habilitadas, escuelas sin materias, título sin cargar, vacantes en sus intereses del mapa y
+        antecedentes sin revisar. Los avisos de inscripción solo aparecen con la inscripción abierta.
+      responses:
+        '200':
+          description: Avisos ordenados por prioridad.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [avisos]
+                properties:
+                  avisos:
+                    type: array
+                    items: { $ref: '#/components/schemas/AsistenteAviso' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/asistente/mensaje:
+    post:
+      tags: [Asistente]
+      summary: Enviar un mensaje o elegir una opción
+      description: |
+        Recibe texto libre o la acción de una opción, junto con el `contexto` de la respuesta anterior. El servidor no guarda
+        conversaciones: el cliente reenvía el contexto y el servidor solo toma sus campos conocidos.
+
+        Intents: `recomendar_materias`, `recomendar_escuelas_ubicacion`, `evaluar_postulacion_escuela`, `recomendar_cursos`,
+        `cargar_titulo`, `postular_escuela_especifica`, `simular_trayectoria`, `plan_escuela`, `proximo_paso`, `revisar_pendientes`.
+        Si la respuesta trae `navegar`, el cliente
+        lleva al docente a esa pantalla con esos filtros.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AsistenteEntrada' }
+            examples:
+              texto:
+                summary: Texto libre
+                value: { texto: '¿Me conviene postularme al IPET 247?', contexto: {} }
+              opcion:
+                summary: Opción elegida
+                value: { accion: { tipo: intent, intent: postular_escuela_especifica, datos: { escuelaId: ESC-001, materiaCodigo: '320' } } }
+      responses:
+        '200':
+          description: Respuesta del asistente.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AsistenteRespuesta' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/junta/escuelas:
+    get:
+      tags: [Junta]
+      summary: Escuelas asignadas al vocal
+      responses:
+        '200':
+          description: Escuelas con total de aspirantes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [escuelas]
+                properties:
+                  escuelas:
+                    type: array
+                    items: { $ref: '#/components/schemas/EscuelaAsignada' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenRole' }
+
+  /api/junta/escuelas/{escuelaId}/aspirantes:
+    get:
+      tags: [Junta]
+      summary: Aspirantes de una escuela
+      description: Aspirantes que eligieron la escuela en su Formulario C.
+      parameters:
+        - $ref: '#/components/parameters/EscuelaIdPath'
+        - name: estado
+          in: query
+          description: Filtra por estado de revisión del aspirante.
+          schema: { $ref: '#/components/schemas/EstadoRevision' }
+      responses:
+        '200':
+          description: Aspirantes.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [aspirantes]
+                properties:
+                  aspirantes:
+                    type: array
+                    items: { $ref: '#/components/schemas/AspiranteResumen' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenJunta' }
+
+  /api/junta/aspirantes/{cuil}/legajo:
+    get:
+      tags: [Junta]
+      summary: Legajo de un aspirante para revisión
+      parameters:
+        - $ref: '#/components/parameters/CuilPath'
+        - name: escuelaId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Legajo del aspirante.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LegajoAspiranteResponse' }
+        '400':
+          description: Falta `escuelaId` o el aspirante no postuló a esa escuela.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenJunta' }
+
+  /api/junta/aspirantes/{cuil}/antecedentes/{id}/aceptar:
+    post:
+      tags: [Junta]
+      summary: Aceptar antecedente
+      description: Pasa el antecedente a `SIN_PENDIENTE` y limpia la observación vigente.
+      parameters:
+        - $ref: '#/components/parameters/CuilPath'
+        - $ref: '#/components/parameters/AntecedenteIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [escuelaId]
+              properties:
+                escuelaId: { type: string, example: ESC-001 }
+      responses:
+        '200': { $ref: '#/components/responses/AntecedenteRevisado' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenJunta' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/junta/aspirantes/{cuil}/antecedentes/{id}/rechazar:
+    post:
+      tags: [Junta]
+      summary: Rechazar antecedente con motivo
+      description: |
+        Pasa el antecedente a `RECHAZADO`, guarda la observación (motivo, fecha y vocal) y la agrega al historial.
+        El aspirante la ve en su legajo.
+      parameters:
+        - $ref: '#/components/parameters/CuilPath'
+        - $ref: '#/components/parameters/AntecedenteIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [escuelaId, motivo]
+              properties:
+                escuelaId: { type: string, example: ESC-001 }
+                motivo: { type: string, minLength: 10, example: 'Falta la firma en el certificado.' }
+      responses:
+        '200': { $ref: '#/components/responses/AntecedenteRevisado' }
+        '400':
+          description: Motivo con menos de 10 caracteres o aspirante que no postuló a la escuela.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/ForbiddenJunta' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token emitido por `POST /api/auth/mock-login`. Vigencia según `JWT_EXPIRES_IN` (8 h por defecto).
+
+  parameters:
+    EscuelaIdPath:
+      name: escuelaId
+      in: path
+      required: true
+      schema: { type: string }
+      example: ESC-001
+    CuilPath:
+      name: cuil
+      in: path
+      required: true
+      description: CUIL del aspirante (11 dígitos).
+      schema: { type: string, pattern: '^[0-9]{11}$' }
+    AntecedenteIdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+
+  responses:
+    BadRequest:
+      description: Datos inválidos o regla de negocio incumplida.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Falta el token o es inválido o expiró.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            sinToken: { value: { mensaje: 'Sesión no válida. Iniciá sesión nuevamente.' } }
+            expirado: { value: { mensaje: 'Sesión expirada o token inválido.' } }
+    ForbiddenRole:
+      description: El rol del token no tiene acceso a esta ruta.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { mensaje: 'Acceso denegado para su rol.' }
+    ForbiddenJunta:
+      description: Rol distinto de vocal, o la escuela no está asignada al vocal.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            rol: { value: { mensaje: 'Acceso denegado para su rol.' } }
+            escuela: { value: { mensaje: 'No tenés asignada esa escuela.' } }
+    NotFound:
+      description: Recurso inexistente.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    PayloadTooLarge:
+      description: El cuerpo supera 5 MB.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    AntecedenteRevisado:
+      description: Antecedente actualizado.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [antecedente]
+            properties:
+              antecedente: { $ref: '#/components/schemas/AntecedenteItem' }
+
+  schemas:
+    Error:
+      type: object
+      required: [mensaje]
+      properties:
+        mensaje: { type: string }
+    Mensaje:
+      type: object
+      required: [mensaje]
+      properties:
+        mensaje: { type: string }
+    CodigoNombre:
+      type: object
+      required: [codigo, nombre]
+      properties:
+        codigo: { type: string }
+        nombre: { type: string }
+
+    HealthResponse:
+      type: object
+      properties:
+        status: { type: string, example: ok }
+        version: { type: string, example: 0.1.0 }
+        integrationMode: { type: string, enum: [mock, sql, prod] }
+        inscripcionAbierta: { type: boolean }
+        alcance:
+          type: object
+          properties:
+            ready: { type: boolean }
+            filasCargadas: { type: integer, nullable: true }
+            sourceObject: { type: string, nullable: true }
+        padron:
+          type: object
+          properties:
+            ready: { type: boolean }
+            empresasCargadas: { type: integer, nullable: true }
+            catalogoFilas: { type: integer, nullable: true }
+            sourceObjects:
+              type: object
+              nullable: true
+              properties:
+                empresas: { type: string }
+                catalogo: { type: string }
+                cue: { type: string }
+        mapa:
+          type: object
+          properties:
+            ready: { type: boolean }
+            establecimientosCargados: { type: integer, nullable: true }
+            filasVacantes: { type: integer, nullable: true }
+            escuelasLomCargadas: { type: integer, nullable: true }
+            filasLom: { type: integer, nullable: true }
+            sourceObjects:
+              type: object
+              nullable: true
+              additionalProperties: { type: string }
+
+    MockLoginBody:
+      type: object
+      required: [password]
+      properties:
+        cuil: { type: string, example: '20123456789', description: 'Obligatorio salvo con cuentaPrueba.' }
+        password: { type: string, format: password }
+        cuentaPrueba: { type: boolean, description: 'Ingresa como el docente real de DOCENTE_PRUEBA_CUIL.' }
+    AuthUser:
+      type: object
+      required: [cuil, nombre, rol, cidiNivel]
+      properties:
+        cuil: { type: string }
+        nombre: { type: string }
+        rol: { type: string, enum: [aspirante, vocal] }
+        cidiNivel: { type: integer }
+    LoginSuccessResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token: { type: string, description: JWT }
+        user: { $ref: '#/components/schemas/AuthUser' }
+
+    CategoriaAntecedente:
+      type: object
+      required: [id, nombre]
+      properties:
+        id: { type: string, example: titulos }
+        nombre: { type: string, example: Títulos }
+        requiere_adjunto: { type: boolean }
+        requiere_adjunto_si_externo: { type: boolean }
+        requiere_adjunto_si_no_provincial: { type: boolean }
+        requiere_descripcion: { type: boolean }
+    EstadoAntecedente:
+      type: string
+      enum: [PENDIENTE, SIN_PENDIENTE, RECHAZADO]
+    ArchivoAdjunto:
+      type: object
+      required: [nombre, tipo, tamanoBytes, contenidoBase64]
+      properties:
+        nombre: { type: string, example: titulo.pdf }
+        tipo: { type: string, example: application/pdf }
+        tamanoBytes: { type: integer, maximum: 1048576 }
+        contenidoBase64: { type: string, description: 'Contenido en base64, sin el prefijo data:...;base64,' }
+    ObservacionRechazo:
+      type: object
+      required: [motivo, fecha, vocalCuil, vocalNombre]
+      properties:
+        motivo: { type: string }
+        fecha: { type: string, format: date-time }
+        vocalCuil: { type: string }
+        vocalNombre: { type: string }
+    TituloDocenteData:
+      type: object
+      required: [universidadFacultadInstitutoSuperiorNivelMedio, titulo, analitico, finDeEstudio, promedio, certificadoAnaliticoAnverso, certificadoAnaliticoReverso]
+      properties:
+        universidadFacultadInstitutoSuperiorNivelMedio: { type: string }
+        titulo: { type: string }
+        analitico: { type: string }
+        finDeEstudio: { type: string }
+        promedio: { type: string }
+        planDeEstudio: { type: string }
+        certificadoAnaliticoAnverso: { $ref: '#/components/schemas/ArchivoAdjunto' }
+        certificadoAnaliticoReverso: { $ref: '#/components/schemas/ArchivoAdjunto' }
+        diplomaAnverso: { $ref: '#/components/schemas/ArchivoAdjunto' }
+        diplomaReverso: { $ref: '#/components/schemas/ArchivoAdjunto' }
+    AntiguedadDocenteData:
+      type: object
+      required: [provincia, cargo]
+      properties:
+        provincia: { type: string }
+        esUniversitario: { type: boolean }
+        establecimientoEducativo: { type: string }
+        fechaDesde: { type: string }
+        fechaHasta: { type: string }
+        totalAnios: { type: integer, minimum: 0 }
+        totalMeses: { type: integer, minimum: 0 }
+        totalDias: { type: integer, minimum: 0 }
+        cargo: { type: string }
+    FormacionPostInicialData:
+      type: object
+      properties:
+        concepto: { type: string }
+        emisor: { type: string }
+        descripcionCertificado: { type: string }
+        cantidadHoras: { type: integer, minimum: 0 }
+        fechaAntecedente: { type: string }
+    ConceptoDocenteData:
+      type: object
+      properties:
+        tipoConcepto: { type: string }
+        nivelEducativo: { type: string }
+        puntajeObtenido: { type: number }
+        conceptoAnio: { type: string }
+        fechaConfeccionAntecedente: { type: string }
+        establecimientoEducativo: { type: string }
+    EstudiosParcialesData:
+      type: object
+      properties:
+        titulo: { type: string }
+        aniosAprobados: { type: integer, minimum: 0 }
+        materiasAprobadas: { type: integer, minimum: 0 }
+        fechaUltimaMateria: { type: string }
+        planDeEstudio: { type: string }
+    AltaAntecedenteBody:
+      type: object
+      required: [categoriaId]
+      properties:
+        categoriaId: { type: string, example: titulos }
+        tituloCodigo: { type: string, example: PROFESOR DE COMPUTACION Y MATEMATICA }
+        tituloData: { $ref: '#/components/schemas/TituloDocenteData' }
+        descripcion: { type: string }
+        antiguedadDocente: { $ref: '#/components/schemas/AntiguedadDocenteData' }
+        formacionPostInicial: { $ref: '#/components/schemas/FormacionPostInicialData' }
+        conceptoDocente: { $ref: '#/components/schemas/ConceptoDocenteData' }
+        estudiosParciales: { $ref: '#/components/schemas/EstudiosParcialesData' }
+        archivoNombre: { type: string }
+        archivo: { $ref: '#/components/schemas/ArchivoAdjunto' }
+    AntecedenteItem:
+      type: object
+      required: [id, categoriaId, estado, origen, creadoEn]
+      properties:
+        id: { type: string, format: uuid }
+        categoriaId: { type: string }
+        tituloCodigo: { type: string }
+        tituloData: { $ref: '#/components/schemas/TituloDocenteData' }
+        descripcion: { type: string }
+        antiguedadDocente: { $ref: '#/components/schemas/AntiguedadDocenteData' }
+        formacionPostInicial: { $ref: '#/components/schemas/FormacionPostInicialData' }
+        conceptoDocente: { $ref: '#/components/schemas/ConceptoDocenteData' }
+        estudiosParciales: { $ref: '#/components/schemas/EstudiosParcialesData' }
+        archivoNombre: { type: string }
+        archivo: { $ref: '#/components/schemas/ArchivoAdjunto' }
+        estado: { $ref: '#/components/schemas/EstadoAntecedente' }
+        origen: { type: string, enum: [MANUAL, PROVINCIA] }
+        idProvincia: { type: string, description: Identificador del antecedente en el sistema provincial (solo origen PROVINCIA). }
+        creadoEn: { type: string, format: date-time }
+        observacionRechazo: { $ref: '#/components/schemas/ObservacionRechazo' }
+        historialObservaciones:
+          type: array
+          items: { $ref: '#/components/schemas/ObservacionRechazo' }
+    LegajoResponse:
+      type: object
+      required: [antecedentes]
+      properties:
+        antecedentes:
+          type: array
+          items: { $ref: '#/components/schemas/AntecedenteItem' }
+
+    EscuelaResumen:
+      type: object
+      required: [id, nombre, codigo_empresa, cue]
+      properties:
+        id: { type: string, description: 'ESC-… en mock; código de empresa EE… en Oracle lab.', example: ESC-001 }
+        nombre: { type: string }
+        codigo_empresa: { type: string, example: EE0320014 }
+        cue: { type: string, description: Puede venir vacío si el lab no tiene CUE para la escuela. }
+    TipoItem:
+      type: string
+      enum: [asignatura, cargo]
+    CatalogoItem:
+      type: object
+      required: [codigo, nombre, tipo]
+      properties:
+        codigo: { type: string, example: '320' }
+        nombre: { type: string, example: Matemática }
+        tipo: { $ref: '#/components/schemas/TipoItem' }
+        tipoCompetencia:
+          type: string
+          enum: [DOCENTE, HABILITANTE, SUPLETORIO]
+          readOnly: true
+          description: Mejor competencia de los títulos del legajo para el ítem. Ausente si ningún título lo habilita.
+    InscripcionItem:
+      type: object
+      required: [codigo, nombre, tipo]
+      properties:
+        codigo: { type: string }
+        nombre: { type: string }
+        tipo: { $ref: '#/components/schemas/TipoItem' }
+        habilitado:
+          type: boolean
+          readOnly: true
+          description: Si algún título del legajo habilita el ítem. `false` = inscripto sin título habilitante. No se persiste.
+        tipoCompetencia:
+          type: string
+          enum: [DOCENTE, HABILITANTE, SUPLETORIO]
+          readOnly: true
+          description: Presente cuando `habilitado` es true.
+    InscripcionEscuela:
+      type: object
+      required: [escuelaId, items]
+      properties:
+        escuelaId: { type: string }
+        escuelaNombre: { type: string }
+        items:
+          type: array
+          maxItems: 5
+          items: { $ref: '#/components/schemas/InscripcionItem' }
+    FormularioCData:
+      type: object
+      required: [inscripciones]
+      properties:
+        inscripciones:
+          type: array
+          maxItems: 3
+          items: { $ref: '#/components/schemas/InscripcionEscuela' }
+
+    TituloAlcanceRegla:
+      type: object
+      required: [codigo, nombre, habilita]
+      properties:
+        codigo: { type: string, description: Clave normalizada del título. }
+        nombre: { type: string }
+        habilita:
+          type: array
+          items: { type: string }
+          description: Códigos de asignatura o cargo habilitados.
+    HabilitacionBody:
+      type: object
+      required: [inscripcion]
+      properties:
+        titulos:
+          type: array
+          items: { type: string }
+          description: Opcional. Si falta o está vacío se usan los títulos del legajo.
+        inscripcion:
+          type: object
+          required: [codigo, tipo]
+          properties:
+            codigo: { type: string, example: '320' }
+            tipo: { $ref: '#/components/schemas/TipoItem' }
+            nombre: { type: string, example: Matemática }
+    HabilitacionResult:
+      type: object
+      required: [habilitado]
+      properties:
+        habilitado: { type: boolean }
+        motivo: { type: string, description: Presente cuando no habilita. }
+        tipoCompetencia:
+          type: string
+          enum: [DOCENTE, HABILITANTE, SUPLETORIO]
+          description: Presente cuando habilita. Con varios títulos, la mejor (DOCENTE > HABILITANTE > SUPLETORIO).
+
+    PuntajeFila:
+      type: object
+      required: [escuelaId, escuelaNombre, itemCodigo, itemNombre, itemTipo, tituloBase, antiguedad, capacitaciones, total]
+      properties:
+        escuelaId: { type: string }
+        escuelaNombre: { type: string }
+        itemCodigo: { type: string }
+        itemNombre: { type: string }
+        itemTipo: { $ref: '#/components/schemas/TipoItem' }
+        tipoCompetencia: { type: string, enum: [DOCENTE, HABILITANTE, SUPLETORIO] }
+        nivelTitulo: { type: string, enum: [superior, secundario], description: Nivel del título que da la condición (deducido del nombre). }
+        tituloBase: { type: number, description: 'Cap. I del Dto. 257/19 (en la valoración LOM, lo que informe el motor).' }
+        acumulacion: { type: number, description: 'Cap. II: acumulación de títulos (solo en el estimado).' }
+        antiguedad: { type: number, description: Cap. III. }
+        capacitaciones: { type: number, description: 'Cap. IV: formación posinicial.' }
+        otros: { type: number, description: 'Caps. V y VI (solo en el estimado).' }
+        total: { type: number }
+        partidas:
+          type: array
+          description: Título, acumulación y antigüedad de esta materia (lo demás está en `desglose.comunes`).
+          items: { $ref: '#/components/schemas/PartidaValoracion' }
+    PartidaValoracion:
+      type: object
+      description: Una línea del puntaje según el Dto. 257/19 (ADR-027). Un tope aplicado es una partida negativa.
+      required: [capitulo, articulo, concepto, puntos, origen]
+      properties:
+        capitulo: { type: string, enum: [I, II, III, IV, V, VI] }
+        articulo: { type: string, example: '24' }
+        concepto: { type: string, example: Concepto Sobresaliente 2024 }
+        puntos: { type: number }
+        origen: { type: string, enum: [dato, deducido], description: 'dato: lo dice la base; deducido: sale del texto cargado (ver nota).' }
+        antecedenteId: { type: string }
+        nota: { type: string }
+    AntecedenteSinValorar:
+      type: object
+      required: [antecedenteId, categoria, descripcion, motivo]
+      properties:
+        antecedenteId: { type: string }
+        categoria: { type: string }
+        descripcion: { type: string }
+        motivo: { type: string }
+        articulo: { type: string }
+    PuntajeInscripcionResponse:
+      type: object
+      required: [disponible]
+      properties:
+        disponible: { type: boolean }
+        mensaje: { type: string, description: Presente cuando no hay valoración. }
+        ciclo: { type: string, example: '2026' }
+        tipoOrden: { type: string, enum: [PROVISORIO, DEFINITIVO] }
+        filas:
+          type: array
+          items: { $ref: '#/components/schemas/PuntajeFila' }
+        pendientesRevision:
+          type: integer
+          description: Antecedentes que la junta todavía no revisó (igual a `revision.pendientes`).
+        revision:
+          type: object
+          description: Estado de revisión del legajo. Se informa aunque `disponible` sea false.
+          required: [pendientes, aceptados, rechazados]
+          properties:
+            pendientes: { type: integer, description: Esperan revisión de la junta; todavía no suman. }
+            aceptados: { type: integer, description: Aceptados por la junta o validados por la provincia. }
+            rechazados: { type: integer }
+        desglose:
+          type: object
+          description: Solo en el estimado. Cómo se calculó según el Dto. 257/19.
+          required: [decreto, comunes, sinValorar, noValorados]
+          properties:
+            decreto: { type: string, example: Dto. 257/19 }
+            comunes:
+              type: array
+              description: Caps. IV, V y VI; valen igual para todas las materias.
+              items: { $ref: '#/components/schemas/PartidaValoracion' }
+            sinValorar:
+              type: array
+              description: Cargados pero sin los datos para valorarlos.
+              items: { $ref: '#/components/schemas/AntecedenteSinValorar' }
+            noValorados:
+              type: array
+              description: Cargados pero el decreto no los valora.
+              items: { $ref: '#/components/schemas/AntecedenteSinValorar' }
+
+    GeoJsonProvincia:
+      type: object
+      description: FeatureCollection con polígonos (fixture demo; no hay GeoJSON oficial integrado).
+      required: [type, features]
+      properties:
+        type: { type: string, enum: [FeatureCollection] }
+        features:
+          type: array
+          items: { type: object }
+    EscuelaLomMapa:
+      type: object
+      required: [escuelaId, nombre, cue, departamento, localidad, barrio, tipoEducacion, lat, lng, promedioLom, cantidadDocentes]
+      properties:
+        escuelaId: { type: string }
+        nombre: { type: string }
+        cue: { type: string }
+        departamento: { type: string }
+        localidad: { type: string }
+        barrio: { type: string, nullable: true }
+        tipoEducacion: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+        promedioLom: { type: number, nullable: true, description: Promedio LOM de la escuela (misma escala que el puntaje del aspirante). }
+        cantidadDocentes: { type: integer, nullable: true }
+        sedeId: { type: string, nullable: true, description: ID_SEQ_EMPRESA; único por punto (sede, anexo o extensión áulica). Varias sedes pueden compartir escuelaId. }
+        tipoSede: { type: string, nullable: true, description: 'ESCUELA MADRE, ESCUELA ANEXO, EXTENSION AULICA o SEDE DISTANCIA.' }
+        domicilio: { type: string, nullable: true }
+        escuelaMadre: { type: string, nullable: true, description: Nombre de la escuela madre (mismo CUE con CUE_ANEXO 00) cuando el punto es un anexo o una extensión. }
+        idDeOtraEscuela: { type: boolean, description: El lab le asignó el escuelaId de una escuela con otro CUE; sin promedio LOM propio y sin registro de interés. }
+    EscuelasLomResponse:
+      type: object
+      required: [totalEscuelas, escuelas, tuPuntaje, geojsonProvincia, departamentos, localidades, barrios]
+      properties:
+        totalEscuelas: { type: integer }
+        escuelas:
+          type: array
+          items: { $ref: '#/components/schemas/EscuelaLomMapa' }
+        tuPuntaje: { type: number, nullable: true, description: Null si el aspirante no tiene valoración. }
+        geojsonProvincia: { $ref: '#/components/schemas/GeoJsonProvincia' }
+        departamentos: { type: array, items: { type: string } }
+        localidades: { type: array, items: { type: string } }
+        barrios: { type: array, items: { type: string } }
+    MapaInteres:
+      type: object
+      required: [escuelaId, escuelaNombre, fecha]
+      properties:
+        escuelaId: { type: string }
+        escuelaNombre: { type: string }
+        fecha: { type: string, format: date-time }
+    InteresesResponse:
+      type: object
+      required: [intereses]
+      properties:
+        intereses:
+          type: array
+          items: { $ref: '#/components/schemas/MapaInteres' }
+
+    CursoAplicado:
+      type: object
+      required: [id, nombre, puntosEstimados]
+      properties:
+        id: { type: string }
+        nombre: { type: string }
+        puntosEstimados: { type: number }
+    Escenario:
+      type: object
+      required: [id, titulo, descripcion, cursosAplicados, puntajeBase, delta, puntajeProyectado]
+      properties:
+        id: { type: string, enum: [sin-cambios, un-curso, dos-cursos] }
+        titulo: { type: string }
+        descripcion: { type: string }
+        cursosAplicados:
+          type: array
+          items: { $ref: '#/components/schemas/CursoAplicado' }
+        puntajeBase: { type: number }
+        delta: { type: number }
+        puntajeProyectado: { type: number }
+    SimuladorResponse:
+      type: object
+      required: [aviso, puntajeActual, escenarios]
+      properties:
+        aviso: { type: string }
+        puntajeActual:
+          type: object
+          required: [total]
+          properties:
+            total: { type: number }
+            ciclo: { type: string }
+        escenarios:
+          type: array
+          items: { $ref: '#/components/schemas/Escenario' }
+    CursoCarrera:
+      type: object
+      required: [id, nombre, resolucion, horas, puntos]
+      properties:
+        id: { type: string }
+        nombre: { type: string }
+        resolucion: { type: string, description: Resolución que aprueba el curso (SIPEC). }
+        horas: { type: integer }
+        puntos: { type: number }
+    CarreraBase:
+      type: object
+      required: [aviso, puntaje, antiguedad, materiasHabilitadas, escuelas, cursos, titulos, materias, intereses, inscriptas]
+      properties:
+        aviso: { type: string }
+        puntaje:
+          type: object
+          required: [valor, origen, pendientes]
+          properties:
+            valor: { type: number, nullable: true }
+            origen: { type: string, enum: [LOM, ESTIMADO], nullable: true }
+            pendientes: { type: integer, description: Antecedentes que la junta todavía no revisó. }
+        antiguedad:
+          type: object
+          required: [puntosPorAnio, maximo, actual]
+          properties:
+            puntosPorAnio: { type: number }
+            maximo: { type: number, nullable: true, description: Tope del baremo; solo con puntaje estimado. }
+            actual: { type: number, nullable: true }
+        materiasHabilitadas:
+          type: array
+          items: { type: string }
+          description: Códigos de materias con vacantes que sus títulos actuales habilitan.
+        escuelas:
+          type: array
+          items:
+            type: object
+            required: [id, nombre, localidad, departamento, lat, lng, promedio, vacantes]
+            properties:
+              id: { type: string }
+              nombre: { type: string }
+              localidad: { type: string }
+              departamento: { type: string }
+              lat: { type: number }
+              lng: { type: number }
+              promedio: { type: number, nullable: true }
+              vacantes:
+                type: array
+                items:
+                  type: object
+                  required: [materiaCodigo, materiaNombre, caracter]
+                  properties:
+                    materiaCodigo: { type: string }
+                    materiaNombre: { type: string }
+                    caracter: { type: string }
+        cursos:
+          type: array
+          items: { $ref: '#/components/schemas/CursoCarrera' }
+        titulos:
+          type: array
+          items:
+            type: object
+            required: [codigo, nombre]
+            properties:
+              codigo: { type: string }
+              nombre: { type: string }
+        intereses:
+          type: array
+          description: Identificadores de las escuelas (en mayúsculas) que el docente sigue en el mapa. Sobre ellas recibe avisos de vacantes.
+          items: { type: string }
+        inscriptas:
+          type: array
+          description: Identificadores de las escuelas (en mayúsculas) de su Formulario C; el simulador guiado las muestra como «tus escuelas».
+          items: { type: string }
+        materias:
+          type: array
+          description: Materias que habilitan sus títulos, agrupadas por nombre (un nombre puede tener varios códigos). Sirven de meta.
+          items:
+            type: object
+            required: [nombre, codigos]
+            properties:
+              nombre: { type: string }
+              codigos:
+                type: array
+                items: { type: string }
+    TituloSimulado:
+      type: object
+      required: [codigo, nombre, habilita, mejorCondicion, puntosTitulo]
+      properties:
+        codigo: { type: string }
+        nombre: { type: string }
+        habilita:
+          type: object
+          additionalProperties: { type: string, enum: [DOCENTE, HABILITANTE, SUPLETORIO] }
+          description: Código de materia con vacantes → condición con que la habilita el título.
+        mejorCondicion: { type: string, enum: [DOCENTE, HABILITANTE, SUPLETORIO], nullable: true }
+        puntosTitulo: { type: number, description: 'Lo que sube el mejor estimado según el Dto. 257/19 (título por condición y nivel, y acumulación).' }
+    MetaCarrera:
+      type: object
+      required: [tipo, nombre, puntajeActual, margen, totalEscuelas, alcanzadasHoy, objetivos]
+      properties:
+        tipo: { type: string, enum: [escuela, zona, materia] }
+        nombre: { type: string }
+        puntajeActual: { type: number }
+        margen: { type: number, description: Colchón con que se calculó. }
+        totalEscuelas: { type: integer, description: Escuelas con promedio que entran en la meta. }
+        alcanzadasHoy: { type: integer, description: 'De esas, a cuántas ya llega con el margen.' }
+        objetivos:
+          type: array
+          items:
+            type: object
+            required: [etiqueta, puntajeObjetivo, escuelasAlcanzadas, faltante, caminos]
+            properties:
+              etiqueta: { type: string, example: Llegar a la mitad (20 de 40) }
+              puntajeObjetivo: { type: number, description: Promedio de la última escuela del nivel más el margen. }
+              escuelasAlcanzadas: { type: integer }
+              faltante: { type: number }
+              caminos:
+                type: array
+                items:
+                  type: object
+                  required: [anios, puntosPorAnios, faltanteCursos, cursos, horas, puntosCursos, alcanza]
+                  properties:
+                    anios: { type: integer }
+                    puntosPorAnios: { type: number }
+                    faltanteCursos: { type: number }
+                    cursos:
+                      type: array
+                      items: { $ref: '#/components/schemas/CursoCarrera' }
+                    horas: { type: integer }
+                    puntosCursos: { type: number }
+                    alcanza: { type: boolean }
+    NivelEscuela:
+      type: string
+      enum: [segura, justa, apuesta, lejos, sin_datos]
+      description: Puntaje frente al promedio histórico de la escuela con un margen de seguridad (ADR-025).
+    PropuestaFormularioC:
+      type: object
+      required: [puntaje, origen, margen, zona, escuelas, avisos]
+      properties:
+        puntaje: { type: number }
+        origen: { type: string, enum: [LOM, ESTIMADO], nullable: true }
+        margen: { type: number }
+        zona: { type: string, nullable: true, example: a 30 km de Córdoba capital }
+        escuelas:
+          type: array
+          maxItems: 3
+          items:
+            type: object
+            required: [rol, escuelaId, nombre, localidad, promedio, diferencia, distanciaKm, vacantesAbiertas, materias, motivos]
+            properties:
+              rol: { type: string, enum: [segura, justa, apuesta] }
+              escuelaId: { type: string }
+              nombre: { type: string }
+              localidad: { type: string }
+              promedio: { type: number }
+              diferencia: { type: number, description: Puntaje menos promedio. }
+              distanciaKm: { type: number, nullable: true }
+              vacantesAbiertas: { type: integer }
+              materias:
+                type: array
+                maxItems: 5
+                items:
+                  type: object
+                  required: [codigo, nombre, tipo, condicion, vacanteAbierta]
+                  properties:
+                    codigo: { type: string }
+                    nombre: { type: string }
+                    tipo: { type: string, enum: [asignatura, cargo] }
+                    condicion: { type: string, enum: [DOCENTE, HABILITANTE, SUPLETORIO] }
+                    vacanteAbierta: { type: boolean }
+              motivos:
+                type: array
+                items: { type: string }
+        avisos:
+          type: array
+          items: { type: string }
+    RevisionFormularioC:
+      type: object
+      required: [puntaje, margen, escuelas, hallazgos]
+      properties:
+        puntaje: { type: number, nullable: true }
+        margen: { type: number }
+        escuelas:
+          type: array
+          items:
+            type: object
+            required: [escuelaId, nombre, nivel, promedio, diferencia, lugaresLibres, sugeridas]
+            properties:
+              escuelaId: { type: string }
+              nombre: { type: string }
+              nivel: { $ref: '#/components/schemas/NivelEscuela' }
+              promedio: { type: number, nullable: true }
+              diferencia: { type: number, nullable: true }
+              lugaresLibres: { type: integer }
+              sugeridas:
+                type: array
+                items: { type: string }
+        hallazgos:
+          type: array
+          description: Ordenados alertas, sugerencias y lo que está bien.
+          items:
+            type: object
+            required: [tipo, texto]
+            properties:
+              tipo: { type: string, enum: [alerta, sugerencia, bien] }
+              texto: { type: string }
+              escuelaId: { type: string }
+    PendientesImpacto:
+      type: object
+      required: [pendientes, origen, puntajeHoy, puntajeSiAceptan, diferencia, escuelasHoy, escuelasSiAceptan, ejemplos, materiasNuevas, items, aviso]
+      properties:
+        pendientes: { type: integer }
+        origen: { type: string, enum: [LOM, ESTIMADO], nullable: true }
+        puntajeHoy: { type: number, nullable: true }
+        puntajeSiAceptan: { type: number, nullable: true }
+        diferencia: { type: number }
+        escuelasHoy: { type: integer }
+        escuelasSiAceptan: { type: integer }
+        ejemplos:
+          type: array
+          maxItems: 3
+          items: { type: string }
+        materiasNuevas: { type: integer }
+        items:
+          type: array
+          items:
+            type: object
+            required: [id, categoria, descripcion, puntos, materiasNuevas, nota]
+            properties:
+              id: { type: string }
+              categoria: { type: string }
+              descripcion: { type: string }
+              puntos: { type: number, nullable: true, description: null si no se puede estimar. }
+              materiasNuevas: { type: integer }
+              nota: { type: string }
+        aviso: { type: string }
+    AjusteVacantes:
+      type: object
+      required: [puntaje, origen, margen, vacantes, aviso]
+      properties:
+        puntaje: { type: number, nullable: true }
+        origen: { type: string, enum: [LOM, ESTIMADO], nullable: true }
+        margen: { type: number }
+        vacantes:
+          type: array
+          items:
+            type: object
+            required: [idPublicacion, nivel, habilitado, condicion, puntaje, promedio, diferencia, motivo]
+            properties:
+              idPublicacion: { type: string }
+              nivel: { type: string, enum: [segura, justa, apuesta, lejos, sin_datos, no_habilitado] }
+              habilitado: { type: boolean }
+              condicion: { type: string, enum: [DOCENTE, HABILITANTE, SUPLETORIO], nullable: true }
+              puntaje: { type: number, nullable: true }
+              promedio: { type: number, nullable: true }
+              diferencia: { type: number, nullable: true }
+              motivo: { type: string }
+        aviso: { type: string }
+    CursoSugerido:
+      type: object
+      required: [id, nombre, resolucion, horas, puntosEstimados]
+      properties:
+        id: { type: string }
+        nombre: { type: string }
+        resolucion: { type: string, description: Resolución que aprueba el curso (SIPEC). }
+        horas: { type: integer }
+        puntosEstimados: { type: number }
+    CapacitacionesResponse:
+      type: object
+      required: [aviso, sugerencias]
+      properties:
+        aviso: { type: string }
+        sugerencias:
+          type: array
+          items:
+            type: object
+            required: [motivo, cursos]
+            properties:
+              motivo: { type: string }
+              cursos:
+                type: array
+                items: { $ref: '#/components/schemas/CursoSugerido' }
+
+    AntiguedadTexto:
+      type: object
+      required: [anios, meses, dias]
+      properties:
+        anios: { type: integer }
+        meses: { type: integer }
+        dias: { type: integer }
+    PerfilAntiguedadEscuela:
+      type: object
+      description: Una escuela de la trayectoria, actual (`hasta` null) o anterior.
+      required: [escuelaId, escuelaNombre, desde, hasta, anios, meses, cargos]
+      properties:
+        escuelaId: { type: string }
+        escuelaNombre: { type: string, description: Si la escuela no tiene nombre en el lab, llega el código. }
+        desde: { type: string, format: date, description: Alta más antigua en la escuela. }
+        hasta:
+          type: string
+          format: date
+          nullable: true
+          description: Baja más reciente; null si hoy trabaja ahí (incluye bajas futuras).
+        anios: { type: integer, description: Tiempo de desde a hasta (u hoy) sin descontar huecos. }
+        meses: { type: integer }
+        cargos:
+          type: array
+          description: Cargos vigentes si es actual; si no, cada cargo que tuvo una sola vez.
+          items:
+            type: object
+            required: [cargo, situacionRevista, desde]
+            properties:
+              cargo: { type: string }
+              situacionRevista: { type: string, example: Titular }
+              desde: { type: string, format: date }
+    PerfilResponse:
+      type: object
+      required: [cuil, nombre, puntaje, legajo, inscripcion, antiguedad, interesesMapa, notificaciones]
+      properties:
+        cuil: { type: string }
+        nombre: { type: string }
+        puntaje:
+          type: object
+          required: [disponible, total, ciclo, filasCargadas]
+          properties:
+            disponible: { type: boolean }
+            total: { type: number }
+            ciclo: { type: string, nullable: true }
+            filasCargadas: { type: integer }
+        legajo:
+          type: object
+          required: [totalAntecedentes, totalTitulos, items]
+          properties:
+            totalAntecedentes: { type: integer }
+            totalTitulos: { type: integer }
+            items:
+              type: array
+              items:
+                type: object
+                required: [categoria, detalle, estado, validado]
+                properties:
+                  categoria: { type: string }
+                  detalle: { type: string }
+                  estado: { $ref: '#/components/schemas/EstadoAntecedente' }
+                  validado: { type: boolean }
+        inscripcion:
+          type: object
+          required: [totalEscuelas, totalItems, escuelas]
+          properties:
+            totalEscuelas: { type: integer }
+            totalItems: { type: integer }
+            escuelas:
+              type: array
+              items:
+                type: object
+                required: [escuelaId, escuelaNombre, items]
+                properties:
+                  escuelaId: { type: string }
+                  escuelaNombre: { type: string }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [codigo, nombre, tipo]
+                      properties:
+                        codigo: { type: string }
+                        nombre: { type: string }
+                        tipo: { $ref: '#/components/schemas/TipoItem' }
+        antiguedad:
+          type: object
+          required: [disponible, total, escuelas]
+          properties:
+            disponible: { type: boolean, description: false si no hay cargos o el lab no respondió. }
+            total:
+              allOf: [{ $ref: '#/components/schemas/AntiguedadTexto' }]
+              nullable: true
+              description: Antigüedad docente total calculada por Meta4 (la mayor informada).
+            escuelas:
+              type: array
+              description: Trayectoria; actuales primero y después las anteriores, de la última baja a la primera.
+              items: { $ref: '#/components/schemas/PerfilAntiguedadEscuela' }
+        interesesMapa:
+          type: array
+          items:
+            type: object
+            required: [escuelaId, escuelaNombre, fecha]
+            properties:
+              escuelaId: { type: string }
+              escuelaNombre: { type: string }
+              fecha: { type: string, format: date-time }
+        notificaciones:
+          type: object
+          required: [noLeidas, vacantesAbiertas]
+          properties:
+            noLeidas: { type: integer }
+            vacantesAbiertas: { type: integer }
+
+    EstadoRevision:
+      type: string
+      enum: [PENDIENTE, RECHAZADO, SIN_PENDIENTE]
+      description: PENDIENTE si hay algún antecedente pendiente; si no, RECHAZADO si hay alguno rechazado; si no, SIN_PENDIENTE.
+    EscuelaAsignada:
+      type: object
+      required: [escuelaId, escuelaNombre, totalAspirantes]
+      properties:
+        escuelaId: { type: string }
+        escuelaNombre: { type: string }
+        totalAspirantes: { type: integer }
+    AspiranteResumen:
+      type: object
+      required: [cuil, nombre, cuilEnmascarado, pendientes, rechazados, sinPendiente, estadoRevision]
+      properties:
+        cuil: { type: string }
+        nombre: { type: string }
+        cuilEnmascarado: { type: string, example: '20***6789' }
+        pendientes: { type: integer }
+        rechazados: { type: integer }
+        sinPendiente: { type: integer }
+        estadoRevision: { $ref: '#/components/schemas/EstadoRevision' }
+    LegajoAspiranteResponse:
+      type: object
+      required: [cuil, nombre, antecedentes]
+      properties:
+        cuil: { type: string }
+        nombre: { type: string }
+        antecedentes:
+          type: array
+          items: { $ref: '#/components/schemas/AntecedenteItem' }
+    CapacitacionesCatalogoResponse:
+      type: object
+      required: [aviso, cursos]
+      properties:
+        aviso: { type: string }
+        cursos:
+          type: array
+          items: { $ref: '#/components/schemas/CursoSugerido' }
+    AsistenteIntent:
+      type: string
+      enum:
+        - recomendar_materias
+        - recomendar_escuelas_ubicacion
+        - evaluar_postulacion_escuela
+        - recomendar_cursos
+        - cargar_titulo
+        - postular_escuela_especifica
+        - simular_trayectoria
+        - plan_escuela
+        - proximo_paso
+        - revisar_pendientes
+    AsistenteAviso:
+      type: object
+      required: [id, prioridad, titulo, icono]
+      properties:
+        id:
+          type: string
+          description: Estable mientras el aviso no cambie; el cliente lo usa para saber cuáles ya vio.
+          example: 'rechazo:ant-demo-302:2026-03-12T11:00:00.000Z'
+        prioridad:
+          type: string
+          enum: [alta, media, baja]
+        titulo: { type: string }
+        detalle: { type: string }
+        icono: { type: string, description: Nombre de un ícono de Material Icons. }
+        accion: { $ref: '#/components/schemas/AsistenteAccion' }
+    AsistenteContexto:
+      type: object
+      description: Dato que el asistente espera y datos de la consulta en curso. El cliente lo reenvía sin modificarlo.
+      properties:
+        intent: { $ref: '#/components/schemas/AsistenteIntent' }
+        esperando:
+          type: string
+          enum: [ubicacion, escuela, materia, titulo, filtro_cursos, tema_cursos]
+        escuelaId: { type: string }
+        materiaCodigo: { type: string }
+        departamento: { type: string }
+        localidad: { type: string }
+        lat: { type: number }
+        lng: { type: number }
+        reintentos: { type: integer, minimum: 0 }
+    AsistenteAccion:
+      type: object
+      required: [tipo]
+      description: |
+        `intent` ejecuta una consulta con `datos`; `navegar` y `ubicacion` los resuelve el cliente (ir a una pantalla o pedir
+        la ubicación al navegador); `coordenadas` y `ubicacion_no_disponible` son la respuesta del navegador; `menu` vuelve al inicio.
+      properties:
+        tipo:
+          type: string
+          enum: [intent, navegar, ubicacion, coordenadas, ubicacion_no_disponible, menu]
+        intent: { $ref: '#/components/schemas/AsistenteIntent' }
+        datos:
+          type: object
+          properties:
+            escuelaId: { type: string }
+            materiaCodigo: { type: string }
+            tema: { type: string }
+            departamento: { type: string }
+            localidad: { type: string }
+            tituloCodigo: { type: string }
+            supletorio: { type: boolean }
+            todos: { type: boolean }
+            sinTitulo: { type: boolean }
+            sinMateria: { type: boolean }
+            pedirTema: { type: boolean }
+            otraZona: { type: boolean }
+        ruta: { type: string, example: /mapa }
+        query:
+          type: object
+          additionalProperties: { type: string }
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lng: { type: number, minimum: -180, maximum: 180 }
+    AsistenteOpcion:
+      type: object
+      required: [etiqueta, accion]
+      properties:
+        etiqueta: { type: string }
+        icono: { type: string, description: Nombre de un ícono de Material Icons. }
+        accion: { $ref: '#/components/schemas/AsistenteAccion' }
+    AsistenteItemLista:
+      type: object
+      required: [titulo]
+      properties:
+        titulo: { type: string }
+        detalle: { type: string }
+        valor: { type: string }
+        semaforo:
+          type: string
+          enum: [verde, amarillo, rojo, azul]
+          description: Mismas reglas que el semáforo del mapa (ADR-019).
+        icono: { type: string, description: 'Ícono con color en lugar del semáforo (por ejemplo, en los avisos).' }
+        tono:
+          type: string
+          enum: [info, exito, advertencia, error]
+        accion: { $ref: '#/components/schemas/AsistenteAccion' }
+    AsistenteMensaje:
+      type: object
+      required: [tipo]
+      properties:
+        tipo:
+          type: string
+          enum: [texto, lista]
+        texto: { type: string }
+        tono:
+          type: string
+          enum: [info, exito, advertencia]
+        titulo: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AsistenteItemLista' }
+        nota: { type: string }
+    AsistenteRespuesta:
+      type: object
+      required: [mensajes, opciones, contexto]
+      properties:
+        mensajes:
+          type: array
+          items: { $ref: '#/components/schemas/AsistenteMensaje' }
+        opciones:
+          type: array
+          items: { $ref: '#/components/schemas/AsistenteOpcion' }
+        contexto: { $ref: '#/components/schemas/AsistenteContexto' }
+        navegar:
+          type: object
+          required: [ruta]
+          properties:
+            ruta: { type: string, example: /formulario-c }
+            query:
+              type: object
+              additionalProperties: { type: string }
+              example: { escuelaId: ESC-001, materia: '320' }
+    AsistenteEntrada:
+      type: object
+      description: Hace falta `texto` (hasta 500 caracteres) o `accion`.
+      properties:
+        texto: { type: string, maxLength: 500 }
+        accion: { $ref: '#/components/schemas/AsistenteAccion' }
+        contexto: { $ref: '#/components/schemas/AsistenteContexto' }
