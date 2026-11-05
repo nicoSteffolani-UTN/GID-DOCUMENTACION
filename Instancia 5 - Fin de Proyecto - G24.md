@@ -38,18 +38,26 @@
    2.2. Instructivo para el Vocal de Junta de Clasificación
    2.3. Preguntas Frecuentes (FAQ) y Resolución de Problemas Comunes
 3. MANUAL DE INSTALACIÓN Y OPERACIÓN
-   3.1. Requisitos de Hardware, Software y Red
-   3.2. Procedimiento de Despliegue Paso a Paso
-   3.3. Configuración de Variables de Entorno y Secretos
-   3.4. Backups, Restauración, Monitoreo y Operación
+   3.1. Propósito y Audiencia
+   3.2. Arquitectura de Despliegue y Qué Hace Cada Contenedor Docker
+   3.3. Requisitos de Hardware, Software y Red
+   3.4. Instalación Paso a Paso en un Servidor y Explicación de Comandos Docker
+   3.5. Verificación de Conectividad con la Base de Datos y Sistemas Externos
+   3.6. Configuración de Variables de Entorno y Secretos
+   3.7. Operación, Monitoreo y Comandos Docker de Mantenimiento
+   3.8. Gestión de Backups y Restauración
+   3.9. Resolución de Incidentes Comunes de Infraestructura
 4. ANÁLISIS DE IMPACTO AMBIENTAL
-   4.1. Estimación de Consumo Energético y Huella de Carbono
-   4.2. Alternativas de Diseño Evaluadas y Prácticas de Ingeniería Verde
-   4.3. Beneficios Ambientales Directos: Despapelización y Ahorro en Traslados
+   4.1. Propósito y Alcance
+   4.2. Estimación del Consumo Energético y Huella de Carbono (67.700 Inscripciones)
+   4.3. Alternativas de Diseño Evaluadas y Prácticas de Ingeniería Verde
+   4.4. Beneficios Ambientales Directos: Continuidad de la Despapelización, Almacenamiento Físico y Reducción de Traslados
+   4.5. Balance Ambiental Neto de la Solución
 5. RETROSPECTIVA DE PROYECTO
-   5.1. Top 3 Decisiones Acertadas
-   5.2. Top 3 Aspectos a Modificar / Lecciones Aprendidas
-   5.3. Recomendaciones para Futuros Equipos
+   5.1. Propósito y Audiencia
+   5.2. Top 3 Decisiones que Resultaron Bien y por qué
+   5.3. Top 3 Cosas que Haríamos Diferente (Lecciones Aprendidas)
+   5.4. Recomendaciones para Futuros Equipos de Proyecto Final
 ```
 
 ---
@@ -280,7 +288,7 @@ El nuevo marco operativo distribuye de manera precisa las responsabilidades para
 - **Para quién:** Educadores, directivos y preceptores de nivel secundario (Rol Aspirante), y miembros y personal evaluador de la Junta de Clasificación Secundaria (Rol Vocal).
 
 > [!NOTE]
-> **Acceso al Portal:** El sistema no cuenta con un registro de usuarios ni formulario de login propio. El acceso se realiza de forma centralizada a través de la plataforma provincial de **Ciudadano Digital (CiDi)** (o el entorno de homologación **CiDi Test** en ambientes de prueba), la cual autentica al usuario y lo deriva automáticamente al portal con su sesión iniciada y su identidad verificada (Nivel 2).
+> **Ingreso Único mediante Ciudadano Digital (CiDi):** El acceso a la plataforma se realiza de forma centralizada a través del servicio provincial de **Ciudadano Digital (CiDi / CiDi Test)** (`cidi.cba.gov.ar` / `ciditest.cba.gov.ar`). Al autenticarse con su CUIL y clave en CiDi, la plataforma provincial verifica la identidad Nivel 2 del usuario y lo redirige automáticamente dentro de GID con su sesión iniciada y su rol institucional asignado (`Aspirante Docente` o `Vocal de Junta`).
 
 ---
 
@@ -544,259 +552,363 @@ flowchart LR
 ## 3. MANUAL DE INSTALACIÓN Y OPERACIÓN
 
 ### 3.1. Propósito y Audiencia
-- **Para qué:** Proporciona los procedimientos técnicos y operativos necesarios para instalar, desplegar, configurar, monitorear y mantener la plataforma **Gestión Integral Docente (GID)** en un servidor oficial de gobierno (Ministerio de Educación / Dirección de Infraestructura y Servidores Provinciales), asegurando su continuidad operativa sin requerir intervención del equipo de desarrollo.
-- **Para quién:** Administradores de sistemas, ingenieros de infraestructura, equipos de DevOps provinciales y futuros mantenedores de los sistemas informáticos del Gobierno de Córdoba.
+- **Para qué:** Proporciona una guía técnica completa y explicada paso a paso para que cualquier administrador de sistemas pueda instalar la plataforma **Gestión Integral Docente (GID)** en un servidor desde cero, comprender qué ejecuta cada contenedor de Docker, interpretar el propósito de cada comando y verificar fehacientemente la conexión tanto con las bases de datos (PostgreSQL local y Oracle de la Junta) como con los sistemas externos provinciales (Ciudadano Digital, catálogo maestro de alcances y asistente).
+- **Para quién:** Administradores de servidores, ingenieros de infraestructura, equipos de DevOps provinciales, docentes evaluadores y futuros mantenedores de los sistemas informáticos del Gobierno de Córdoba.
 
 ---
 
-### 3.2. Arquitectura de Despliegue en el Entorno Oficial
+### 3.2. Arquitectura de Despliegue y Qué Hace Cada Contenedor Docker
 
-El portal se despliega sobre contenedores inmutables orquestados mediante **Docker Compose V2**, desacoplando la capa de presentación, la lógica transaccional de la API y el repositorio relacional local, e integrándose con la infraestructura centralizada provincial:
+Para que quien instale o audite el servidor pueda formarse una idea general clara de lo que se está ejecutando, el sistema GID se empaqueta y orquesta mediante **Docker Compose V2** (`src/compose.yaml`) dividiendo las responsabilidades en **tres contenedores independientes** que corren aislados sobre redes virtuales definidas por software:
 
 ```mermaid
 graph TD
-    subgraph red_publica ["Red Provincial / Internet"]
+    subgraph red_publica ["Red Provincial / Internet (portal_public)"]
         Usuario([Docente / Vocal]) -->|HTTPS / 443| LB[Reverse Proxy Provincial / DNS *.cba.gov.ar]
     end
 
-    subgraph servidor_gobierno ["Servidor Oficial de Gobierno (Host Docker)"]
-        LB -->|HTTP / 8080| NGINX[Contenedor Frontend: Nginx Unprivileged]
-        NGINX -->|Archivos Estáticos| SPA[Bundle Angular Compilado]
-        NGINX -->|Proxy /api/*| API[Contenedor Backend: Express / Node.js]
+    subgraph servidor_gobierno ["Servidor Host Docker (compose.yaml)"]
+        LB -->|HTTP / Puerto 8080| NGINX["Contenedor 1: frontend<br/>(Nginx 1.28 Alpine Unprivileged)"]
         
-        API -->|Red Privada Interna| DB[(Contenedor PostgreSQL 16: Portal & Auditoría)]
-        VOL_DATA[(Volumen Docker: Datos y Dump Alcance)] -->|Montaje Solo Lectura| API
+        subgraph red_interna ["Red Privada Aislada (portal_internal — internal: true)"]
+            NGINX -->|Sirve SPA Estática| SPA[Bundle Angular Compilado]
+            NGINX -->|Reverse Proxy /api/* :3000| API["Contenedor 2: backend<br/>(Node.js 22 Alpine + Express)"]
+            API -->|TCP :5432| DB[("Contenedor 3: db<br/>(PostgreSQL 16 Alpine)")]
+        end
+
+        VOL_DB[("Volumen Docker:<br/>portal_docente_db")] -->|/var/lib/postgresql/data| DB
+        VOL_DATA[("Volumen Docker:<br/>portal_docente_data")] -->|/app/.data| API
+        BIND_SQL[("Bind Mount Read-Only:<br/>01_alcance_titulo.sql")] -->|/data/alcance/| API
     end
 
-    subgraph infraestructura_provincial ["Servicios y Bases Centrales de Gobierno"]
-        API -->|HTTPS / OAuth2| CIDI[Ciudadano Digital: CiDi Test / Oficial]
-        API -->|Easy Connect / 1521| ORACLE[(Base de Datos Junta: Oracle MT4D / MT4T)]
-        API -->|Consulta Servicios| SGE[Sistema de Gestión Escolar - SGE]
+    subgraph infraestructura_provincial ["Sistemas Externos y Bases Centrales (vía red portal_egress)"]
+        API -->|HTTPS / OAuth2 / Cookies| CIDI[Ciudadano Digital: CiDi Test / Oficial]
+        API -->|Easy Connect TCP / 1521| ORACLE[(Base de Datos Junta: Oracle MT4D / MT4T)]
+        API -->|HTTPS / API REST| GROQ[Servicio LLM Externo: Groq API]
     end
 ```
 
+#### 3.2.1. Detalle de los Tres Contenedores que Conforman el Sistema
+
+| Contenedor / Servicio | Imagen Base y Construcción | Usuario y Límites en Ejecución | Qué Hace Exactamente en el Servidor |
+| :--- | :--- | :--- | :--- |
+| **1. `frontend`** (`portal-docente-frontend`) | **Multi-stage build** (`web/Dockerfile`): Etapa 1 compila Angular 19 con `node:22.23.1-alpine3.23`; Etapa 2 copia únicamente los archivos estáticos compilados a `nginx:1.28.3-alpine3.23-slim`. | Usuario `nginx` (`UID 101`, no-root). Límite: `0.5 CPU`, `128 MB RAM`, raíz en solo lectura (`read_only: true`). | **1. Servidor Web SPA:** Entrega la interfaz gráfica (Angular compilado) al navegador del usuario y resuelve las rutas del cliente mediante `try_files`.<br/>**2. Puerta de Enlace Única (Reverse Proxy):** Es el **único contenedor que publica un puerto en el servidor (`8080`)**. Cuando el navegador solicita cualquier ruta `/api/*`, Nginx la reenvía internamente al contenedor `backend:3000` por la red privada, ocultando la API y la base de datos del exterior. |
+| **2. `backend`** (`portal-docente-backend`) | **Multi-stage build** (`server/Dockerfile`): Compila el código TypeScript a JavaScript en una etapa previa y genera una imagen limpia sobre `node:22.23.1-alpine3.23` solo con dependencias de producción (eliminando `npm`, `npx`, `yarn` y código fuente `.ts`). | Usuario `node` (`UID 1000`, no-root). Límite: `1.0 CPU`, `512 MB RAM`, raíz en solo lectura (`read_only: true`). Puerto interno `3000` (no expuesto al host). | **1. Motor de Negocio y API REST:** Ejecuta las reglas del Decreto 257/19, validación de Formulario C, mapa territorial, simulador y bandeja de Junta.<br/>**2. Inicializador de Esquema:** Al arrancar, se conecta al contenedor `db` y aplica automáticamente las migraciones SQL versionadas (`server/db/migraciones/`) para las tablas operativas y de auditoría inmutable.<br/>**3. Indexador en Memoria:** Parsea e indexa al inicio el archivo `01_alcance_titulo.sql` (74.765 alcances legales) para consultas instantáneas.<br/>**4. Conector con Sistemas Externos:** Se comunica con Oracle (puerto `1521`), Ciudadano Digital (CiDi) y el servicio LLM (Groq). |
+| **3. `db`** (`postgres:16-alpine`) | Imagen oficial `postgres:16-alpine` gestionada por el archivo `compose.yaml`. | Proceso `postgres` con `no-new-privileges:true`. Límite: `1.0 CPU`, `256 MB RAM`. Puerto `5432` **cerrado al host**. | **Base de Datos Transaccional y de Auditoría del Portal:** Aloja la base `portal_docente`, donde se persisten los legajos digitales (incluyendo los certificados PDF en formato binario `BYTEA`), los Formularios C confeccionados, las muestras de interés y las **tablas de auditoría inmutable (`auditoria_acceso` y `auditoria_cambio`)** protegidas por *triggers* que bloquean cualquier `UPDATE` o `DELETE`. |
+
+#### 3.2.2. Redes Virtuales y Volúmenes de Persistencia en Docker
+Para garantizar el aislamiento de seguridad (*defensa en profundidad*), `compose.yaml` crea tres redes virtuales y tres puntos de montaje:
+1. **`portal_docente_internal` (`internal: true`):** Red privada sin salida a Internet donde se comunican `frontend`, `backend` y `db`. El contenedor `db` vive **únicamente** en esta red, haciendo imposible que reciba conexiones desde fuera del servidor.
+2. **`portal_docente_public`:** Red asignada exclusivamente a `frontend` para publicar el puerto HTTP `8080` hacia el host o balanceador de carga provincial.
+3. **`portal_docente_egress`:** Red de salida asignada exclusivamente al `backend`. Es el canal que le permite a la API salir por la interfaz de red/VPN del servidor anfitrión para alcanzar la base **Oracle de la Junta (`10.250.11.53:1521`)**, los servicios web de **Ciudadano Digital (CiDi)** y la API de **Groq**.
+4. **Volúmenes de datos (`portal_docente_db`, `portal_docente_data` y Bind Mount de Alcance):**
+   - `portal_docente_db`: Volumen persistente de Docker donde PostgreSQL guarda los archivos físicos de las tablas (`/var/lib/postgresql/data`). Aunque los contenedores se apaguen o actualicen, los datos no se pierden.
+   - `/data/alcance/01_alcance_titulo.sql`: Montaje directo de solo lectura (*bind mount* `read_only: true`) que inyecta el dump maestro de títulos del host dentro del contenedor `backend`.
+
 ---
 
-### 3.3. Requisitos de Infraestructura y Red
+### 3.3. Requisitos de Hardware, Software y Red
 
 #### 3.3.1. Requisitos de Hardware del Servidor
-Para un entorno productivo con concurrencia masiva en períodos de convocatoria anual (estimada en picos de hasta 5.000 usuarios concurrentes):
+Para un entorno productivo provincial (dimensionado sobre el volumen real de **67.700 inscripciones anuales** y picos de concurrencia durante la apertura de convocatoria):
 - **Procesador (CPU):** Mínimo 4 vCPUs (Recomendado: 8 vCPUs arquitectura x86_64).
-- **Memoria RAM:** Mínimo 8 GB (Recomendado: 16 GB, reservando 4 GB para PostgreSQL, 4 GB para Node.js y buffers de Nginx).
-- **Almacenamiento en Disco:** Mínimo 100 GB en disco de estado sólido (SSD / NVMe) para soportar volúmenes de base de datos, logs de auditoría y almacenamiento de comprobantes digitalizados.
+- **Memoria RAM:** Mínimo 8 GB (Recomendado: 16 GB; los tres contenedores de GID consumen en conjunto menos de 900 MB bajo los límites estrictos del Compose, dejando amplio margen para caché de sistema operativo y buffers).
+- **Almacenamiento en Disco:** Mínimo 100 GB en disco de estado sólido (SSD / NVMe) para alojar imágenes Docker, el volumen de PostgreSQL con documentos PDF adjuntos y los respaldos diarios comprimidos.
 
 #### 3.3.2. Requisitos de Software
-- **Sistema Operativo Base:** Linux con soporte empresarial (Ubuntu Server 22.04 LTS, RHEL 9 o Debian 12).
-- **Motor de Contenedores:** Docker Engine versión 24.0 o superior con plugin `docker compose` V2 habilitado y BuildKit activo.
-- **Node.js:** Versión 20+ LTS (únicamente requerido si se ejecutan herramientas de diagnóstico o migraciones fuera de Docker; dentro del contenedor se utiliza Node.js 22-alpine).
+- **Sistema Operativo Base:** Linux de servidor (Ubuntu Server 22.04/24.04 LTS, Debian 12 o RHEL 9).
+- **Motor de Contenedores:** Docker Engine `24.0+` y **Docker Compose V2** (`docker compose`) con soporte BuildKit activo.
+- **Utilidades de consola en el servidor:** `git`, `curl`, `jq` (para formatear salidas JSON de diagnóstico) y `openssl` o `node` (para generar claves aleatorias).
 
 #### 3.3.3. Requisitos de Red y Conectividad Gubernamental
-El servidor donde se aloje GID debe poseer las siguientes reglas de enrutamiento y puertos habilitados:
-1. **Acceso Entrante (Inbound):**
-   - Puerto `8080/TCP` (o `443/HTTPS` a través del proxy provincial) para el tráfico web de los usuarios.
-2. **Acceso Saliente (Outbound):**
-   - **Ciudadano Digital (CiDi):** Salida HTTPS (`443/TCP`) hacia los dominios oficiales de CiDi:
-     - Entorno de Homologación / Pruebas: `ciditest.cba.gov.ar` y `cuentaciditest.cba.gov.ar`.
-     - Entorno de Producción: `cidi.cba.gov.ar` y `cuentacidi.cba.gov.ar`.
-   - **Base de Datos de la Junta (Oracle):** Conectividad directa TCP por puerto `1521` hacia el host de base de datos del Ministerio (`10.250.11.53` o el host de base asignado).
-3. **Requisito de Dominio Oficial para Cookies de Sesión:**
-   - La plataforma debe publicarse obligatoriamente bajo un subdominio perteneciente a `*.cba.gov.ar` (por ejemplo: `https://portaldocente.cba.gov.ar`). Esto se debe a que la cookie de identidad de Ciudadano Digital viaja restringida al dominio padre provincial; publicar bajo un dominio ajeno impediría la captura del token de sesión al regresar de CiDi.
-4. **URL de Retorno Registrada en CiDi:**
-   - En el panel de administración de CiDi de la Secretaría de Innovación debe registrarse la URL canónica de callback:  
-     `https://<dominio-del-portal>/api/auth/cidi/retorno`.
+1. **Tráfico Entrante (Inbound):** Puerto `8080/TCP` en el host (o `443/HTTPS` en el Reverse Proxy provincial que redirige al puerto `8080` del servidor).
+2. **Tráfico Saliente (Outbound):**
+   - **Hacia Base de Datos Oracle de la Junta:** Conectividad TCP al puerto `1521` del servidor de base de datos ministerial (`10.250.11.53` para el servicio `mt4d`, y opcionalmente `10.250.11.60:1521/mt4t` para notificaciones). Si el servidor está fuera de la LAN del Ministerio, debe tener la VPN institucional conectada en el host.
+   - **Hacia Ciudadano Digital (CiDi):** Salida HTTPS (`443/TCP`) hacia `cidi.cba.gov.ar` y `cuentacidi.cba.gov.ar` (o `ciditest.cba.gov.ar` y `cuentaciditest.cba.gov.ar` en homologación).
+3. **Subdominio Oficial `*.cba.gov.ar` y Callback de CiDi:**
+   - Para utilizar autenticación real con CiDi (`AUTH_MODE=cidi`), el portal debe publicarse bajo un dominio `*.cba.gov.ar` (ya que la cookie de sesión de CiDi tiene alcance sobre ese dominio padre) y tener registrada en CiDi la URL de retorno `https://<dominio-del-portal>/api/auth/cidi/retorno`.
 
 ---
 
-### 3.4. Procedimiento de Despliegue Paso a Paso
+### 3.4. Instalación Paso a Paso en un Servidor y Explicación de Comandos Docker
 
-#### Paso 1: Obtención del Código Fuente y Preparación de Directorios
-Conectarse mediante SSH al servidor gubernamental y clonar el repositorio oficial en el directorio de aplicaciones del sistema:
+A continuación se detalla cómo un administrador instala el sistema desde cero en un servidor limpio y **qué hace exactamente cada comando ejecutado**.
+
+#### Paso 1: Verificar la Instalación de Docker y Clonar el Repositorio
+Conectarse por SSH al servidor, comprobar que el motor de Docker y Docker Compose V2 estén activos, y descargar el proyecto en `/opt/portal-docente`:
 
 ```bash
+# 1. Comprobar que el demonio de Docker (cliente y servidor) está corriendo
+docker version
+
+# 2. Comprobar que el plugin Docker Compose V2 está disponible
+docker compose version
+
+# 3. Clonar el repositorio oficial y posicionarse en la carpeta src/ (donde viven los archivos Compose)
 cd /opt
 sudo git clone https://github.com/fabrivalseg/PF-24---Gestion-Docente-Secundaria.git portal-docente
-cd portal-docente/src
+cd /opt/portal-docente/src
 ```
 
-#### Paso 2: Creación y Configuración del Archivo de Entorno (`.env`)
-Crear el archivo de configuración a partir de la plantilla y restringir sus permisos para proteger las credenciales:
+#### Paso 2: Ubicar el Dump Maestro de Alcance de Títulos y Crear el Archivo `.env`
+El validador de alcance de títulos utiliza el catálogo oficial de la Junta (`01_alcance_titulo.sql`, ~29 MB con 74.765 filas). Se copia en una carpeta del servidor y luego se crea el archivo `.env` a partir de la plantilla `.env.example`:
 
 ```bash
+# Crear directorio para el catálogo maestro y copiar el archivo SQL oficial
+sudo mkdir -p /opt/portal-docente/data/alcance
+sudo cp /ruta/origen/01_alcance_titulo.sql /opt/portal-docente/data/alcance/01_alcance_titulo.sql
+sudo chmod 644 /opt/portal-docente/data/alcance/01_alcance_titulo.sql
+
+# Crear el archivo de variables de entorno y restringir permisos de lectura solo al propietario
 cp .env.example .env
 chmod 600 .env
 ```
 
-Editar el archivo `.env` (`sudo nano .env`) configurando las variables del entorno oficial que se detallan en la sección 3.5.
-
-#### Paso 3: Generación del Secreto de Sesión (JWT)
-Genere un secreto criptográfico de 384 bits para firmar los tokens de sesión internos. Nunca utilice un valor predeterminado en producción:
+Generar el secreto criptográfico para la firma de tokens JWT (`JWT_SECRET`) y editar el archivo `.env` (ver tabla completa de variables en la sección 3.6):
 
 ```bash
-node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"
+# Genera 48 bytes aleatorios codificados en base64url para usar en JWT_SECRET
+openssl rand -base64 48 | tr '+/' '-_' | tr -d '='
 ```
-Copie el resultado y asígnelo a la variable `JWT_SECRET=` en el archivo `.env`.
 
-#### Paso 4: Ubicación del Archivo Maestro de Alcance de Títulos
-Copie el archivo SQL de alcance de títulos (`01_alcance_titulo.sql`, ~29 MB) provisto por la Dirección de Sistemas al directorio local `/opt/portal-docente/data/alcance/` y configure su ruta en el `.env`:
+En el archivo `/opt/portal-docente/src/.env` deben quedar definidos los parámetros de producción e integración oficial: `JWT_SECRET`, `POSTGRES_PASSWORD`, `AUTH_MODE=cidi`, `CIDI_ID_APP`, `CIDI_KEY_APP`, `CIDI_PASSWORD`, `INTEGRATION_MODE=prod`, `DB_USER`, `DB_PASSWORD`, `ORACLE_HOST=10.250.11.53`, `ORACLE_PORT=1521`, `ORACLE_SERVICE=mt4d` y `ALCANCE_SQL_PATH=/opt/portal-docente/data/alcance/01_alcance_titulo.sql`.
+
+#### Paso 3: Validar la Sintaxis y Interpolación de Docker Compose (`config`)
+Antes de construir o levantar contenedores, se verifica que el archivo `compose.yaml` y las variables del `.env` estén bien formados:
 
 ```bash
-sudo mkdir -p /opt/portal-docente/data/alcance
-sudo cp /ruta/origen/01_alcance_titulo.sql /opt/portal-docente/data/alcance/01_alcance_titulo.sql
-sudo chmod 644 /opt/portal-docente/data/alcance/01_alcance_titulo.sql
+docker compose -f compose.yaml config
 ```
-En `.env` defina: `ALCANCE_SQL_PATH=/opt/portal-docente/data/alcance/01_alcance_titulo.sql`.
+- **¿Qué hace este comando?**
+  - `-f compose.yaml`: Indica explícitamente que se utilice la definición de producción (`compose.yaml`).
+  - `config`: Lee `compose.yaml`, interpola todas las variables desde el archivo `.env` y valida las reglas de esquema. Si falta una variable obligatoria en producción (como `JWT_SECRET` o `POSTGRES_PASSWORD`, definidas con la sintaxis `${VARIABLE:?mensaje de error}`), **el comando falla inmediatamente mostrando qué variable falta**, evitando levantar un entorno mal configurado.
 
-#### Paso 5: Verificación de Red hacia la Base de Datos Oracle
-Antes de compilar e iniciar los contenedores, valide que el servidor tiene visibilidad de red hacia el puerto 1521 de Oracle mediante una prueba puntual:
+#### Paso 4: Construir las Imágenes Productivas de los Contenedores (`build --pull`)
+Una vez validada la configuración, se compilan las imágenes de `frontend` y `backend`:
+
+```bash
+docker compose -f compose.yaml build --pull
+```
+- **¿Qué hace este comando?**
+  - `build`: Ejecuta los *multi-stage builds* definidos en `server/Dockerfile` y `web/Dockerfile` apuntando al `target: production`. Compila TypeScript en el backend, compila el bundle SPA de Angular en el frontend, elimina herramientas de desarrollo y empaqueta las imágenes finales `portal-docente-backend:0.1.0` y `portal-docente-frontend:0.1.0`.
+  - `--pull`: Fuerza a Docker a consultar el registro oficial para asegurarse de contar con las últimas actualizaciones de seguridad de las imágenes base (`node:22.23.1-alpine3.23`, `nginx:1.28.3-alpine3.23-slim` y `postgres:16-alpine`) antes de compilar.
+
+#### Paso 5: Levantar el Sistema y Esperar las Sondas de Salud (`up -d --wait`)
+Se ponen en marcha los contenedores, redes y volúmenes en orden de dependencia:
+
+```bash
+docker compose -f compose.yaml up -d --wait
+```
+- **¿Qué hace este comando y qué ocurre por detrás paso a paso?**
+  - `up`: Crea las 3 redes (`portal_internal`, `portal_egress`, `portal_public`), inicializa los 2 volúmenes persistentes (`portal_docente_db`, `portal_docente_data`) y arranca los contenedores respetando la cadena `depends_on` con `condition: service_healthy`:
+    1. **Primero arranca `db` (PostgreSQL 16):** Inicializa el motor relacional y ejecuta su `healthcheck` (`pg_isready`) cada 10 segundos hasta que la base acepta conexiones.
+    2. **Segundo arranca `backend` (API Express):** Recién cuando `db` está `healthy`, inicia el contenedor `backend`. Al arrancar, ejecuta las migraciones SQL en PostgreSQL, carga en memoria las 74.765 filas de `01_alcance_titulo.sql`, se conecta al servidor Oracle de la Junta (`10.250.11.53:1521`) para precargar padrón, mapa LOM y publicaciones de vacantes, y habilita el endpoint `/api/health`.
+    3. **Tercero arranca `frontend` (Nginx):** Recién cuando el `backend` responde `200 OK` en `/api/health` y pasa a estado `healthy`, se inicia Nginx publicando el puerto `8080`.
+  - `-d` (*detached*): Ejecuta los contenedores en segundo plano como servicios del servidor, liberando la terminal.
+  - `--wait`: Hace que la consola espere sin devolver el control hasta que **los tres contenedores hayan superado sus respectivos `healthchecks` y estén en estado `Up (healthy)`**. Si algún servicio no logra conectar con su base de datos en el tiempo estipulado, el comando informa el error de inmediato.
+
+---
+
+### 3.5. Verificación de Conectividad con la Base de Datos y Sistemas Externos
+
+Una vez levantado el servidor, el administrador debe comprobar que los contenedores estén sanos y que el sistema se encuentre efectivamente conectado tanto a la **base de datos local (PostgreSQL)** como a la **base de datos de la Junta (Oracle)** y a los **sistemas externos**. A continuación se presentan las 4 verificaciones en orden.
+
+#### 3.5.1. Verificación 1: Prueba de Visibilidad de Red hacia Oracle y Sistemas Externos
+Para comprobar desde el propio motor de Docker que el servidor llega por red al puerto `1521` de la base de datos Oracle de la Junta (a través de la LAN ministerial o la VPN del host):
 
 ```bash
 docker run --rm busybox:1.36 nc -zv -w 5 10.250.11.53 1521
 ```
-Debe responder: `10.250.11.53 (10.250.11.53:1521) open`. Si falla, revise los grupos de seguridad, interfaces VLAN o la VPN de enlace antes de continuar.
+- **Explicación del comando:**
+  - `docker run --rm busybox:1.36`: Levanta un micro-contenedor efímero con utilidades de red (`busybox`) que usa el mismo stack de red de Docker que el backend, y lo elimina automáticamente al terminar (`--rm`).
+  - `nc -zv -w 5 10.250.11.53 1521`: Ejecuta *Netcat* en modo escaneo sin enviar datos (`-z`), con salida detallada (`-v`) y un tiempo máximo de espera de 5 segundos (`-w 5`) contra la IP `10.250.11.53` y puerto `1521`.
+  - **Resultado esperado:** `10.250.11.53 (10.250.11.53:1521) open`.
 
-#### Paso 6: Construcción y Puesta en Marcha con Docker Compose
-Valide la sintaxis del archivo de orquestación, construya las imágenes productivas y arranque los servicios en segundo plano:
-
+Para verificar que el servidor también tiene salida HTTPS hacia **Ciudadano Digital (CiDi)**:
 ```bash
-# Validar la configuración fusionada
-docker compose -f compose.yaml config
-
-# Construir imágenes productivas optimizadas
-docker compose -f compose.yaml build --pull
-
-# Iniciar los servicios y esperar a que pasen los health checks
-docker compose -f compose.yaml up -d --wait
+curl -I -s --connect-timeout 5 https://cidi.cba.gov.ar | head -n 5
 ```
 
-#### Paso 7: Comprobación del Despliegue y Estado de Salud
-Verifique que los tres contenedores (`frontend`, `backend` y `db`) se encuentren en estado `Up (healthy)`:
+#### 3.5.2. Verificación 2: Estado de Contenedores y Diagnóstico Integral (`/api/health`)
+Primero se inspecciona el estado de los contenedores con Docker Compose:
 
 ```bash
 docker compose -f compose.yaml ps
 ```
+- **Explicación del comando:** Lista los contenedores activos del proyecto. Los tres servicios (`portal-docente-db-1`, `portal-docente-backend-1` y `portal-docente-frontend-1`) deben figurar con `STATUS: Up ... (healthy)` y solo `frontend` debe mostrar el mapeo de puerto `0.0.0.0:8080->8080/tcp`.
 
-Consulte el endpoint de salud de la API para confirmar que todos los subsistemas iniciaron correctamente:
+A continuación, se consulta el endpoint de diagnóstico integral `/api/health` a través de Nginx:
 
 ```bash
 curl -s http://localhost:8080/api/health | jq .
 ```
+- **Explicación del comando:** Realiza una petición HTTP al puerto `8080` de Nginx, el cual la redirige internamente a `backend:3000/api/health`, y formatea la respuesta JSON con `jq`.
 
-Respuesta esperada en un servidor de gobierno:
+**Respuesta real esperada y qué verifica cada bloque:**
+
 ```json
 {
   "status": "ok",
+  "version": "0.1.0",
   "integrationMode": "prod",
   "authMode": "cidi",
-  "alcance": { "sourceObject": "ALCANCE_SQL_PATH", "filasCargadas": 74765 },
-  "padron": { "ready": true },
-  "mapa": { "ready": true },
-  "notificaciones": { "ready": true },
-  "espejoJunta": { "modo": "ensayo", "sincronizaciones": 0, "error": null }
+  "inscripcionAbierta": true,
+  "alcance": {
+    "ready": true,
+    "filasCargadas": 74765,
+    "sourceObject": "ALCANCE_SQL_PATH"
+  },
+  "padron": {
+    "ready": true,
+    "empresasCargadas": 1042,
+    "catalogoFilas": 18540,
+    "sourceObjects": ["VT_EMPRESAS", "VT_CATALOGO_MAT"]
+  },
+  "mapa": {
+    "ready": true,
+    "escuelasLomCargadas": 890,
+    "filasLom": 67700,
+    "correccionesCoordenadas": 14,
+    "sourceObjects": ["VT_LOM_SECUNDARIA"]
+  },
+  "notificaciones": {
+    "ready": true,
+    "filasPublicaciones": 312,
+    "sourceObjects": ["VT_PUBLICACIONES_VACANTES"]
+  },
+  "persistencia": {
+    "tipo": "postgres",
+    "ready": true,
+    "escriturasPendientes": 0,
+    "ultimaEscritura": "2026-11-04T20:15:00.000Z",
+    "conError": false
+  },
+  "espejoJunta": {
+    "modo": "ensayo",
+    "sincronizaciones": 0,
+    "ultimaSincronizacion": null,
+    "conError": false
+  }
 }
 ```
 
+**Guía de interpretación del diagnóstico `/api/health`:**
+
+| Bloque / Campo en `/api/health` | Qué Base de Datos o Sistema Externo Verifica | Cómo Saber que Está Bien Conectado |
+| :--- | :--- | :--- |
+| **`persistencia`** | **Base de Datos Local PostgreSQL (`db`)** | `tipo: "postgres"`, `ready: true` y `conError: false`. Confirma que el `backend` se conectó a PostgreSQL, aplicó las migraciones y puede leer/escribir legajos, Formularios C y auditoría. |
+| **`integrationMode` + `padron` + `mapa` + `notificaciones`** | **Base de Datos Oracle de la Junta (`10.250.11.53:1521/mt4d`)** | `integrationMode: "prod"` y los tres bloques con `ready: true` y conteo de filas mayor a cero. Confirma que la API autenticó en Oracle y leyó las vistas reales de escuelas, oferta curricular, LOM histórica y vacantes. |
+| **`alcance`** | **Catálogo Maestro de Alcances (`01_alcance_titulo.sql`)** | `ready: true`, `sourceObject: "ALCANCE_SQL_PATH"` y `filasCargadas: 74765`. Confirma que el contenedor montó el archivo SQL del host y cargó las categorías Docente, Habilitante y Supletorio. |
+| **`authMode`** | **Ciudadano Digital (CiDi / CiDi Test)** | `authMode: "cidi"`. Confirma que se encuentra activa la pasarela oficial de identidad de Ciudadano Digital exigiendo Nivel 2. |
+| **`espejoJunta`** | **Escritura Espejo en Tablas de Junta (Oracle)** | Muestra el `modo` activo (`"off"`, `"ensayo"` u `"on"`), la cantidad de `sincronizaciones` realizadas y `conError: false`. |
+
+#### 3.5.3. Verificación 3: Inspección Directa sobre la Base de Datos PostgreSQL (`db`)
+Para comprobar directamente dentro del contenedor `db` que el esquema relacional y las tablas de auditoría inmutable fueron creadas correctamente:
+
+```bash
+docker compose -f compose.yaml exec db psql -U portal -d portal_docente -c "\dt"
+```
+- **Explicación del comando:**
+  - `docker compose -f compose.yaml exec db`: Abre una ejecución interactiva dentro del contenedor `db` en marcha (sin necesidad de abrir puertos al exterior).
+  - `psql -U portal -d portal_docente -c "\dt"`: Invoca el cliente oficial de PostgreSQL con el usuario configurado y lista las tablas creadas por las migraciones (`portal_estado_docente`, `auditoria_acceso` y `auditoria_cambio`).
+
+#### 3.5.4. Verificación 4: Prueba Transaccional de Escritura en las Tablas Oracle de la Junta
+Antes de pasar `ESCRITURA_JUNTA` a modo `"on"` en un entorno de prueba/preproducción del Ministerio, el administrador puede verificar que el contenedor `backend` tiene permisos sobre las nueve tablas de la Junta (ADR-029) ejecutando la herramienta de diagnóstico incluida en la imagen:
+
+```bash
+docker compose -f compose.yaml exec -e JUNTA_PRUEBA_CUIL=20111111111 backend node server/dist/store/persistencia/probar-escritura-junta.js
+```
+- **Explicación del comando:**
+  - Ejecuta dentro del contenedor `backend` el script compilado `probar-escritura-junta.js` pasándole un CUIL de prueba (`-e JUNTA_PRUEBA_CUIL=...`).
+  - El script abre una conexión contra el servidor Oracle de la Junta, comprueba que el servicio esté dentro de la lista blanca `JUNTA_BASES_PERMITIDAS` (`MT4D,MT4T`), simula la inserción espejo de un legajo y un Formulario C dentro de una transacción y **ejecuta un `ROLLBACK` automático al finalizar**, confirmando que la conectividad y los permisos `INSERT/UPDATE/DELETE` en Oracle funcionan sin dejar datos residuales.
+
 ---
 
-### 3.5. Configuración de Variables de Entorno y Secretos
+### 3.6. Configuración de Variables de Entorno y Secretos
 
-El archivo `.env` en el servidor de gobierno gobierna el comportamiento de la infraestructura. A continuación se detalla cada parámetro:
+El archivo `/opt/portal-docente/src/.env` gobierna el comportamiento de los contenedores. A continuación se detalla cada parámetro:
 
 | Variable | Valor Típico en Servidor Provincial | Requerida | Propósito y Consideraciones |
 | :--- | :--- | :---: | :--- |
 | `NODE_ENV` | `production` | Sí | Activa optimizaciones de Express y Angular. |
-| `FRONTEND_PORT` | `8080` | Sí | Puerto TCP público que publica Nginx en el host. |
-| `BACKEND_PORT` | `3000` | Sí | Puerto interno de Express accesible dentro de la red privada de Docker. |
-| `CORS_ORIGIN` | `https://portaldocente.cba.gov.ar` | Sí | Origen público oficial. Debe coincidir con el dominio registrado en CiDi. |
-| `JWT_SECRET` | *(cadena aleatoria de 48+ bytes)* | Sí | Clave criptográfica para firmas de sesión. Falla al arrancar si está vacía. |
+| `FRONTEND_PORT` | `8080` | Sí | Puerto TCP público que publica el contenedor `frontend` (Nginx) en el host. |
+| `BACKEND_PORT` | `3000` | Sí | Puerto interno de Express accesible solo dentro de la red privada `portal_internal`. |
+| `CORS_ORIGIN` | `https://portaldocente.cba.gov.ar` | Sí | Origen público oficial permitido por CORS. Debe coincidir con el dominio público. |
+| `JWT_SECRET` | *(cadena aleatoria de 48+ bytes)* | Sí | Clave criptográfica para firmas de sesión. Docker Compose aborta si está vacía. |
 | `JWT_EXPIRES_IN` | `8h` | Sí | Vigencia máxima de la sesión tras autenticar con CiDi. |
-| `AUTH_MODE` | `cidi` | Sí | Habilita el ingreso oficial mediante Ciudadano Digital. |
+| `AUTH_MODE` | `cidi` | Sí | Activa el ingreso oficial mediante Ciudadano Digital (CiDi / CiDi Test) con validación obligatoria de Nivel 2. |
 | `CIDI_ID_APP` | *(provisto por CiDi)* | Sí | Identificador de aplicación asignado por la Provincia. |
-| `CIDI_KEY_APP` | *(provisto por CiDi)* | Sí | Clave secreta institucional de la aplicación. |
-| `CIDI_PASSWORD` | *(provisto por CiDi)* | Sí | Contraseña de autenticación de la aplicación en el servidor CiDi. |
-| `CIDI_API_URL` | `https://cba.gov.ar/...` | No | URL del servicio web CiDi. Si se deja vacía, apunta a homologación / test. |
-| `CIDI_LOGIN_URL` | `https://cba.gov.ar/...` | No | URL de pasarela del login de CiDi. |
-| `INTEGRATION_MODE` | `prod` | Sí | Activa la lectura directa de Oracle y catálogos de Junta. |
-| `DB_USER` | `USR_PORTAL_DOCENTE` | Sí | Usuario de base de datos de Oracle para lectura del padrón y LOM. |
+| `CIDI_KEY_APP` | *(provisto por CiDi)* | Sí | Clave secreta institucional de la aplicación en CiDi. |
+| `CIDI_PASSWORD` | *(provisto por CiDi)* | Sí | Contraseña de aplicación en el servidor CiDi. |
+| `CIDI_API_URL` | `https://...` | No | URL del servicio web CiDi. Si se deja vacía, usa el entorno de homologación CiDi Test. |
+| `CIDI_LOGIN_URL` | `https://...` | No | URL de pasarela de login de CiDi. Si se deja vacía, usa el entorno de homologación CiDi Test. |
+| `VOCALES_CUIL` | *(lista separada por comas)* | No | CUILs adicionales habilitados como vocales si aún no figuran en `T_USUARIOS_JUNTA`. |
+| `INTEGRATION_MODE` | `prod` | Sí | Activa la integración productiva en tiempo real con la base de datos Oracle de la Junta de Clasificación. |
+| `DB_USER` | `USR_PORTAL_DOCENTE` | Sí | Usuario de base de datos Oracle para lectura de padrón, catálogo, mapa y LOM. |
 | `DB_PASSWORD` | *(contraseña segura)* | Sí | Contraseña del usuario Oracle. |
-| `ORACLE_HOST` | `10.250.11.53` | Sí | Dirección IP del clúster de base de datos de educación. |
-| `ORACLE_PORT` | `1521` | Sí | Puerto TCP de escucha del Listener de Oracle. |
-| `ORACLE_SERVICE` | `mt4d` | Sí | Nombre del servicio o PDB de Oracle de la Junta. |
-| `ALCANCE_SQL_PATH` | `/opt/portal-docente/data/alcance/01_alcance_titulo.sql` | Sí | Ruta del dump de alcance en el host. Se monta de solo lectura en el contenedor. |
-| `PERSISTENCIA` | `postgres` | Sí | Persiste legajos, Formularios C y bitácoras de auditoría en la BD relacional. |
-| `POSTGRES_DB` | `portal_docente` | Sí | Nombre de la base de datos local en el servicio `db`. |
-| `POSTGRES_USER` | `portal_usr` | Sí | Usuario de PostgreSQL para el servicio del portal. |
-| `POSTGRES_PASSWORD`| *(contraseña segura)* | Sí | Contraseña maestra de PostgreSQL (obligatoria en producción). |
-| `ESCRITURA_JUNTA` | `ensayo` u `on` | Sí | `ensayo` prueba escrituras en Junta deshaciendo cada commit; `on` confirma la copia. |
-| `JUNTA_BASES_PERMITIDAS`| `MT4D,MT4T` | Sí | Lista blanca de bases donde se admiten escrituras de prueba/contingencia. |
-| `INSCRIPCION_ABIERTA`| `true` o `false` | Sí | Abre o cierra la posibilidad de enviar el Formulario C en el portal. |
+| `ORACLE_HOST` | `10.250.11.53` | Sí | Dirección IP del servidor Oracle de la Junta. |
+| `ORACLE_PORT` | `1521` | Sí | Puerto TCP del Listener de Oracle. |
+| `ORACLE_SERVICE` | `mt4d` | Sí | Nombre del servicio de base de datos Oracle (`mt4d` / `mt4t`). |
+| `ALCANCE_SQL_PATH` | `/opt/portal-docente/data/alcance/01_alcance_titulo.sql` | Sí | Ruta absoluta del dump en el host. Docker lo monta como solo lectura en `/data/alcance/`. |
+| `PERSISTENCIA` | `postgres` | Sí | Almacena legajos, Formularios C y auditoría en el contenedor `db` (PostgreSQL). |
+| `POSTGRES_DB` | `portal_docente` | Sí | Nombre de la base de datos creada automáticamente en el contenedor `db`. |
+| `POSTGRES_USER` | `portal` | Sí | Usuario administrador de la base PostgreSQL del portal. |
+| `POSTGRES_PASSWORD`| *(contraseña segura)* | Sí | Contraseña de PostgreSQL (obligatoria en `compose.yaml`). |
+| `ESCRITURA_JUNTA` | `off`, `ensayo` u `on` | Sí | `off` desactiva copia; `ensayo` prueba escrituras en Oracle y hace rollback; `on` confirma. |
+| `JUNTA_BASES_PERMITIDAS`| `MT4D,MT4T` | Sí | Lista blanca de servicios Oracle donde se autoriza la escritura espejo. |
+| `INSCRIPCION_ABIERTA`| `true` o `false` | Sí | Habilita o cierra la ventana de presentación del Formulario C. |
+| `GROQ_API_KEY` | *(clave API opcional)* | No | Habilita el modelo LLM en el Asistente Virtual; si está vacía, usa el motor local determinístico. |
 
 ---
 
-### 3.6. Operación y Comandos Habituales
+### 3.7. Operación, Monitoreo y Comandos Docker de Mantenimiento
 
-Todas las tareas de mantenimiento se ejecutan desde el directorio `/opt/portal-docente/src`:
+Todas las tareas operativas cotidianas se ejecutan desde `/opt/portal-docente/src`. A continuación se detalla cada comando y su efecto sobre los contenedores:
 
-```bash
-# Ver estado de los contenedores y consumo de recursos
-docker compose -f compose.yaml ps
-docker stats --no-stream
+| Comando Docker | Explicación de lo que Ejecuta | Cuándo Utilizarlo |
+| :--- | :--- | :--- |
+| `docker compose -f compose.yaml ps` | Muestra el listado de contenedores del proyecto, su estado (`Up`, `Restarting`, `Exited`), el resultado de las sondas de salud (`healthy` / `unhealthy`) y los puertos expuestos. | Verificación rápida del estado del servidor. |
+| `docker stats --no-stream` | Toma una instantánea en vivo del consumo de CPU, memoria RAM (frente al límite configurado de `128M`/`512M`/`256M`), tráfico de red y lecturas/escrituras de disco de cada contenedor. | Monitoreo de uso de recursos durante picos de inscripción. |
+| `docker compose -f compose.yaml logs -f backend` | Muestra en tiempo real (`-f`, *follow*) la salida estándar del contenedor `backend` (arranque de adaptadores Oracle, peticiones HTTP y errores de integración). | Diagnóstico ante fallos de conexión con Oracle o CiDi. |
+| `docker compose -f compose.yaml logs -f frontend` | Muestra en tiempo real los registros de acceso y errores del proxy Nginx en el contenedor `frontend`. | Diagnóstico de tráfico web entrante o códigos HTTP 502/413. |
+| `docker compose -f compose.yaml restart backend` | Reinicia únicamente el contenedor de la API Node.js sin detener Nginx ni PostgreSQL. Al iniciar vuelve a cargar las vistas de Oracle. | Tras reconectar la VPN del host o ante un corte temporal con Oracle. |
+| `docker compose -f compose.yaml up -d --wait` | Compara el archivo `.env` y `compose.yaml` contra los contenedores en ejecución y **recrea únicamente aquellos cuya configuración haya cambiado**, esperando los health checks. | Tras modificar una variable en `.env` (ej.: cambiar `INSCRIPCION_ABIERTA`). |
+| `docker compose -f compose.yaml stop` | Envía la señal `SIGTERM` para detener ordenadamente los 3 contenedores respetando los tiempos de gracia (`stop_grace_period`), sin borrar contenedores ni volúmenes. | Mantenimiento programado del servidor físico. |
+| `docker compose -f compose.yaml start` | Vuelve a encender los contenedores previamente detenidos con `stop`. | Reanudación tras mantenimiento del servidor. |
+| `docker compose -f compose.yaml down` | Detiene y elimina los contenedores y las redes virtuales, pero **conserva intactos los volúmenes de datos (`portal_docente_db` y `portal_docente_data`)**. | Limpieza de contenedores antes de una actualización mayor de versión. |
 
-# Seguimiento de logs en tiempo real
-docker compose -f compose.yaml logs -f backend
-docker compose -f compose.yaml logs -f frontend
+#### 3.7.1. Sondas de Salud Automatizadas (`HEALTHCHECK`)
+El archivo `compose.yaml` mantiene tres sondas automáticas que vigilan continuamente cada servicio:
+- **Contenedor `db` (PostgreSQL):** Ejecuta cada `10s` el comando `pg_isready -U $POSTGRES_USER -d $POSTGRES_DB` (con 5 reintentos).
+- **Contenedor `backend` (API Express):** Ejecuta cada `30s` (con un período de gracia inicial `start_period: 60s` para dar tiempo a la carga por red desde Oracle) una petición HTTP interna a `http://127.0.0.1:3000/api/health`.
+- **Contenedor `frontend` (Nginx):** Ejecuta cada `30s` el comando `wget --quiet --tries=1 --spider http://127.0.0.1:8080/healthz`.
 
-# Reinicio controlado de la API (ejemplo: tras reconectar un enlace)
-docker compose -f compose.yaml restart backend
-
-# Aplicación de cambios de configuración en .env (recreación sin corte de red)
-docker compose -f compose.yaml up -d --wait
-
-# Detención ordenada de los servicios
-docker compose -f compose.yaml stop
-
-# Reinicio completo de la plataforma
-docker compose -f compose.yaml restart
-```
-
----
-
-### 3.7. Monitoreo y Supervisión del Sistema
-
-#### 3.7.1. Health Checks Automatizados
-El sistema incorpora sondas de salud continuas (`HEALTHCHECK`) configuradas en Docker Compose:
-- **Frontend Nginx:** Inspecciona cada 15 segundos el endpoint `http://localhost:8080/healthz`.
-- **Backend API:** Consulta cada 20 segundos `http://localhost:3000/api/health`, verificando la conectividad de Easy Connect con Oracle y la disponibilidad de PostgreSQL.
-- **Base PostgreSQL:** Ejecuta periódicamente `pg_isready -U $POSTGRES_USER -d $POSTGRES_DB`.
-
-#### 3.7.2. Bitácora de Auditoría Inmutable
-Para fiscalizar las operaciones de acceso y modificaciones de legajo o Formulario C, el personal de auditoría de gobierno puede consultar directamente las tablas no modificables en PostgreSQL:
+#### 3.7.2. Consulta de la Bitácora de Auditoría Inmutable en PostgreSQL
+Para auditar los ingresos al portal y las modificaciones sobre legajos, Formulario C o dictámenes de Junta, el administrador puede consultar las tablas `APPEND-ONLY` dentro del contenedor `db`:
 
 ```bash
-# Conectarse a la consola de PostgreSQL del portal
-docker compose -f compose.yaml exec db psql -U portal_usr -d portal_docente
+# 1. Consultar los últimos 20 eventos de acceso e inicio de sesión mediante Ciudadano Digital (CiDi)
+docker compose -f compose.yaml exec db psql -U portal -d portal_docente \
+  -c "SELECT id, fecha, cuil, rol, evento, resultado FROM auditoria_acceso ORDER BY id DESC LIMIT 20;"
 
-# Consultar últimos accesos registrados
-SELECT fecha_hora, cuil, accion, ip_origen FROM auditoria_acceso ORDER BY id_auditoria_acceso DESC LIMIT 20;
-
-# Consultar modificaciones sobre inscripciones y legajos
-SELECT fecha_hora, cuil_operador, entidad_modificada, id_entidad, operacion FROM auditoria_cambio ORDER BY id_auditoria_cambio DESC LIMIT 20;
+# 2. Consultar las últimas 20 modificaciones sobre legajos, Formulario C y revisiones de Junta
+docker compose -f compose.yaml exec db psql -U portal -d portal_docente \
+  -c "SELECT id, fecha, cuil_actor, rol_actor, ambito, metodo, ruta, estado_http FROM auditoria_cambio ORDER BY id DESC LIMIT 20;"
 ```
-*(Nota técnica: Estas tablas cuentan con triggers a nivel de esquema que rechazan de plano sentencias `UPDATE` y `DELETE`, garantizando la inviolabilidad del historial administrativo).*
+*(Nota técnica: Ambas tablas poseen triggers en PostgreSQL que rechazan cualquier sentencia `UPDATE` o `DELETE`, garantizando la trazabilidad forense de todo lo actuado).*
 
 ---
 
 ### 3.8. Gestión de Backups y Restauración
 
 #### 3.8.1. Política de Copias de Seguridad
-- **Frecuencia:** Volcado automático diario a las 03:00 AM (y copias extraordinarias antes del cierre de convocatorias anuales).
+- **Frecuencia:** Volcado automático diario a las 03:00 AM (y copias adicionales antes del cierre de convocatorias anuales).
 - **Alcance:**
-  1. Base de datos PostgreSQL (`portal_docente`): contiene las inscripciones registradas, los antecedentes cargados y las bitácoras de auditoría.
-  2. Archivo de configuración `.env`.
-  3. Archivo maestro de títulos `01_alcance_titulo.sql`.
+  1. Volumen de base de datos PostgreSQL (`portal_docente` en el contenedor `db`).
+  2. Archivo de configuración y secretos `/opt/portal-docente/src/.env`.
+  3. Catálogo maestro `/opt/portal-docente/data/alcance/01_alcance_titulo.sql`.
 
-#### 3.8.2. Script Automatizado de Backup (Cron Job)
-Crear el archivo `/opt/scripts/backup-portal.sh` con el siguiente contenido:
-
+#### 3.8.2. Script Automatizado de Backup (`/opt/scripts/backup-portal.sh`)
 ```bash
 #!/bin/bash
 set -e
@@ -805,36 +917,39 @@ BACKUP_DIR="/var/backups/portal-docente"
 DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p "$BACKUP_DIR"
 
-# 1. Volcado comprimido de la base de datos PostgreSQL
-docker compose -f /opt/portal-docente/src/compose.yaml exec -T db pg_dump -U portal_usr portal_docente | gzip > "$BACKUP_DIR/db_portal_${DATE}.sql.gz"
+# 1. Volcado SQL en caliente desde el contenedor db comprimido con gzip
+# El flag -T desactiva la asignación de pseudo-TTY para que pueda correr en cron
+docker compose -f /opt/portal-docente/src/compose.yaml exec -T db \
+  pg_dump -U portal portal_docente | gzip > "$BACKUP_DIR/db_portal_${DATE}.sql.gz"
 
-# 2. Resguardo de la configuración y claves
+# 2. Resguardo del archivo de entorno (.env)
 cp /opt/portal-docente/src/.env "$BACKUP_DIR/env_${DATE}.bak"
+chmod 600 "$BACKUP_DIR/env_${DATE}.bak"
 
-# 3. Retención: eliminar respaldos con más de 30 días
+# 3. Política de retención: conservar los últimos 30 días
 find "$BACKUP_DIR" -type f -mtime +30 -delete
 
 echo "Backup completado exitosamente: $BACKUP_DIR/db_portal_${DATE}.sql.gz"
 ```
 
-Dar permisos de ejecución y programar en el crontab del sistema:
+Dar permisos de ejecución y programar en `crontab`:
 ```bash
 sudo chmod +x /opt/scripts/backup-portal.sh
-# Agregar en crontab: 0 3 * * * /opt/scripts/backup-portal.sh >> /var/log/backup-portal.log 2>&1
+# Línea en crontab (ejecución diaria a las 03:00 AM):
+# 0 3 * * * /opt/scripts/backup-portal.sh >> /var/log/backup-portal.log 2>&1
 ```
 
 #### 3.8.3. Procedimiento de Restauración ante Contingencias
-En caso de pérdida de datos o migración de servidor:
-
-1. Detener la API para evitar transacciones en vuelo:
+1. Detener el contenedor `backend` para evitar escrituras durante la restauración:
    ```bash
    docker compose -f /opt/portal-docente/src/compose.yaml stop backend
    ```
-2. Restaurar el dump comprimido sobre la base de datos:
+2. Descomprimir e inyectar el respaldo en el contenedor `db`:
    ```bash
-   gunzip -c /var/backups/portal-docente/db_portal_YYYYMMDD_HHMMSS.sql.gz | docker compose -f /opt/portal-docente/src/compose.yaml exec -T db psql -U portal_usr -d portal_docente
+   gunzip -c /var/backups/portal-docente/db_portal_YYYYMMDD_HHMMSS.sql.gz | \
+     docker compose -f /opt/portal-docente/src/compose.yaml exec -T db psql -U portal -d portal_docente
    ```
-3. Reiniciar la API y verificar la integridad de las tablas:
+3. Volver a iniciar el contenedor `backend` y comprobar `/api/health`:
    ```bash
    docker compose -f /opt/portal-docente/src/compose.yaml start backend
    curl -s http://localhost:8080/api/health | jq .
@@ -846,25 +961,25 @@ En caso de pérdida de datos o migración de servidor:
 
 | Síntoma Observado | Causa Raíz Probable | Acción Correctiva Recomendada |
 | :--- | :--- | :--- |
-| El contenedor `backend` queda en estado `unhealthy` o reiniciándose. | Fallo de enlace con la base Oracle o credenciales erróneas. | Ejecutar `docker compose logs backend`. Verificar con `nc -zv 10.250.11.53 1521` la salida de red. Revisar que `DB_USER` y `DB_PASSWORD` coincidan con los del esquema asignado. |
-| Error `authMode: "cidi"` rechaza retornos con error 401 o cookie faltante. | El portal no está publicado bajo un dominio `*.cba.gov.ar` o la URL de retorno no coincide. | Asegurarse de que el reverse proxy provincial publique bajo un subdominio `.cba.gov.ar`. Confirmar que la URL de callback registrada en CiDi sea exactamente `https://<dominio>/api/auth/cidi/retorno`. |
-| `/api/health` informa `"sourceObject": "VT_MAT_GRADO_X_TITULO"`. | No se encontró el dump de alcances en la ruta indicada. | Verificar que el archivo `01_alcance_titulo.sql` exista en el host y que `ALCANCE_SQL_PATH` esté configurado con su ruta absoluta correcta en `.env`. |
-| Error `Port is already allocated: 8080`. | Conflicto con otro servicio web o instancia previa en el servidor. | Modificar `FRONTEND_PORT` en `.env` (por ejemplo a `8085`) y ajustar la regla de reenvío en el balanceador provincial. |
-| El navegador muestra error de CORS al intentar realizar peticiones a la API. | `CORS_ORIGIN` no coincide con la URL pública desde la que accede el usuario. | Ajustar `CORS_ORIGIN=https://<dominio-publico-exacto>` en `.env` y reiniciar el contenedor de backend (`docker compose up -d`). |
+| El contenedor `backend` queda en `unhealthy` o reiniciándose al hacer `up`. | El servidor no llega al puerto `1521` de Oracle o las credenciales `DB_USER` / `DB_PASSWORD` son incorrectas. | Ejecutar `docker compose -f compose.yaml logs backend`. Probar conectividad con `docker run --rm busybox:1.36 nc -zv -w 5 10.250.11.53 1521` y verificar tanto el enlace de red/VPN del servidor como las credenciales `DB_USER` y `DB_PASSWORD` en `.env`. |
+| `/api/health` muestra `persistencia.conError: true` o `db` no arranca. | Contraseña `POSTGRES_PASSWORD` cambiada sobre un volumen existente o falta de espacio en disco. | Revisar `docker compose -f compose.yaml logs db` y comprobar que `POSTGRES_PASSWORD` en `.env` coincida con el usuario con que se inicializó el volumen `portal_docente_db`. |
+| `/api/health` informa `"sourceObject": "VT_MAT_GRADO_X_TITULO"` en lugar de `"ALCANCE_SQL_PATH"`. | `ALCANCE_SQL_PATH` está vacío en `.env` o la ruta no existe en el servidor host. | Verificar que `/opt/portal-docente/data/alcance/01_alcance_titulo.sql` exista, definir `ALCANCE_SQL_PATH` en `.env` y recrear con `docker compose -f compose.yaml up -d --wait`. |
+| El ingreso con CiDi (`authMode: "cidi"`) falla al retornar al portal. | El portal no está publicado bajo un dominio `*.cba.gov.ar` o la URL de callback no está registrada en CiDi. | Publicar detrás del proxy oficial `*.cba.gov.ar` y registrar `https://<dominio>/api/auth/cidi/retorno` en CiDi. |
+| Error `Bind for 0.0.0.0:8080 failed: port is already allocated`. | Otro proceso en el servidor está ocupando el puerto `8080`. | Cambiar `FRONTEND_PORT=8085` en el archivo `.env` y ejecutar `docker compose -f compose.yaml up -d --wait`. |
 
 ---
 
 ## 4. ANÁLISIS DE IMPACTO AMBIENTAL
 
 ### 4.1. Propósito y Alcance
-- **Para qué:** Evalúa y cuantifica el impacto ambiental derivado de la implementación de la plataforma **Gestión Integral Docente (GID)**, contrastando el consumo energético de la infraestructura de software frente a la reducción masiva de emisiones y recursos naturales lograda mediante la digitalización y optimización del proceso de cobertura docente.
+- **Para qué:** Evalúa y cuantifica el impacto ambiental derivado de la implementación de la plataforma **Gestión Integral Docente (GID)** sobre el volumen real de la convocatoria anual (**67.700 inscripciones registradas el último año**), contrastando el consumo energético de la infraestructura de software frente a los beneficios ecológicos y operativos de **dar continuidad y profundizar el proceso de despapelización** —tanto en el uso como en el posterior almacenamiento físico documental de docentes y vocales— y en la reducción de traslados presenciales.
 - **Para quién:** Cátedra de Proyecto Final, autoridades educativas, comunidad académica y profesionales de ingeniería interesados en el diseño de software sostenible (*Green Computing*).
 
 ---
 
-### 4.2. Estimación del Consumo Energético y Huella de Carbono
+### 4.2. Estimación del Consumo Energético y Huella de Carbono (67.700 Inscripciones)
 
-Para evaluar el impacto directo del sistema sobre el medio ambiente, se modeló el ciclo de vida operativo del software considerando dos fuentes de consumo: la infraestructura de servidores gubernamentales (*backend, base de datos y proxy*) y la carga inducida en los dispositivos de los usuarios (*docentes y vocales*).
+Para evaluar el impacto directo del sistema sobre el medio ambiente, se modeló el ciclo de vida operativo del software considerando dos fuentes de consumo: la infraestructura de servidores gubernamentales (*frontend Nginx, backend Express y base de datos PostgreSQL*) y la carga inducida en los dispositivos de los usuarios finales (*docentes y vocales*).
 
 #### 4.2.1. Cómputo e Infraestructura de Servidores
 El entorno productivo de GID opera sobre un servidor virtualizado en el Centro de Datos Provincial (o infraestructura Cloud) con dimensionamiento de 8 vCPUs y 16 GB de RAM:
@@ -879,25 +994,25 @@ El entorno productivo de GID opera sobre un servidor virtualizado en el Centro d
   $$\text{Huella Servidores} = 1.752\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 578{,}16\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}58\text{ t CO}_2\text{e/año}}$$  
   *(Cálculo: Multiplicación directa del consumo eléctrico anual del servidor por el factor de intensidad de carbono del SADI).*
 
-#### 4.2.2. Consumo en Dispositivos de Usuarios Finales
-El padrón de aspirantes de nivel secundario en la Provincia de Córdoba comprende un universo de aproximadamente **60.000 educadores**:  
-*(Fuente / Justificación: Anuario Estadístico Educativo del Ministerio de Educación de la Provincia de Córdoba y padrón de la Junta de Clasificación Secundaria. Comprende ~48.000 docentes en actividad en más de 850 escuelas medias, más ~12.000 recién graduados universitarios/terciarios y postulantes que se inscriben en la LOM para interinatos y suplencias).*
+#### 4.2.2. Consumo en Dispositivos de Usuarios Finales (67.700 Inscripciones Anuales)
+En el último período anual se registraron **67.700 inscripciones** en el nivel secundario de la Provincia de Córdoba, cifra real muy cercana a la proyección preliminar de 60.000 usuarios planteada al inicio del proyecto:  
+*(Fuente / Justificación: Registros de la última convocatoria anual de la Junta de Clasificación Secundaria y Anuario Estadístico del Ministerio de Educación de la Provincia de Córdoba, que abarca tanto a educadores en actividad en las más de 850 escuelas medias provinciales como a graduados y aspirantes que se postulan a interinatos, suplencias y titularizaciones).*
 
-Con el nuevo portal, la interacción anual se estima en un promedio de **4 sesiones de 10 minutos (40 minutos totales al año por usuario)** distribuidos entre legajo, consulta de puntaje, exploración de vacantes y Formulario C:
+Con el nuevo portal, la interacción anual se estima en un promedio de **4 sesiones de 10 minutos (40 minutos totales al año por inscripción)** distribuidos entre actualización de legajo, consulta de puntaje, exploración de vacantes en mapa/simulador y confección del Formulario C:
 - **Potencia promedio por dispositivo (laptop / smartphone):** **15 W**.  
   *(Fuente: Estándar de la Agencia Internacional de la Energía [IEA] para consumo mixto ponderado de dispositivos personales: smartphones 3-5 W, computadoras portátiles 20-30 W).*
-- **Consumo energético por aspirante anual:**  
-  $$15\text{ W} \times \left(\frac{40}{60}\text{ h}\right) = \mathbf{0{,}010\text{ kWh/docente/año}}$$  
-  *(Cálculo: 15 vatios consumidos durante 0,66 horas al año).*
-- **Consumo agregado para los 60.000 docentes:**  
-  $$60.000 \times 0{,}010\text{ kWh} = \mathbf{600\text{ kWh/año}}$$
+- **Consumo energético por inscripción anual:**  
+  $$15\text{ W} \times \left(\frac{40}{60}\text{ h}\right) = \mathbf{0{,}010\text{ kWh/inscripción/año}}$$  
+  *(Cálculo: 15 vatios consumidos durante 0,667 horas al año).*
+- **Consumo agregado para las 67.700 inscripciones:**  
+  $$67.700 \times 0{,}010\text{ kWh} = \mathbf{677\text{ kWh/año}}$$
 - **Emisión derivada de los dispositivos:**  
-  $$600\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 198{,}00\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}20\text{ t CO}_2\text{e/año}}$$  
-  *(Cálculo: Consumo eléctrico de los 60.000 usuarios multiplicado por el factor de CAMMESA).*
+  $$677\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 223{,}41\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}22\text{ t CO}_2\text{e/año}}$$  
+  *(Cálculo: Consumo eléctrico de las 67.700 inscripciones multiplicado por el factor de CAMMESA).*
 
 #### 4.2.3. Huella de Carbono Operativa Total del Sistema
-Sumando ambos componentes, el costo ambiental directo que demanda mantener la plataforma GID operativa para toda la provincia es:  
-$$\text{Huella Total GID} = 0{,}58\text{ t CO}_2\text{e} + 0{,}20\text{ t CO}_2\text{e} = \mathbf{0{,}78\text{ toneladas de CO}_2\text{e / año}}$$
+Sumando ambos componentes, el costo ambiental directo que demanda mantener la plataforma GID operativa para las **67.700 inscripciones** provinciales es:  
+$$\text{Huella Total GID} = 0{,}58\text{ t CO}_2\text{e} + 0{,}22\text{ t CO}_2\text{e} = \mathbf{0{,}80\text{ toneladas de CO}_2\text{e / año}} \quad (801{,}57\text{ kg CO}_2\text{e/año})$$
 
 ---
 
@@ -937,64 +1052,76 @@ flowchart TD
 
 ---
 
-### 4.4. Beneficios Ambientales Directos: Despapelización y Reducción de Traslados
+### 4.4. Beneficios Ambientales Directos: Continuidad de la Despapelización, Almacenamiento Físico y Reducción de Traslados
 
-El impacto ecológico positivo de GID radica en la optimización sobre el proceso analógico y semi-digital previo, eliminando dos fuentes críticas de degradación ambiental: el papel residual administrativo y los desplazamientos presenciales para trámites y reclamos.
+El impacto ambiental positivo de GID no parte de la premisa irreal de que el sistema educativo provincial careciera por completo de herramientas digitales o de que esta plataforma venga a "inaugurar desde cero" la eliminación total del papel. Por el contrario, el Ministerio de Educación y la Junta de Clasificación ya habían iniciado un camino previo de digitalización parcial; el valor de **GID consiste en dar continuidad, profundizar y consolidar ese proceso de despapelización**, atacando los puntos ciegos donde el papel seguía utilizándose y acumulándose tanto en el trabajo interno de los **vocales de Junta** como en los **documentos que imprimían los propios docentes**.
 
-#### 4.4.1. Despapelización del Proceso y Ahorro de Recursos Naturales
-En el circuito administrativo previo a la integración completa de GID, persistía un volumen considerable de papel físico:
-- **Desglose de la carpeta analógica histórica (~25 hojas por docente):**
-  - Formulario C por duplicado/triplicado para sellado de constancia (4 a 6 hojas).
-  - Fotocopias de DNI, constancia de CUIL y Título/Analítico legalizado (4 a 6 hojas).
-  - Certificaciones de cursos de capacitación continua con carga horaria (6 a 10 hojas).
-  - Hojas de concepto y constancias de antigüedad docente en colegios (3 a 5 hojas).
-  - Carátula de mesa de entrada y hoja de ruta foliada (1 a 2 hojas).  
-  *(Metodología de cálculo: Relevamiento de requisitos reglamentarios de presentación en mesa de entrada de la Junta de Clasificación Secundaria para la apertura o actualización de legajo).*
-- **Volumen de papel ahorrado:**  
-  $$60.000\text{ aspirantes} \times 25\text{ hojas} = \mathbf{1.500.000\text{ hojas de papel al año}} \quad (3.000\text{ resmas de 500 hojas})$$  
-  *(Nota: Incluso considerando que los sistemas preliminares de la Junta recibían cargas de PDFs, la eliminación de expedientes de reclamo en papel de mesa de entrada, duplicados de resguardo e impresiones de actas escolares para carteleras docentes representa un ahorro directo atribuible de no menos de **180.000 a 200.000 hojas de papel anuales**).*
+#### 4.4.1. Continuidad de la Despapelización y el Problema del Almacenamiento Posterior del Papel
 
-**Factores de Conversión Ambiental y Recursos Preservados:**
-- **Árboles preservados: ~176 árboles maduros al año.**  
-  *(Fuente / Coeficiente: Environmental Paper Network [EPN] y la Technical Association of the Pulp and Paper Industry [TAPPI]. 1 árbol adulto de madera blanda para pasta de celulosa [pino o eucalipto de ~12 m de altura] rinde entre 40 y 50 kg de pulpa química, equivalentes a 17 resmas de 500 hojas de 75-80 g/m² = **8.500 hojas por árbol**. Cálculo: $1.500.000 / 8.500 = \mathbf{176{,}47\text{ árboles}}$).*
-- **Ahorro hídrico: 15.000.000 de litros de agua potable al año.**  
-  *(Fuente / Coeficiente: Water Footprint Network [Mekonnen & Hoekstra, UNESCO-IHE]. La huella hídrica de ciclo de vida para fabricar 1 kg de papel de oficina oscila entre 1.000 y 2.000 litros de agua. Como 1 hoja de 80 g pesa ~5 g [0,005 kg], cada hoja demanda hasta 10 litros de agua. Cálculo: $1.500.000\text{ hojas} \times 10\text{ L} = \mathbf{15.000.000\text{ de litros}}$).*
-- **Emisiones de producción de papel evitadas: 7.500 kg CO₂e / año (7,5 t CO₂e).**  
-  *(Fuente / Coeficiente: Modelo WARM [Waste Reduction Model] de la Agencia de Protección Ambiental de EE.UU. [EPA]. La huella de ciclo de vida del papel de oficina [tala, pulpa Kraft, químicos de blanqueo, flete, más el tóner y electricidad de fotocopiado/impresión] es de ~1 kg CO₂e por kg de papel terminado. Para 1 hoja de 5 gramos [0,005 kg] el factor es de **$0{,}005\text{ kg CO}_2\text{e por hoja}$**. Cálculo: $1.500.000 \times 0{,}005 = \mathbf{7.500\text{ kg CO}_2\text{e}}$).*
+Un aspecto central que suele omitirse al analizar el uso de papel en la administración pública es que **el problema ambiental y logístico del papel no termina cuando se imprime la hoja, sino que se agrava en su etapa posterior: el guarda y almacenamiento físico a largo plazo**:
+
+1. **El Costo Oculto del Almacenamiento Físico Post-Trámite:**
+   - Por normativas de responsabilidad administrativa y plazos legales de guarda documental, toda constancia impresa, planilla de control de vocalía, recurso de reconsideración en papel o copia física de antecedente objetado no puede desecharse tras la convocatoria: debe **foliarse, encarpetarse, rotularse en cajas y almacenarse durante años en depósitos y archivos físicos de la Junta**.
+   - Con una escala de **67.700 inscripciones anuales**, incluso un remanente pequeño de hojas impresas por trámite genera cientos de miles de folios cada año que se acumulan de forma pasiva sobre los de ciclos anteriores. Mantener esos archivos físicos conlleva una huella ambiental y edilicia permanente: ocupación de metros cuadrados de oficinas públicas, fabricación de estanterías metálicas y cajas de cartón, consumo eléctrico continuo en iluminación, ventilación y control de humedad, y la aplicación periódica de productos químicos de fumigación y desinsectación para evitar el biodeterioro del papel o riesgos de incendio.
+2. **Mejores Herramientas para Evitar los Documentos que Imprimían los Propios Docentes:**
+   - Aun cuando existían formularios web preliminares, la falta de herramientas de validación preventiva y de comprobantes con trazabilidad clara hacía que **los propios docentes imprimieran numerosos documentos por su cuenta**:
+     - Impresión por duplicado de pantallas y borradores del Formulario C como resguardo personal ante el temor a reclamos o pérdidas de datos.
+     - Impresión de listados extensos del padrón de escuelas y grillas de códigos de asignaturas para cruzar manualmente a qué materias les daba alcance su título.
+     - Impresión de grillas del Decreto 257/19 para calcular a mano su puntaje estimado y copias en papel de certificados o resoluciones para llevar a consultas y reclamos de revisión de LOM.
+   - GID elimina la necesidad de estas impresiones domésticas y particulares brindando al docente el **comprobante digital PDF sellado e inmutable**, el **Validador de Alcance de Títulos en vivo**, el **desglose transparente del puntaje artículo por artículo**, el **Mapa Territorial con Semáforo LOM** y el **Simulador de Carrera**.
+3. **Más y Mejores Herramientas Digitales para los Vocales de la Junta:**
+   - En la operatoria de evaluación, los vocales carecían de una bandeja integrada con visor y trazabilidad forense, lo que derivaba en la impresión de **planillas internas de control de aspirantes por escuela, hojas de ruta para tildar antecedentes revisados, minutas de dictámenes de rechazo y borradores de actas escolares** que luego engrosaban los armarios de la Junta.
+   - GID incorpora la **Bandeja de Vocal con aislamiento jurisdiccional**, el visor documental integrado (*Lupa*) para inspeccionar certificados PDF en pantalla sin imprimirlos, el registro digital de dictámenes con motivo tipificado obligatorio y la **bitácora de auditoría inmutable (`APPEND-ONLY` en PostgreSQL)**. De este modo, todo el respaldo legal que antes requería archivo en papel queda resguardado en pocos megabytes dentro de volúmenes digitales auditables.
+
+**Cuantificación del Ahorro Incremental de Papel y Espacio de Archivo (sobre 67.700 Inscripciones):**
+- En el proceso histórico íntegramente físico (~25 hojas por carpeta), las 67.700 inscripciones habrían demandado $1.692.500\text{ hojas anuales}$ ($3.385\text{ resmas}$).
+- Evaluando de forma realista y conservadora **únicamente el remanente de papel que GID viene a erradicar en esta nueva etapa de continuidad de la despapelización** —estimado en un promedio de **5 hojas por inscripción** entre comprobantes/borradores que imprimía el propio docente y planillas/actas operativas de los vocales—:
+  $$67.700\text{ inscripciones} \times 5\text{ hojas} = \mathbf{338.500\text{ hojas de papel al año}} \quad (\approx 677\text{ resmas de 500 hojas})$$
+
+**Impacto en Almacenamiento Físico y Recursos Naturales Preservados por este Avance:**
+- **Volumen físico de archivo evitado: ~34 metros lineales de estanterías y ~1,7 toneladas de papel por año.**  
+  *(Cálculo de almacenamiento: 1 resma de 500 hojas de 80 g/m² tiene un espesor de ~5 cm y pesa ~2,5 kg. Las 677 resmas anuales equivalen a una columna compacta de papel de **$33{,}85\text{ metros de altura}$** [el equivalente a un edificio de 11 pisos de hojas apiladas cada año] y **$1.692{,}5\text{ kg}$** de carga física que dejan de archivarse, conservarse y fumigarse en dependencias del Ministerio).*
+- **Árboles preservados: ~40 árboles maduros al año** en esta etapa incremental *(sobre un total de ~199 árboles/año considerando el ciclo completo de despapelización frente al legajo histórico de 25 hojas)*.  
+  *(Fuente / Coeficiente: Environmental Paper Network [EPN] y TAPPI: 1 árbol adulto rinde 17 resmas = **8.500 hojas por árbol**. Cálculo incremental: $338.500 / 8.500 = \mathbf{39{,}82\text{ árboles}}$).*
+- **Ahorro hídrico: 3.385.000 litros de agua potable al año** *(~16,9 millones de litros/año frente al proceso histórico total)*.  
+  *(Fuente / Coeficiente: Water Footprint Network [UNESCO-IHE]: ~10 litros de agua en el ciclo de vida por cada hoja de 80 g. Cálculo incremental: $338.500\text{ hojas} \times 10\text{ L} = \mathbf{3.385.000\text{ litros}}$).*
+- **Emisiones de ciclo de vida del papel evitadas: 1.692,5 kg CO₂e / año ($\approx 1{,}69\text{ t CO}_2\text{e/año}$)** *(sobre $8{,}46\text{ t CO}_2\text{e/año}$ respecto al proceso histórico completo)*.  
+  *(Fuente / Coeficiente: Modelo WARM [Waste Reduction Model] de la EPA: **$0{,}005\text{ kg CO}_2\text{e por hoja}$** incluyendo pulpa, blanqueo, transporte, energía de impresión, tóner y disposición final. Cálculo: $338.500 \times 0{,}005 = \mathbf{1.692{,}5\text{ kg CO}_2\text{e}}$).*
 
 ---
 
 #### 4.4.2. Reducción Masiva de Emisiones por Transporte (Traslados y Reclamos Evitados)
-Bajo el esquema previo, al no existir un validador de títulos en tiempo real ni desglose detallado del puntaje del Decreto 257/19, miles de docentes del interior provincial debían viajar presencialmente a la sede de la Junta en Córdoba Capital para entregar documentación o interponer recursos de reconsideración por puntajes mal asignados:
-- **Docentes que realizaban traslados:** Estimados en al menos **25.000 educadores del interior provincial**  
-  *(Fuente / Justificación: Distribución geográfica del Ministerio de Educación: el interior provincial concentra más del 45% de los colegios secundarios en departamentos como San Justo, Río Cuarto, Unión, Traslasierra, Tercero Arriba y Punilla).*
+Sobre el universo de **67.700 inscripciones anuales**, al no contarse previamente con un validador de alcance de títulos en tiempo real, ni con un desglose analítico del Decreto 257/19 ni presentación digital de reclamos con seguimiento, miles de docentes del interior provincial debían trasladarse hacia Córdoba Capital o cabeceras de inspección para realizar consultas, subsanar observaciones o interponer reclamos presenciales por puntajes de LOM:
+- **Inscripciones de docentes que evitaban o reducen traslados:** Estimadas conservadoramente en **25.000 desplazamientos anuales del interior provincial** *(equivalentes al ~37% de las 67.700 inscripciones anuales)*.  
+  *(Fuente / Justificación: Distribución geográfica del Ministerio de Educación: el interior provincial concentra más del 45% de los establecimientos secundarios en departamentos como San Justo, Río Cuarto, Unión, Traslasierra, Tercero Arriba y Punilla).*
 - **Distancia media de traslado:** **160 km ida y vuelta**.  
-  *(Fuente / Metodología de cálculo: Distancia media ponderada entre las cabeceras departamentales del interior y la capital provincial. Ejemplos de distancias reales ida y vuelta: Carlos Paz - Córdoba: 72 km; Jesús María - Córdoba: 100 km; Villa María - Córdoba: 300 km; Río Cuarto - Córdoba: 440 km; San Francisco - Córdoba: 420 km. La media de 160 km representa un valor ponderado conservador).*
+  *(Fuente / Metodología de cálculo: Media ponderada conservadora entre cabeceras departamentales del interior y la capital provincial: Carlos Paz 72 km, Jesús María 100 km, Villa María 300 km, Río Cuarto 440 km, San Francisco 420 km).*
 - **Factor de emisión de transporte interurbano:** **$0{,}068\text{ kg CO}_2\text{e / pasajero-km}$**.  
-  *(Fuente oficial: Guía de Factores de Emisión del GHG Protocol [Greenhouse Gas Protocol] y valores oficiales de la Secretaría de Transporte de la Nación para servicios de ómnibus interurbanos de media y larga distancia).*
+  *(Fuente oficial: Guía de Factores de Emisión del GHG Protocol [Greenhouse Gas Protocol] y Secretaría de Transporte de la Nación para ómnibus interurbanos).*
 - **Cálculo de emisiones de transporte evitadas:**  
-  $$\text{Emisiones Colectivo Evitadas} = 25.000\text{ docentes} \times 160\text{ km} \times 0{,}068\text{ kg CO}_2\text{e/km} = \mathbf{272.000\text{ kg CO}_2\text{e/año} (272\text{ t CO}_2\text{e/año})}$$  
-  *(Nota complementaria: Si tan solo el 30% de los docentes se desplazaba en vehículo particular naftero estándar [factor medio de $0{,}180\text{ kg CO}_2\text{e/km}$], la huella de transporte evitada superaría las **430 toneladas de CO₂e al año**).*
+  $$\text{Emisiones Colectivo Evitadas} = 25.000\text{ traslados} \times 160\text{ km} \times 0{,}068\text{ kg CO}_2\text{e/km} = \mathbf{272.000\text{ kg CO}_2\text{e/año} (272\text{ t CO}_2\text{e/año})}$$  
+  *(Nota complementaria: Si tan solo el 30% de dichos traslados se efectuaba en vehículo particular naftero estándar [factor medio de $0{,}180\text{ kg CO}_2\text{e/km}$], la huella de transporte evitada superaría las **430 toneladas de CO₂e al año**).*
 
 ---
 
 ### 4.5. Balance Ambiental Neto de la Solución
 
-El balance ambiental consolidado expone la sostenibilidad neta de la digitalización impulsada por GID:
+El balance ambiental consolidado para el volumen real de **67.700 inscripciones anuales** expone la sostenibilidad neta de la continuidad en la despapelización y digitalización impulsada por GID:
 
 | Concepto Ambiental Evaluado | Impacto en Emisiones (t CO₂e / año) | Origen de la Métrica / Metodología | Balance Neto |
 | :--- | :---: | :--- | :---: |
-| **Cómputo en Servidores del Sistema GID (Host Docker)** | $+0{,}58$ | Servidor 200 W (PUE 1,4) $	imes$ 8.760 h $	imes$ 0,33 kg CO₂e/kWh (CAMMESA) | Emisión |
-| **Consumo Eléctrico de Dispositivos de Usuarios** | $+0{,}20$ | 60.000 usuarios $	imes$ 40 min $	imes$ 15 W (IEA) $	imes$ 0,33 kg CO₂e/kWh | Emisión |
-| **Subtotal Huella Generada por el Software** | **$+0{,}78$** | **Suma de cómputo en servidor y terminales de usuario** | **Costo Ambiental** |
-| **Ahorro por Eliminación de Papel y Fotocopias (1,5 M hojas)** | $-7{,}50$ | 1.500.000 hojas $	imes$ 0,005 kg CO₂e/hoja (Modelo WARM de la EPA) | Mitigación |
-| **Ahorro por Eliminación de Viajes en Transporte (25.000 docentes)** | $-272{,}00$ | 25.000 viajes $	imes$ 160 km $	imes$ 0,068 kg CO₂e/pasajero-km (GHG Protocol) | Mitigación |
-| **Subtotal Emisiones Evitadas en el Entorno Provincial** | **$-279{,}50$** | **Suma de mitigaciones por papel y movilidad interurbana** | **Beneficio Ambiental** |
-| **BALANCE AMBIENTAL NETO ANUAL** | **$-278{,}72$** | **Reducción neta anual en la Provincia de Córdoba** | **Neto Positivo (Reducción)** |
+| **Cómputo en Servidores del Sistema GID (Host Docker)** | $+0{,}58$ | Servidor 200 W (PUE 1,4) $\times$ 8.760 h $\times$ 0,33 kg CO₂e/kWh (CAMMESA) | Emisión |
+| **Consumo Eléctrico de Dispositivos (67.700 inscripciones)** | $+0{,}22$ | 67.700 inscripciones $\times$ 40 min $\times$ 15 W (IEA) $\times$ 0,33 kg CO₂e/kWh | Emisión |
+| **Subtotal Huella Generada por el Software** | **$+0{,}80$** | **Suma de cómputo en servidor y dispositivos para 67.700 inscripciones** | **Costo Ambiental** |
+| **Continuidad de Despapelización en Docentes y Vocales (338.500 hojas)** | $-1{,}69$ | 67.700 inscripciones $\times$ 5 hojas $\times$ 0,005 kg CO₂e/hoja (EPA WARM; $-8{,}46\text{ t}$ vs. histórico total) | Mitigación + Fin de Guarda Física |
+| **Ahorro por Eliminación de Viajes en Transporte (25.000 traslados)** | $-272{,}00$ | 25.000 viajes $\times$ 160 km $\times$ 0,068 kg CO₂e/pasajero-km (GHG Protocol) | Mitigación |
+| **Subtotal Emisiones Evitadas en el Entorno Provincial** | **$-273{,}69$** | **Suma de mitigaciones por despapelización incremental y movilidad** | **Beneficio Ambiental** |
+| **BALANCE AMBIENTAL NETO ANUAL** | **$-272{,}89$** | **Reducción neta anual en la Provincia de Córdoba** | **Neto Positivo (Reducción)** |
 
 > [!IMPORTANT]
 > **Conclusión del Balance Ambiental:**  
-> Por cada **1 kg de CO₂e** emitido para operar y mantener la infraestructura digital de GID, la sociedad provincial evita la emisión de más de **350 kg de CO₂e** al suprimir traslados físicos y consumo de papel. La solución resulta ampliamente superavitaria desde el punto de vista ecológico, consolidando a la digitalización administrativa como una política activa de descarbonización en el Estado Provincial.
+> 1. **El ahorro directo en papel supera por sí solo el consumo eléctrico total del sistema:** Incluso aislando únicamente la reducción incremental de papel lograda en esta etapa entre docentes y vocales (**$-1{,}69\text{ t CO}_2\text{e/año}$**, sin contar el transporte ni el ahorro edilicio de archivar 34 metros lineales de papel por año), el beneficio ambiental **más que duplica la huella eléctrica completa de servidores y dispositivos de las 67.700 inscripciones ($+0{,}80\text{ t CO}_2\text{e/año}$)**.  
+> 2. **Impacto global superavitario:** Al incorporar la supresión de traslados interurbanos por consultas y reclamos, por cada **1 kg de CO₂e** emitido para operar la infraestructura digital de GID, la Provincia evita la emisión de más de **340 kg de CO₂e**, consolidando el proceso de despapelización y autogestión digital como una política efectiva de sostenibilidad en el Estado Provincial.
 
 ## 5. RETROSPECTIVA DE PROYECTO
 
