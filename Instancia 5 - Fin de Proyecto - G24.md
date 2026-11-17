@@ -24,95 +24,106 @@
 
 # INSTANCIA 5 — FIN DE PROYECTO
 
-```
-ÍNDICE GENERAL
-1. DOCUMENTACIÓN DEL PROCESO QUE CONTIENE AL SISTEMA
-   1.1. Propósito y Audiencia
-   1.2. Descripción del Proceso de Negocio Actualizado Post-Implementación
-        1.2.1. El Ciclo Administrativo Docente Anual
-        1.2.2. Detalle de las Etapas del Circuito Integral
-   1.3. Diagrama de Flujo del Proceso Integrado (Swimlanes y Fases Temporales)
-   1.4. Roles y Responsabilidades en el Nuevo Contexto (Matriz RACI)
-2. INSTRUCTIVOS DE USO
-   2.1. Instructivo para el Aspirante Docente
-   2.2. Instructivo para el Vocal de Junta de Clasificación
-   2.3. Preguntas Frecuentes (FAQ) y Resolución de Problemas Comunes
-3. MANUAL DE INSTALACIÓN Y OPERACIÓN
-   3.1. Propósito y Audiencia
-   3.2. Arquitectura de Despliegue y Qué Hace Cada Contenedor Docker
-   3.3. Requisitos de Hardware, Software y Red
-   3.4. Instalación Paso a Paso en un Servidor y Explicación de Comandos Docker
-   3.5. Verificación de Conectividad con la Base de Datos y Sistemas Externos
-   3.6. Configuración de Variables de Entorno y Secretos
-   3.7. Operación, Monitoreo y Comandos Docker de Mantenimiento
-   3.8. Gestión de Backups y Restauración
-   3.9. Resolución de Incidentes Comunes de Infraestructura
-4. ANÁLISIS DE IMPACTO AMBIENTAL
-   4.1. Propósito y Alcance
-   4.2. Estimación del Consumo Energético y Huella de Carbono (67.700 Inscripciones)
-   4.3. Alternativas de Diseño Evaluadas y Prácticas de Ingeniería Verde
-   4.4. Beneficios Ambientales Directos: Continuidad de la Despapelización, Almacenamiento Físico y Reducción de Traslados
-   4.5. Balance Ambiental Neto de la Solución
-5. RETROSPECTIVA DE PROYECTO
-   5.1. Propósito y Audiencia
-   5.2. Top 3 Decisiones que Resultaron Bien y por qué
-   5.3. Top 3 Cosas que Haríamos Diferente (Lecciones Aprendidas)
-   5.4. Recomendaciones para Futuros Equipos de Proyecto Final
-```
+---
+
+## 📑 Índice General
+
+- [**1. Documentación del Proceso que Contiene al Sistema**](#1-documentación-del-proceso-que-contiene-al-sistema)
+  - [1.1. Propósito y Audiencia](#11-propósito-y-audiencia)
+  - [1.2. Descripción del Proceso de Negocio Actualizado Post-Implementación](#12-descripción-del-proceso-de-negocio-actualizado-post-implementación)
+    - [1.2.1. El Ciclo Administrativo Docente Anual](#121-el-ciclo-administrativo-docente-anual)
+    - [1.2.2. Detalle de las Etapas del Circuito Integral](#122-detalle-de-las-etapas-del-circuito-integral)
+  - [1.3. Diagrama de Secuencia del Proceso Integrado](#13-diagrama-de-secuencia-del-proceso-integrado)
+  - [1.4. Roles y Responsabilidades en el Nuevo Contexto (Matriz RACI)](#14-roles-y-responsabilidades-en-el-nuevo-contexto-matriz-raci)
+- [**2. Instructivos de Uso**](#2-instructivos-de-uso)
+  - [2.1. Propósito y Alcance del Instructivo](#21-propósito-y-alcance-del-instructivo)
+  - [2.2. Instructivo de Operación para el Docente Postulante](#22-instructivo-de-operación-para-el-docente-postulante)
+  - [2.3. Instructivo de Operación para el Administrador de la Junta / Usuario de Sistemas](#23-instructivo-de-operación-para-el-administrador-de-la-junta--usuario-de-sistemas)
+  - [2.4. Instructivo de Operación para el Vocal de la Junta de Clasificación](#24-instructivo-de-operación-para-el-vocal-de-la-junta-de-clasificación)
+  - [2.5. Preguntas Frecuentes (FAQ) y Resolución de Problemas Comunes](#25-preguntas-frecuentes-faq-y-resolución-de-problemas-comunes)
+- [**3. Manual de Instalación y Operación**](#3-manual-de-instalación-y-operación)
+  - [3.1. Propósito y Audiencia](#31-propósito-y-audiencia)
+  - [3.2. Arquitectura de Despliegue y Qué Hace Cada Contenedor Docker](#32-arquitectura-de-despliegue-y-qué-hace-cada-contenedor-docker)
+  - [3.3. Requisitos de Hardware, Software y Red](#33-requisitos-de-hardware-software-y-red)
+  - [3.4. Instalación Paso a Paso en un Servidor y Explicación de Comandos Docker](#34-instalación-paso-a-paso-en-un-servidor-y-explicación-de-comandos-docker)
+  - [3.5. Verificación de Conectividad con Bases de Datos y Sistemas Externos](#35-verificación-de-conectividad-con-bases-de-datos-y-sistemas-externos)
+  - [3.6. Configuración de Variables de Entorno y Secretos](#36-configuración-de-variables-de-entorno-y-secretos)
+  - [3.7. Operación, Monitoreo y Comandos Docker de Mantenimiento](#37-operación-monitoreo-y-comandos-docker-de-mantenimiento)
+  - [3.8. Gestión de Backups y Restauración](#38-gestión-de-backups-y-restauración)
+  - [3.9. Resolución de Incidentes Comunes de Infraestructura](#39-resolución-de-incidentes-comunes-de-infraestructura)
+- [**4. Análisis de Impacto Ambiental**](#4-análisis-de-impacto-ambiental)
+  - [4.1. Propósito y Alcance](#41-propósito-y-alcance)
+  - [4.2. Estimación del Consumo Energético y Huella de Carbono (67.700 Inscripciones)](#42-estimación-del-consumo-energético-y-huella-de-carbono-67700-inscripciones)
+  - [4.3. Alternativas de Diseño Evaluadas y Prácticas de Ingeniería Verde](#43-alternativas-de-diseño-evaluadas-y-prácticas-de-ingeniería-verde)
+  - [4.4. Beneficios Ambientales Directos: Continuidad de la Despapelización, Almacenamiento Físico y Reducción de Traslados](#44-beneficios-ambientales-directos-continuidad-de-la-despapelización-almacenamiento-físico-y-reducción-de-traslados)
+  - [4.5. Balance Ambiental Neto de la Solución](#45-balance-ambiental-neto-de-la-solución)
+- [**5. Retrospectiva de Proyecto**](#5-retrospectiva-de-proyecto)
+  - [5.1. Propósito y Audiencia](#51-propósito-y-audiencia)
+  - [5.2. Top 3 Decisiones que Resultaron Bien y por qué](#52-top-3-decisiones-que-resultaron-bien-y-por-qué)
+  - [5.3. Top 3 Cosas que Haríamos Diferente (Lecciones Aprendidas)](#53-top-3-cosas-que-haríamos-diferente-lecciones-aprendidas)
+  - [5.4. Recomendaciones para Futuros Equipos de Proyecto Final](#54-recomendaciones-para-futuros-equipos-de-proyecto-final)
 
 ---
 
 ## 1. DOCUMENTACIÓN DEL PROCESO QUE CONTIENE AL SISTEMA
 
 ### 1.1. Propósito y Audiencia
-- **Para qué:** Describe el proceso de negocio de gestión de carrera, valoración de antecedentes e inscripción docente tras la integración de la plataforma **Gestión Integral Docente (GID)**, documentando los flujos temporales reales y la articulación entre los actores institucionales y los componentes de software provincial.
-- **Para quién:** Autoridades del Ministerio de Educación de la Provincia de Córdoba, personal directivo y vocales de la Junta de Clasificación Secundaria, docentes y aspirantes provinciales, y futuros equipos mantenedores de la infraestructura tecnológica estatal.
+- **Para qué:** Describe el proceso de negocio de gestión de carrera, valoración de antecedentes, fiscalización e inscripción docente tras la integración de la plataforma **Gestión Integral Docente (GID)**, documentando los flujos temporales reales, la articulación entre los actores institucionales y los componentes de software provincial.
+- **Para quién:** Autoridades del Ministerio de Educación de la Provincia de Córdoba, personal directivo, vocales y administradores de la Junta de Clasificación Secundaria, docentes y aspirantes provinciales, y futuros equipos mantenedores de la infraestructura tecnológica estatal.
 
 ---
 
 ### 1.2. Descripción del Proceso de Negocio Actualizado Post-Implementación
 
 #### 1.2.1. El Ciclo Administrativo Docente Anual
-El sistema administrativo de educación secundaria de la provincia se rige por un ciclo secuencial de etapas bien delimitadas temporalmente. No se trata de un trámite instantáneo de un solo paso: existe una ventana temporal donde el docente actualiza sus credenciales y luego atraviesa un período interanual en el cual **no puede inscribirse a cargos**, ya que la Junta de Clasificación debe analizar, tasar y certificar los antecedentes para expedir el puntaje oficial de cada educador.
+El régimen administrativo de educación secundaria de la provincia de Córdoba se estructura en torno a un ciclo anual riguroso y secuencial. Lejos de constituir un trámite instantáneo o aislado, la cobertura de horas cátedra y cargos directivos/docentes exige una coordinación sincronizada entre la autogestión de los aspirantes, la tasación jurídica de la Junta de Clasificación y la gobernanza operativa del Ministerio:
 
-Con el sistema GID integrado, el proceso se estructura de forma ordenada en torno a ese ciclo:
-1. **Fase de Apertura de Legajo y Carga de Antecedentes:** El docente ingresa y carga sus certificaciones, cursos y títulos nuevos.
-2. **Fase de Espera y Valoración de Junta (Período sin inscripciones):** Durante este lapso administrativo, la Junta examina la documentación y le asigna el puntaje oficial reglamentario.
-3. **Fase de Apoyo a la Decisión con Puntaje Asignado:** Ya con su puntaje oficial en mano, el docente explora el mapa, evalúa cortes históricos, simula escenarios y define estratégicamente a qué establecimientos y materias le conviene apuntar.
-4. **Fase de Convocatoria Anual (Inscripción en Formulario C):** Habilitada la inscripción formal, el aspirante carga su Formulario C con validación de alcance de título en tiempo real.
-5. **Fase de Cierre y Publicación de la LOM:** El docente hace el seguimiento de la postulación y aguarda la publicación oficial de la Lista de Orden de Mérito para conocer si accedió a la titularidad, suplencia o interinato de las horas y cargos solicitados.
+1. **Fase 1 — Configuración Previa y Apertura de Convocatoria:** El Administrador de la Junta / Usuario de Sistemas parametriza la ventana temporal en la web (`ABIERTO`, `CERRADO`, `FECHAS`) y distribuye operativamente las escuelas base entre los vocales calificadores.
+2. **Fase 2 — Convocatoria y Autogestión Docente:** Habilitado el plazo, el docente accede con CiDi Nivel 2, actualiza sus antecedentes (con filtro automático de caducidad a 10 años según Decreto 257/19), valida el alcance de sus títulos de forma no bloqueante, simula su puntaje estimado y formaliza su Formulario C (hasta 3 escuelas y 5 asignaturas por establecimiento).
+3. **Fase 3 — Valoración de Legajos y Fiscalización en Junta:** Cerrada la convocatoria, los vocales acceden a su bandeja por escuela base asignada. Auditan las probanzas aplicando los topes normativos (máximo 30 pts en títulos con carga horaria superior a 1600 h; máximo 60 pts en cursos y capacitaciones) y registran ajustes fundados.
+4. **Fase 4 — Publicación de la LOM Provisoria:** El motor calcula los totales preliminares y publica la lista provisoria con desglose transparente de ítems aprobados y desestimados.
+5. **Fase 5 — Régimen Digital de Reclamos:** Se abre la ventana formal de impugnación. El aspirante fundamenta su disconformidad y adjunta nueva prueba; el vocal analiza el expediente y emite dictamen resolutivo vinculante (admitido o rechazado).
+6. **Fase 6 — LOM Definitiva y Analítica de Competitividad:** El Ministerio homologa la LOM definitiva para la cobertura de suplencias e interinatos. El docente consulta en «Mis puntajes» su posición oficial, percentiles departamentales (con privacidad diferencial $k \ge 10$) y el ranking escolar de los 12 primeros puestos.
 
 ```mermaid
 flowchart TD
-    subgraph FASE1 ["FASE 1: Carga de Legajo"]
-        A[Autenticación CiDi Nivel 2] --> B[Actualización de Antecedentes y Títulos]
-        B --> C[Cierre de Recepción de Documentación]
+    subgraph F1 ["FASE 1: Configuración y Apertura (Admin / Sistemas)"]
+        A1[Parametrización de Fechas: ABIERTO / CERRADO / FECHAS] --> A2[Asignación de Escuelas Base a Vocales]
+        A2 --> A3([Convocatoria Oficial Habilitada])
     end
 
-    subgraph FASE2 ["FASE 2: Evaluación de Junta (Espera Interanual)"]
-        C --> D[Sin inscripciones a cargos habilitadas]
-        D --> E[Junta de Clasificación tasa antecedentes]
-        E --> F[Asignación y Notificación del Puntaje Oficial]
+    subgraph F2 ["FASE 2: Convocatoria y Autogestión (Docente)"]
+        A3 --> B1[Acceso CiDi Nivel 2]
+        B1 --> B2[Carga de Antecedentes con Filtro Decenal]
+        B2 --> B3[Validación de Alcances de Títulos No Bloqueante]
+        B3 --> B4[Previsualización de Grilla Decreto 257/19]
+        B4 --> B5[Confirmación Formulario C: Máx 3 Escuelas / 5 Materias]
     end
 
-    subgraph FASE3 ["FASE 3: Análisis y Apoyo a la Decisión"]
-        F --> G[Docente dispone de su Puntaje Oficial]
-        G --> H[Consulta Mapa Territorial y Semáforo LOM]
-        G --> I[Simulador de Carrera y Sugerencia de Escuelas]
-        H & I --> J[Definición Estratégica de Postulación]
+    subgraph F3 ["FASE 3: Valoración y Calificación (Vocal de Junta)"]
+        B5 --> C1[Cierre de Recepción y Consolidación de Legajos]
+        C1 --> C2[Bandeja de Calificación por Escuela Base Asignada]
+        C2 --> C3[Auditoría de Topes Legales: Títulos 30 pts / Cursos 60 pts]
+        C3 --> C4[Ajustes de Puntaje Fundados y Dictámenes]
     end
 
-    subgraph FASE4 ["FASE 4: Convocatoria Anual (Formulario C)"]
-        J --> K[Apertura Oficial de Convocatoria]
-        K --> L[Carga de Formulario C: hasta 3 escuelas y 5 materias]
-        L --> M[Validador de Alcance de Títulos en Vivo]
-        M --> N[Confirmación, Auditoría Append-Only y Resguardo]
+    subgraph F4 ["FASE 4: LOM Provisoria"]
+        C4 --> D1[Cálculo Automatizado del Motor de Puntaje]
+        D1 --> D2[Publicación de Lista Provisoria con Desglose Transparente]
     end
 
-    subgraph FASE5 ["FASE 5: Adjudicación y LOM"]
-        N --> O[Seguimiento de la Postulación en el Portal]
-        O --> P[Publicación Oficial de la LOM Definitiva]
-        P --> Q([Resolución de Cargos e Inicio de Ciclo Lectivo])
+    subgraph F5 ["FASE 5: Tratamiento de Reclamos (Docente + Vocal)"]
+        D2 --> E1[Apertura de Ventana Recursiva Oficial]
+        E1 --> E2[Docente presenta Reclamo Digital con Probanzas]
+        E2 --> E3[Vocal audita y emite Dictamen: Admite o Rechaza]
+        E3 --> E4[Rectificación de Calificaciones en Base de Datos]
+    end
+
+    subgraph F6 ["FASE 6: LOM Definitiva y Competitividad"]
+        E4 --> F1[Emisión Oficial de la LOM Definitiva Vinculante]
+        F1 --> F2[Acceso a «Mis Puntajes»: Percentiles Departamentales k>=10]
+        F1 --> F3[Visualización del Ranking Escolar: 12 Primeros Puestos]
+        F1 --> F4([Asambleas Docentes y Toma de Posesión de Cargos])
     end
 ```
 
@@ -120,104 +131,113 @@ flowchart TD
 
 #### 1.2.2. Detalle de las Etapas del Circuito Integral
 
-#### Etapa 1: Autenticación e Identidad Digital Unificada (CiDi Nivel 2)
-1. El docente accede al portal a través del servicio unificado de **Ciudadano Digital (CiDi)**.
-2. El sistema valida estrictamente que la cuenta posea **Nivel 2 (identidad verificada de forma fehaciente)**. Si el usuario intenta acceder con Nivel 1, el portal interrumpe el acceso preventivamente e instruye los pasos oficiales para completar la validación de identidad provincial.
-3. El subsistema de seguridad emite un token de sesión firmado (JWT) y asigna el perfil de acceso: `aspirante` (docentes y preceptores) o `vocal` (evaluadores reconocidos formalmente en el registro provincial de la Junta).
+#### Etapa 1: Autenticación, Identidad Digital y Asignación de Roles
+1. El usuario accede a través del portal único de **Ciudadano Digital (CiDi)** provincial.
+2. El sistema exige estrictamente **CiDi Nivel 2 (identidad fehaciente verificada)**. Si un usuario intenta ingresar con Nivel 1, el portal bloquea preventivamente la sesión e instruye los pasos para validar su identidad en los centros provinciales.
+3. El subsistema de seguridad emite un token JWT firmado y resuelve el perfil operativo según las fuentes maestras:
+   - `docente`: postulación e inscripción general.
+   - `vocal`: calificador formal habilitado en la Junta de Clasificación.
+   - `administrador`: usuario de sistemas designado por CUIL (`ADMINISTRADORES_CUIL`) con atribuciones de gobierno y auditoría.
 
-#### Etapa 2: Actualización del Legajo Digital y Resguardo de Antecedentes
-1. El educador accede a su **Legajo Digital**.
-2. El sistema recupera de manera automática los servicios y certificaciones institucionales registrados en los sistemas centrales provinciales (antigüedad docente en el Sistema de Gestión Escolar - SGE, y capacitaciones de la Red Provincial / SIPEC).
-3. El docente incorpora sus nuevos títulos académicos, certificados de formación continua o antecedentes de trabajo institucional, adjuntando los comprobantes digitales de respaldo.
-4. Finalizado el plazo de presentación, se procede al cierre administrativo del período de carga de antecedentes para el ciclo.
+#### Etapa 2: Parametrización y Convocatoria Anual
+1. El Administrador de la Junta configura desde el módulo web de gestión el estado del período de inscripción (`ABIERTO`, `CERRADO` o por rango programado de `FECHAS`).
+2. Desde la interfaz de asignación, el Administrador balancea la carga de trabajo distribuyendo las escuelas secundarias provinciales entre los vocales activos.
+3. Se publican los términos y el calendario oficial en la portada del portal GID.
 
-#### Etapa 3: Período Interanual de Evaluación y Asignación de Puntaje por la Junta
-1. Con la recepción cerrada, se abre el período interanual de tasación. Durante esta etapa, **el docente no puede realizar inscripciones a horas ni cargos**, debiendo aguardar que la Junta de Clasificación evalúe las presentaciones.
-2. Los vocales de la Junta fiscalizan la validez formal de los comprobantes aportados, cotejan los títulos contra las normativas vigentes y aplican los topes y ponderaciones establecidos por el **Decreto Provincial Nº 257/19** (títulos, acumulación, antigüedad, formación, antecedentes pedagógicos e institucionales).
-3. Concluida la labor evaluadora, la Junta consolida el puntaje del aspirante y el sistema actualiza el estado de su legajo, dejando el puntaje oficial asentado y disponible en el portal.
+#### Etapa 3: Autogestión, Títulos y Carga de Antecedentes
+1. El docente accede a su **Legajo Digital** y visualiza su historial consolidado (servicios SGE, antigüedad PeopleNet y certificaciones previas).
+2. **Filtro de Caducidad Decenal:** Al incorporar nuevos certificados y cursos, el sistema verifica que la fecha de emisión no supere los diez (10) años al momento del cierre de la convocatoria, conforme a las prescripciones del Decreto 257/19.
+3. **Validación de Alcances No Bloqueante:** Al seleccionar asignaturas para su postulación, el sistema coteja contra el catálogo de alcances de títulos (más de 74.000 combinaciones):
+   - Determina la prioridad legal: **Docente**, **Habilitante** o **Supletorio**.
+   - En caso de no existir incumbencia previa registrada, el sistema **no bloquea el trámite**: emite una advertencia formal y permite al educador continuar postulándose bajo la categoría *"Sin título habilitante"*, garantizando el derecho a la postulación sujeta a revisión de Junta.
+4. **Previsualización de Grilla (Decreto 257/19):** Antes de confirmar, el docente visualiza la estimación preliminar de su puntaje desglosado por concepto, distinguiendo claramente la simulación de grilla respecto del puntaje oficial emitido por Junta.
+5. El docente confirma su Formulario C (hasta 3 escuelas y hasta 5 asignaturas por establecimiento), emitiéndose comprobante digital con hash de seguridad.
 
-#### Etapa 4: Análisis Estratégico mediante Herramientas de Apoyo a la Decisión
-1. Una vez notificado de su puntaje asignado, el docente cuenta con el dato central para planificar su inserción laboral en el ciclo lectivo venidero:
-   - **Mapa Territorial Interactivo:** Permite explorar geográficamente los establecimientos secundarios de la provincia, consultando vacantes declaradas por la Junta y el **Semáforo LOM** (que compara su puntaje real contra el promedio o corte histórico de aspirantes de cada escuela).
-   - **Propuesta de Escuelas Asistida:** El portal clasifica las alternativas institucionales cercanas en *Escuela Segura* (altas probabilidades según antecedentes históricos), *Escuela Justa* (competitividad balanceada) y *Escuela Apuesta* (mayor exigencia de puntaje para proyección futura).
-   - **Simulador de Carrera Docente:** El educador puede evaluar escenarios prospectivos para comprender cómo variaría su competitividad si suma nuevos títulos o capacitaciones con vistas a futuros períodos.
+#### Etapa 4: Valoración y Calificación por Vocales de Junta
+1. Al vencer el plazo de inscripción, la recepción se bloquea automáticamente.
+2. Cada vocal accede a su bandeja exclusiva conteniendo únicamente los legajos de los aspirantes postulados a su **escuela base asignada**.
+3. El vocal audita las probanzas documentales y el sistema asiste en la aplicación estricta de los límites del Decreto 257/19:
+   - **Tope de acumulación de títulos:** Hasta un máximo de **30 puntos** (requiriendo constatar planes con carga horaria superior a 1600 horas).
+   - **Tope de cursos y perfeccionamiento:** Hasta un máximo de **60 puntos**.
+   - **Ajustes de puntaje justificados:** Posibilidad de aplicar adiciones o detracciones especiales, requiriendo obligatoriamente un campo de fundamentación para auditoría.
+4. El legajo transita formalmente por los estados: *Pendiente → En Revisión → Calificado / Observado*.
 
-#### Etapa 5: Apertura de Convocatoria y Confección del Formulario C
-1. Al publicarse la convocatoria anual de cobertura de suplencias e interinatos (`INSCRIPCION_ABIERTA = true`), el docente ingresa al módulo de inscripción ya sabiendo con precisión a qué escuelas y materias orientar su postulación.
-2. **Supresión de la Escuela Base:** Conforme a las definiciones normativas adoptadas (ADR-013), el docente no se encuentra condicionado por una escuela base histórica, pudiendo seleccionar libremente hasta un **máximo estricto de tres (3) escuelas** y hasta **cinco (5) materias o cargos por institución**.
-3. **Validador de Alcance en Tiempo Real:** Al momento de añadir cada asignatura, el sistema consulta de forma instantánea el catálogo maestro de alcances de títulos (74.765 combinaciones oficiales):
-   - Dictamina la categorización legal: **Docente** (prioridad principal), **Habilitante** (prioridad secundaria) o **Supletorio**.
-   - En caso de no existir habilitación legal registrada para la asignatura elegida, el sistema emite una advertencia de bloqueo normativo, evitando que el docente envíe solicitudes inadmisibles que luego devendrían en rechazos administrativos.
+#### Etapa 5: LOM Provisoria y Régimen Digital de Reclamos
+1. El motor consolida las calificaciones y genera la **Lista de Orden de Mérito Provisoria**.
+2. Los aspirantes pueden consultar públicamente su posición preliminar y el desglose de puntaje otorgado.
+3. **Instancia Recursiva Digital:** Dentro del plazo reglamentario de días hábiles, el docente disconforme puede formular un reclamo digital desde el portal:
+   - Identifica el rubro o antecedente objetado.
+   - Redacta la fundamentación formal y adjunta documentación probatoria complementaria.
+4. El vocal revisor evalúa el reclamo y emite un **dictamen resolutivo vinculante**:
+   - **Admitir:** Rectifica la calificación y actualiza el puntaje en la base de datos.
+   - **Rechazar:** Asienta la resolución fundada denegatoria.
+5. El docente es notificado formalmente a través de su panel personal.
 
-#### Etapa 6: Confirmación, Bitácora de Auditoría y Resguardo Espejo
-1. El docente revisa el resumen consolidado de su postulación y confirma el envío del Formulario C.
-2. El portal procesa la operación asegurando máxima consistencia:
-   - Registra el evento en la base del portal.
-   - Genera una entrada no modificable en la bitácora de auditoría `APPEND-ONLY` en PostgreSQL (`auditoria_cambio` y `auditoria_acceso`, ADR-032).
-   - Sincroniza los registros de manera espejo en las tablas institucionales de la Junta de Clasificación (`T_INSCRIPCIONES`, `T_FORMULARIO_C`, ADR-029).
-3. El educador recibe su constancia digital oficial de inscripción debidamente numerada y sellada en el sistema.
-
-#### Etapa 7: Cierre, Emisión de Actas y Publicación de la LOM Definitiva
-1. Concluido el período de inscripción, la Junta de Clasificación genera las actas de aspirantes correspondientes a cada escuela del padrón provincial.
-2. El docente puede monitorear desde el portal el estado de su trámite.
-3. El Ministerio de Educación procede a la publicación oficial de la **Lista de Orden de Mérito (LOM) definitiva**, permitiendo que el docente conozca con certeza si ha alcanzado el cargo u horas cátedra solicitadas para el nuevo ciclo lectivo.
+#### Etapa 6: LOM Definitiva y Analítica de Competitividad
+1. El Ministerio de Educación procede a la homologación de la **LOM Definitiva Oficial**, instrumento público e inalterable que rige las asambleas de designación docente.
+2. **Módulo «Mis Puntajes» y Competitividad Regional:**
+   - **Percentiles Departamentales:** Cálculo en base de datos mediante `PERCENTILE_CONT` para que el docente conozca su ubicación relativa frente a los demás aspirantes de su misma disciplina en el departamento.
+   - **Protección de Privacidad ($k \ge 10$):** Si en un departamento existen menos de 10 inscriptos en una materia, el sistema suprime el percentil para resguardar el secreto estadístico y evitar la individualización de colegas.
+   - **Ranking Escolar Público:** Visualización abierta de los primeros 12 puestos de la LOM escolar para transparentar la cobertura efectiva de las vacantes.
 
 ---
 
-### 1.3. Diagrama de Flujo del Proceso Integrado (Swimlanes y Fases Temporales)
-
-El siguiente diagrama detalla la interacción cronológica y las responsabilidades funcionales distribuidas a lo largo de las distintas fases temporales del ciclo docente:
+### 1.3. Diagrama de Secuencia del Proceso Integrado
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Docente as Docente / Aspirante
+    actor Admin as Administrador / Sistemas
+    actor Docente as Docente Postulante
     participant CiDi as Ciudadano Digital (CiDi)
-    participant Portal as Portal GID (Angular / Express)
+    participant Portal as Portal GID (Angular / Node)
     actor Vocal as Vocal de Junta
-    participant Auditoria as DB Portal & Auditoría (Postgres)
-    participant JuntaDB as Base Junta (Oracle MT4D)
+    participant Postgres as DB Postgres (Auditoría)
+    participant Oracle as DB Junta (Oracle MT4D)
 
-    %% FASE 1: LEGAJO
-    Note over Docente, JuntaDB: FASE 1: Carga de Legajo y Presentación de Antecedentes
-    Docente->>CiDi: Ingresa credenciales institucionales (Nivel 2)
-    CiDi-->>Portal: Retorna sesión validada
-    Portal->>Portal: Emite JWT de sesión (Rol Aspirante)
-    Docente->>Portal: Accede a Mi Legajo y sube títulos y certificaciones
-    Portal->>Auditoria: Registra inserción de antecedentes (Append-Only)
-    Portal->>JuntaDB: Envía legajo para custodia de la convocatoria
+    %% FASE 1: APERTURA
+    Note over Admin,Portal: FASE 1: Configuración y Apertura
+    Admin->>Portal: Configura período (ABIERTO / FECHAS) y asigna escuelas a vocales
+    Portal->>Postgres: Registra configuración en AUDITORIA_CAMBIO
+    Portal-->>Admin: Período habilitado y carga balanceada
 
-    %% FASE 2: EVALUACIÓN DE JUNTA (ESPERA)
-    Note over Docente, JuntaDB: FASE 2: Período Interanual de Evaluación (Sin inscripciones abiertas)
-    Vocal->>Portal: Ingresa al módulo /junta según escuelas asignadas
-    Vocal->>JuntaDB: Examina documentación y títulos presentados
-    Vocal->>JuntaDB: Aplica pautas del Dto. 257/19 y dicta puntaje oficial
-    JuntaDB-->>Portal: Notifica puntaje asignado al docente
-    Portal-->>Docente: Muestra en Mi Perfil el Puntaje Oficial asignado
+    %% FASE 2: AUTOGESTIÓN DOCENTE
+    Note over Docente,Portal: FASE 2: Convocatoria y Autogestión Docente
+    Docente->>CiDi: Autenticación Nivel 2
+    CiDi-->>Portal: Valida identidad y entrega token JWT
+    Docente->>Portal: Carga antecedentes y consulta alcance de títulos
+    Portal->>Oracle: Coteja catálogo de incumbencias y antigüedad SGE
+    alt Título sin alcance registrado
+        Portal-->>Docente: Advertencia no bloqueante ("Sin título habilitante")
+    else Título con alcance
+        Portal-->>Docente: Clasificación oficial (Docente / Habilitante / Supletorio)
+    end
+    Docente->>Portal: Confirma Formulario C (máx 3 escuelas / 5 materias)
+    Portal->>Postgres: Asienta registro inmutable en AUDITORIA_ACCESO y CAMBIO
+    Portal->>Oracle: Sincroniza Formulario C en tablas de Junta
 
-    %% FASE 3: HERRAMIENTAS DE APOYO A LA DECISIÓN
-    Note over Docente, JuntaDB: FASE 3: Apoyo a la Decisión con Puntaje Asignado
-    Docente->>Portal: Consulta Mapa Territorial de Oportunidades
-    Portal->>JuntaDB: Lee vacantes y cortes históricos de corte LOM
-    Portal-->>Docente: Renderiza mapa interactivo, semáforo LOM y propuesta inteligente
-    Docente->>Portal: Prueba escenarios en el Simulador de Carrera
+    %% FASE 3: CALIFICACIÓN
+    Note over Vocal,Oracle: FASE 3: Valoración y Calificación en Junta
+    Vocal->>Portal: Accede a Bandeja de Calificación de su escuela asignada
+    Portal->>Oracle: Consulta legajos de la escuela base
+    Vocal->>Portal: Audita títulos (>1600h, máx 30) y cursos (máx 60)
+    Vocal->>Portal: Aplica ajustes fundados de puntaje y dictamina estado
+    Portal->>Oracle: Persiste puntaje oficial calificado
+    Portal->>Postgres: Log de cambios con usuario y timestamp
 
-    %% FASE 4: CONVOCATORIA Y FORMULARIO C
-    Note over Docente, JuntaDB: FASE 4: Apertura de Convocatoria Anual (Inscripción Formulario C)
-    Docente->>Portal: Ingresa a Inscripción (Formulario C)
-    Docente->>Portal: Selecciona escuelas (máx 3) y materias (máx 5)
-    Portal->>Portal: Valida materias contra 74k alcances de títulos (Docente/Habilitante/Supletorio)
-    Portal-->>Docente: Muestra habilitación legal y advertencias en vivo
-    Docente->>Portal: Confirma y envía Formulario C
-    Portal->>Auditoria: Inserta registro inmutable en auditoria_cambio
-    Portal->>JuntaDB: Replicación espejo en T_INSCRIPCIONES de la Junta
-    Portal-->>Docente: Emite constancia digital de postulación
+    %% FASE 4: LOM PROVISORIA Y RECLAMOS
+    Note over Docente,Vocal: FASE 4 y 5: LOM Provisoria y Reclamos
+    Portal->>Docente: Publica LOM Provisoria con desglose de puntaje
+    Docente->>Portal: Presenta Reclamo Digital con fundamentación y adjunto
+    Portal->>Vocal: Notifica apelación en bandeja de reclamos
+    Vocal->>Portal: Resuelve reclamo (Admitido / Rechazado con dictamen)
+    Portal->>Oracle: Actualiza rectificación si fue admitido
+    Portal-->>Docente: Notifica resolución formal en su panel
 
-    %% FASE 5: LOM Y ADJUDICACIÓN
-    Note over Docente, JuntaDB: FASE 5: Adjudicación y Publicación de la LOM
-    Vocal->>JuntaDB: Consolida nómina de aspirantes por escuela
-    JuntaDB->>Portal: Publica Lista de Orden de Mérito (LOM) definitiva
-    Docente->>Portal: Consulta posición en LOM y resultado de cobertura de cargo
+    %% FASE 6: LOM DEFINITIVA
+    Note over Docente,Oracle: FASE 6: LOM Definitiva y Competitividad
+    Portal->>Oracle: Genera LOM Definitiva y calcula percentiles departamentales
+    Docente->>Portal: Consulta «Mis puntajes» (percentiles k>=10 y ranking 12 puestos)
 ```
 
 ---
@@ -227,332 +247,239 @@ sequenceDiagram
 El nuevo marco operativo distribuye de manera precisa las responsabilidades para asegurar la gobernanza, trazabilidad e integridad de los datos provinciales.
 
 #### Definiciones de la Matriz RACI
-- **R (Responsible / Responsable):** Quien ejecuta la tarea u operación.
-- **A (Accountable / Aprobador):** Quien rinde cuentas y tiene la autoridad final sobre el resultado.
-- **C (Consulted / Consultado):** Quien proporciona insumos, criterios o soporte especializado.
-- **I (Informed / Informado):** Quien es notificado formalmente sobre los resultados o avances.
+- **R (Responsible / Responsable):** Quien ejecuta operativamente la tarea.
+- **A (Accountable / Aprobador):** Quien rinde cuentas y posee la autoridad final sobre el resultado.
+- **C (Consulted / Consultado):** Quien proporciona criterios normativos o soporte técnico especializado.
+- **I (Informed / Informado):** Quien es notificado formalmente sobre los avances o resultados.
 
 #### Matriz RACI de Procesos de Negocio
 
-| Tarea / Actividad del Proceso | Aspirante Docente | Vocal de Junta | Soporte Técnico / DevOps | Dirección Gral. de Carrera Docente | Sistema CiDi Provincial |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Validación de Identidad Digital (Nivel 2)** | R | I | I | I | **A** |
-| **Actualización y Carga de Legajo Digital** | **R / A** | C | I | I | I |
-| **Tasación de Antecedentes y Asignación de Puntaje** | I | **R** | I | **A** | I |
-| **Exploración de Vacantes, Mapa y Simulación** | **R** | I | I | I | I |
-| **Confección y Envío del Formulario C** | **R / A** | I | I | I | I |
-| **Validación de Alcance Legal de Títulos** | I | C | R *(Mantenimiento del Catálogo)* | **A** | I |
-| **Cierre de Convocatoria y Emisión de Actas** | I | **R** | I | **A** | I |
-| **Publicación Oficial de la LOM Definitiva** | I | C | I | **R / A** | I |
-| **Resguardo de Auditoría Inmutable y Backups** | I | I | **R / A** | I | I |
-| **Gestión de Calendario y Fechas de Convocatoria** | I | C | R *(Operativo)* | **A** | I |
+| Tarea / Actividad del Proceso | Docente Aspirante | Vocal de Junta | Administrador de Junta / Sistemas | Dirección Gral. de Carrera Docente | Soporte Técnico / DevOps | Ciudadano Digital (CiDi) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Validación de Identidad Digital (Nivel 2)** | R | I | I | I | I | **A** |
+| **Parametrización de Períodos de Convocatoria** | I | I | **R** | **A** | C | I |
+| **Asignación y Reasignación de Escuelas a Vocales** | I | I | **R / A** | C | I | I |
+| **Actualización y Carga de Legajo Digital** | **R / A** | C | I | I | I | I |
+| **Validación de Alcances de Títulos (No Bloqueante)** | R | C | I | **A** | C *(Catálogo)* | I |
+| **Confección y Envío del Formulario C** | **R / A** | I | I | I | I | I |
+| **Valoración de Legajos y Control de Topes (Dto. 257/19)** | I | **R** | C | **A** | I | I |
+| **Publicación de la LOM Provisoria** | I | C | R | **A** | I | I |
+| **Presentación de Reclamos Digitales** | **R / A** | I | I | I | I | I |
+| **Dictamen y Resolución de Reclamos** | I | **R / A** | I | C | I | I |
+| **Homologación y Publicación de LOM Definitiva** | I | C | R | **R / A** | I | I |
+| **Consulta de Percentiles ($k \ge 10$) y Ranking** | **R** | I | I | I | I | I |
+| **Monitoreo de Avance y Rendimiento por Vocal** | I | I | **R / A** | I | I | I |
+| **Fiscalización del Log Inmutable de Auditoría** | I | I | **R / A** | I | C | I |
+| **Resguardo de Base de Datos y Backups** | I | I | C | I | **R / A** | I |
 
 ---
 
 #### Descripción Específica de Responsabilidades por Rol
 
-1. **Aspirante Docente / Preceptor:**
-   - Responsable de mantener su identidad CiDi Nivel 2 activa y actualizada.
-   - Custodio de la veracidad de los títulos y certificados incorporados en su legajo digital durante la fase de recepción.
-   - Usuario de las herramientas de apoyo a la decisión (mapa territorial, semáforo LOM, propuesta asistida y simulador) una vez que su puntaje ha sido asignado formalmente por la Junta.
-   - Ejecutor de la selección final de hasta 3 escuelas y 5 asignaturas por establecimiento mediante el Formulario C en el período de convocatoria.
-   - Receptor del comprobante digital y responsable de verificar su ubicación en la LOM definitiva publicada.
+1. **Docente / Aspirante a Horas y Cargos:**
+   - Responsable de mantener su identidad CiDi Nivel 2 activa y validada.
+   - Custodio de la veracidad de los títulos, cursos y certificaciones adjuntados en su legajo.
+   - Ejecutor de la selección libre de hasta 3 escuelas y 5 asignaturas por establecimiento mediante el Formulario C en el período de convocatoria.
+   - Titular del derecho de impugnación: formula reclamos fundados dentro de la ventana recursiva.
+   - Usuario de las herramientas de competitividad regional («Mis puntajes») para planificar su carrera profesional.
 
 2. **Vocal de la Junta de Clasificación:**
-   - Evaluador oficial responsable de tasar, validar o rechazar los antecedentes presentados por los educadores durante la fase de valoración interanual.
-   - Emisor del puntaje oficial del aspirante conforme a las pautas y topes del Decreto Provincial 257/19.
-   - Responsable de emitir dictámenes y observaciones fundadas sobre documentación objetada en las escuelas asignadas a su cargo.
-   - Firmante de las actas de valoración escolar previas a la consolidación de la LOM.
+   - Calificador oficial responsable de tasar, validar o rechazar los antecedentes presentados por los educadores en su escuela base asignada.
+   - Aplicador de los topes y ponderaciones del Decreto Provincial 257/19 (máximo 30 pts en títulos con carga horaria >1600 h; máximo 60 pts en capacitaciones).
+   - Emisor de ajustes de puntaje fundados con justificación obligatoria para auditoría.
+   - Juez administrativo de primera instancia: analiza los reclamos docentes y emite dictámenes resolutivos (admite rectificando el puntaje o rechaza con causa).
 
-3. **Dirección General de Carrera Docente (Autoridad de Aplicación):**
-   - Máxima autoridad responsable de fijar el calendario de convocatorias y decretar los períodos de inscripción (`INSCRIPCION_ABIERTA`).
-   - Homologador oficial de la Lista de Orden de Mérito provincial resultante.
-   - Autoridad interpretativa de la normativa del Decreto 257/19 y de las excepciones jurisdiccionales.
+3. **Administrador de la Junta / Usuario de Sistemas (`ADMINISTRADORES_CUIL`):**
+   - Responsable de la parametrización del calendario web de convocatorias (apertura, prórrogas, cierre).
+   - Encargado de balancear la carga de trabajo asignando y reasignando escuelas base entre los vocales habilitados.
+   - Supervisor del progreso de calificación mediante el panel de control y estadísticas en tiempo real (avance por vocal y estado de expedientes).
+   - Auditor forense: facultado para consultar y filtrar el log inmutable de auditoría en PostgreSQL (`AUDITORIA_ACCESO` y `AUDITORIA_CAMBIO`) por CUIL, fecha o tipo de operación.
 
-4. **Administrador del Sistema / Equipo DevOps:**
-   - Responsable de garantizar la disponibilidad de la plataforma en entornos contenerizados (Docker / Cloud).
-   - Encargado de la custodia de secretos (`JWT_SECRET`, credenciales de bases de datos) y de la política de copias de seguridad.
-   - Auditor de la consistencia entre el esquema PostgreSQL del portal y la replicación en las tablas de la Junta Oracle.
+4. **Dirección General de Carrera Docente (Autoridad de Aplicación):**
+   - Máxima autoridad ministerial responsable de homologar los cronogramas y refrendar la validez de las convocatorias.
+   - Firmante y homologador oficial de la Lista de Orden de Mérito provincial definitiva.
+   - Órgano rector de interpretación normativa del Decreto 257/19.
 
-5. **Servicios Externos Integrados (CiDi, SGE, Infraestructura Provincial):**
-   - Proveedores autoritativos de la identidad del usuario, de la antigüedad de servicios registrada en las escuelas y de las bases relacionales centrales de educación.
-
+5. **Soporte Técnico / DevOps:**
+   - Responsable de la infraestructura de contenedores (Docker Compose), redes y alta disponibilidad de los servicios frontend (Angular 17) y backend (Node.js).
+   - Custodio de la seguridad de credenciales y variables de entorno (`JWT_SECRET`, cadenas de conexión a PostgreSQL Supabase y Oracle Lab MT4D).
+   - Administrador de las rutinas de backup automatizado y continuidad operativa.
 
 ---
----
-
 ## 2. INSTRUCTIVOS DE USO
 
 ### 2.1. Propósito y Alcance del Instructivo
-- **Para qué:** Permite a los usuarios finales operar la plataforma **Gestión Integral Docente (GID)** de manera autónoma, detallando las secuencias de pasos para cada funcionalidad clave según el rol institucional.
-- **Para quién:** Educadores, directivos y preceptores de nivel secundario (Rol Aspirante), y miembros y personal evaluador de la Junta de Clasificación Secundaria (Rol Vocal).
-
-> [!NOTE]
-> **Ingreso Único mediante Ciudadano Digital (CiDi):** El acceso a la plataforma se realiza de forma centralizada a través del servicio provincial de **Ciudadano Digital (CiDi / CiDi Test)** (`cidi.cba.gov.ar` / `ciditest.cba.gov.ar`). Al autenticarse con su CUIL y clave en CiDi, la plataforma provincial verifica la identidad Nivel 2 del usuario y lo redirige automáticamente dentro de GID con su sesión iniciada y su rol institucional asignado (`Aspirante Docente` o `Vocal de Junta`).
-
----
-
-### 2.2. Instructivo de Operación para el Aspirante Docente
-
-Una vez autenticado en la plataforma provincial, el educador accede a las herramientas de autogestión organizadas según las etapas del ciclo administrativo docente.
-
-```mermaid
-flowchart LR
-    A[1. Panel de Inicio: Estado del Ciclo] --> B[2. Mi Legajo: Carga de Antecedentes]
-    B --> C[3. Espera: Consulta de Puntaje Asignado]
-    C --> D[4. Herramientas: Mapa, Semáforo y Simulador]
-    D --> E[5. Convocatoria: Formulario C con Validador]
-    E --> F[6. Seguimiento y Consulta de la LOM]
-```
+- **Para qué:** Brindar una guía operativa clara, estructurada paso a paso y orientada a tareas para cada uno de los actores que interactúan con el portal **Gestión Integral Docente (GID)**, facilitando la autogestión, la calificación transparente y la gobernanza administrativa.
+- **Para quién:** 
+  1. **Docentes y Aspirantes provinciales:** para la administración de su legajo, inscripción a convocatorias, reclamos y análisis de competitividad.
+  2. **Administradores de la Junta / Usuarios de Sistemas:** para la configuración de períodos web, distribución de escuelas entre vocales, monitoreo y auditoría.
+  3. **Vocales de la Junta de Clasificación:** para la fiscalización de legajos asignados por escuela base, control de topes del Decreto 257/19 y resolución de reclamos.
 
 ---
 
-#### 2.2.1. Panel Principal de Inicio (Home) y Estado del Ciclo
-Al ingresar al portal, el docente visualiza el **Panel de Inicio** (`/home`), el cual brinda una visión integral y ordenada de su situación administrativa:
-1. **Indicador de Etapa Activa:** Muestra en cuál de las fases del ciclo se encuentra el aspirante (Recepción de Antecedentes, Período de Tasación de la Junta, o Convocatoria de Inscripción a Cargos).
-2. **Accesos Directos:** Tarjetas interactivas para navegar rápidamente hacia *Mi Legajo*, *Mi Puntaje*, el *Mapa Territorial* o la inscripción a *Formulario C*.
-3. **Alertas Proactivas:** Notificaciones automáticas sobre novedades de interés, tales como el cierre de plazos de presentación o la disponibilidad de vacantes en su zona.
+### 2.2. Instructivo de Operación para el Docente Postulante
 
-![Figura 2.1: Panel de inicio del aspirante con estado del ciclo](capturas/02-home-aspirante.png)  
-*Figura 2.1: Panel de inicio del educador con accesos directos por fases, estado del ciclo y botón del Asistente Docente Virtual.*
+#### 2.2.1. Acceso mediante CiDi Nivel 2 y Panel Principal
+1. Ingrese al portal provincial GID desde cualquier navegador web moderno.
+2. Haga clic en el botón oficial **«Ingresar con Ciudadano Digital»**.
+3. Ingrese su CUIL y contraseña provincial en la pasarela segura de **CiDi**.
+   > [!IMPORTANT]
+   > Se requiere estrictamente **CiDi Nivel 2 (identidad verificada)**. Si cuenta con Nivel 1, el portal indicará los centros provinciales habilitados para elevar su nivel de seguridad.
+4. Una vez autenticado, el sistema lo redirigirá al **Panel Principal del Docente**, donde visualizará el estado actual del ciclo lectivo, accesos directos a su legajo, la convocatoria activa y notificaciones oficiales.
 
----
+#### 2.2.2. Mi Legajo Digital: Títulos, Certificaciones y Filtro Decenal (Decreto 257/19)
+1. En la barra de navegación superior, seleccione **«Mi Legajo»**.
+2. **Pestaña Títulos:** Visualice sus títulos registrados oficialmente en el sistema provincial. Para añadir un nuevo título, pulse *«Cargar Título»*, ingrese nivel, institución emisora, año de egreso y adjunte el archivo PDF del analítico legalizado.
+3. **Pestaña Antecedentes y Capacitaciones:**
+   - Para registrar un nuevo certificado, haga clic en *«Añadir Antecedente»*.
+   - Complete la denominación del curso, institución acreditada, fecha de emisión y carga horaria en horas reloj.
+   - **Filtro de Caducidad Decenal:** El sistema cotejará automáticamente que la fecha de expedición no supere los diez (10) años al cierre de la convocatoria, de conformidad con el Decreto Provincial 257/19. Si el certificado supera el decenio, el sistema informará su desestimación para puntaje por prescripción reglamentaria.
+4. Guarde los cambios. Los antecedentes quedarán registrados en estado *Pendiente de Valoración* para la intervención de Junta.
 
-#### 2.2.2. Gestión de Mi Legajo Digital (Fase 1: Carga de Antecedentes)
-El módulo **Mi Legajo** (`/legajo`) centraliza toda la trayectoria profesional del educador y constituye el legajo digital único que la Junta de Clasificación examinará para asignarle su puntaje.
+#### 2.2.3. Formulario C: Postulación, Alcances No Bloqueantes y Previsualización de Grilla
+1. Durante la ventana de convocatoria habilitada (`ABIERTO`), acceda a la sección **«Inscripción — Formulario C»**.
+2. **Selección de Establecimientos:** Puede seleccionar libremente hasta un **máximo estricto de tres (3) escuelas secundarias** de la provincia, sin estar atado a una escuela base histórica (ADR-013).
+3. **Selección de Asignaturas o Cargos:** Dentro de cada escuela seleccionada, puede postularse a un **máximo de cinco (5) materias o cargos**.
+4. **Validación de Alcances No Bloqueante (US-09 / ADR-009):**
+   - Al seleccionar la materia, el sistema consulta en tiempo real el catálogo maestro de alcances de títulos (más de 74.000 combinaciones).
+   - Si su título registra incumbencia, se le asignará la prioridad legal correspondiente (**Docente**, **Habilitante** o **Supletorio**).
+   - Si el título cargado **no registra incumbencia previa en el catálogo**, el sistema **no bloqueará su postulación**: emitirá una advertencia formal y le permitirá continuar inscribiéndose bajo la categoría *"Sin título habilitante"*, garantizando que la Junta de Clasificación evalúe su caso en instancia de fiscalización.
+5. **Previsualización de Grilla Estimada (US-10 / ADR-027):**
+   - Antes de confirmar el envío, el sistema desplegará el desglose preliminar estimado de su puntaje conforme a la grilla del Decreto 257/19 (antigüedad SGE, títulos y cursos con topes teóricos).
+   - Esta estimación se exhibe con la leyenda *"Puntaje Preliminar Estimado — Sujeto a Validación de Junta"*, distinguiéndose del puntaje oficial definitivo.
+6. Pulse **«Confirmar y Enviar Inscripción»**. El sistema generará su comprobante digital oficial de postulación con hash y número de transacción.
 
-1. **Consulta de Antecedentes Oficiales Automatizados:**  
-   Al ingresar, el docente observa los antecedentes que la Provincia ya tiene acreditados de forma directa en sus sistemas centrales:
-   - **Antigüedad Docente:** Años, meses y días de servicio reconocidos en el Sistema de Gestión Escolar (SGE).
-   - **Cursos y Trayectos de Formación Continua:** Certificados oficiales emitidos por la Red Provincial de Formación Docente Continua (SIPEC).
-2. **Carga de Nuevos Títulos y Antecedentes:**  
-   Para incorporar certificaciones recientes o títulos obtenidos fuera de la red provincial:
-   - Desplácese hacia el formulario de carga en la parte inferior de la pantalla.
-   - Complete los campos requeridos:
-     - *Tipo de Antecedente:* Título de Grado, Posgrado / Especialización, Certificación de Capacitación, Publicación / Trabajo Institucional u Otros Antecedentes.
-     - *Entidad Emisora:* Universidad o Instituto Superior otorgante.
-     - *Denominación:* Nombre exacto de la titulación o curso.
-     - *Fecha de Emisión / Egreso:* Fecha asentada en el diploma.
-     - *Carga Horaria:* Cantidad de horas reloj acreditadas (dato esencial para la ponderación reglamentaria).
-   - **Adjuntar Documentación Digital:** Presione **"Seleccionar Archivo"** y adjunte el comprobante digitalizado en formato PDF o imagen legible (límite: 5 MB).
-   - Presione **"Guardar Antecedente"**. El registro quedará asentado con estado *Pendiente de Valoración*.
-3. **Revisión de Observaciones:**  
-   Si la Junta realizó alguna observación formal sobre un documento en convocatorias previas, el ítem se resalta con una indicación visual y el motivo de la objeción, permitiendo al educador subsanar la presentación.
+#### 2.2.4. Consulta de LOM Provisoria y Presentación de Reclamos Digitales (ADR-035)
+1. Al publicarse la **Lista de Orden de Mérito Provisoria**, ingrese a **«Mis Inscripciones»** para consultar su orden preliminar y el desglose de puntaje asignado por el vocal evaluador.
+2. **Presentación de Reclamo Digital:**
+   - Si detecta omisiones, cómputos erróneos o antecedentes indebidamente desestimados, pulse el botón **«Presentar Reclamo»** dentro de la ventana reglamentaria de días hábiles.
+   - Seleccione el rubro u objeto de la impugnación (Antigüedad, Títulos, Antecedentes o Ajustes).
+   - Redacte la fundamentación fáctica y legal de su reclamo.
+   - Adjunte la documentación probatoria digitalizada en formato PDF.
+   - Confirme el envío. El reclamo ingresará de forma directa a la bandeja del vocal asignado para su tratamiento formal.
+3. Podrá realizar el seguimiento del reclamo desde el portal hasta la emisión del dictamen resolutivo formal (*Admitido* o *Rechazado* con causa).
 
-![Figura 2.2: Vista consolidada de Mi Legajo Digital](capturas/03-legajo-digital.png)  
-*Figura 2.2: Vista consolidada de Mi Legajo Digital con antecedentes oficiales recuperados y títulos acreditados.*
+#### 2.2.5. Consulta de LOM Definitiva y Métricas de Competitividad («Mis Puntajes»)
+1. Publicada la LOM definitiva homologada por el Ministerio, acceda a la sección **«Mis Puntajes»**.
+2. Verifique su puntaje final oficial inalterable, que rige las asambleas de cobertura de interinatos y suplencias.
+3. **Percentiles Departamentales (US-68 / ADR-037):** Visualice su posición porcentual relativa dentro del departamento provincial para cada asignatura postulada.
+   > [!NOTE]
+   > **Protección de Privacidad ($k \ge 10$):** Si en su departamento y materia existen menos de 10 aspirantes inscriptos, el percentil no se exhibirá para resguardar la identidad de los colegas y cumplir con las normas de confidencialidad de datos.
+4. **Ranking Escolar Público:** Explore la lista de los 12 primeros puestos de la LOM en cada escuela base para evaluar objetivamente sus posibilidades de designación en asamblea.
 
-![Figura 2.3: Formulario de carga de nuevo antecedente](capturas/04-legajo-formulario-registro.png)  
-*Figura 2.3: Formulario para la incorporación de nuevos antecedentes con campos de carga horaria y adjunto documental.*
-
----
-
-#### 2.2.3. Período de Espera y Consulta de Puntaje Oficial (Fase 2 y 3)
-Una vez concluida la fecha de recepción de antecedentes, el legajo digital queda congelado administrativamente. Durante este período interanual, **el aspirante no puede inscribirse a cargos**, ya que la Junta de Clasificación se encuentra abocada a la tarea de revisar y tasar las presentaciones.
-
-Cuando la Junta emite su resolución, el docente accede a **"Mi Puntaje"** (`/puntaje`), donde encontrará:
-1. **Puntaje Oficial Total:** La puntuación numérica oficial y vinculante otorgada por la Junta para el ciclo lectivo.
-2. **Desglose Reglamentario según Decreto 257/19:** Una apertura analítica detallada artículo por artículo:
-   - *Artículo 8:* Puntos por Título de Base según nivel educativo.
-   - *Artículo 9:* Bonificación por acumulación de títulos docentes o habilitantes.
-   - *Artículo 10:* Puntos por perfeccionamiento y formación continua, con indicación clara del tope reglamentario y las deducciones aplicadas por horas excedentes.
-   - *Artículo 11:* Puntuación acreditada por antigüedad en la docencia.
-   - *Artículos 12 y 13:* Desempeño institucional, tutorías y otros méritos.
-3. **Antecedentes que no suman:** Sección explicativa que aclara qué cursos o certificados no otorgaron puntaje (por duplicación temáticas, superación de topes o falta de pertinencia), aportando total claridad al educador sobre su calificación.
-
-![Figura 2.4: Pantalla Mi Puntaje con desglose del Decreto 257/19](capturas/05-mi-puntaje-decreto257.png)  
-*Figura 2.4: Pantalla Mi Puntaje con desglose analítico artículo por artículo según el Decreto 257/19.*
+#### 2.2.6. Asistente Virtual Docente (Chatbot Flotante)
+- En el vértice inferior derecho de la pantalla encontrará disponible el **Asistente GID**, impulsado por inteligencia artificial.
+- Puede consultarle dudas sobre fechas de convocatoria, normativas del Decreto 257/19, requisitos de legalización de títulos o pasos para formular un reclamo formal.
 
 ---
 
-#### 2.2.4. Exploración Territorial: Mapa Interactivo y Semáforo LOM (Fase 3)
-Ya disponiendo de su puntaje oficial en mano, el docente puede emplear de manera fundamentada el **Mapa Territorial** (`/mapa`):
+### 2.3. Instructivo de Operación para el Administrador de la Junta / Usuario de Sistemas
 
-1. **Geolocalización de Escuelas:** El mapa despliega los colegios secundarios provinciales con pines interactivos sobre la cartografía oficial.
-2. **Filtros de Búsqueda:**  
-   - *Departamento o Localidad:* Para orientar la búsqueda a la zona de residencia o traslado.
-   - *Modalidad Educativa:* Técnica, Orientada, Adultos o Artística.
-   - *Radio de Distancia (km):* Define un radio kilométrico a partir de una localidad de referencia.
-3. **Semáforo LOM:** Al seleccionar un establecimiento, el sistema compara el puntaje oficial del docente contra el corte histórico de la Lista de Orden de Mérito en esa escuela:
-   - 🟢 **Punta de Lista / Muy Competitivo (Verde):** El puntaje del docente supera con holgura el corte histórico de la escuela.
-   - 🟡 **Competitividad Media (Amarillo):** El puntaje se ubica dentro del rango promedio de adjudicaciones previas.
-   - 🔴 **Alta Exigencia (Rojo):** La institución presenta un corte histórico elevado que supera el puntaje actual del aspirante.
-4. **Vacantes Declaradas:** El panel lateral expone las publicaciones de horas cátedra o cargos vacantes remitidas por la Junta para esa institución.
-5. **Marcar Interés:** El educador puede marcar colegios como favoritos para recibir alertas tempranas sobre novedades en esos destinos.
+#### 2.3.1. Acceso Administrativo y Asignación de Roles (`ADMINISTRADORES_CUIL`)
+1. Ingrese al portal con su cuenta CiDi Nivel 2.
+2. El sistema verificará que su CUIL figure incorporado en la lista autorizada de administradores (`ADMINISTRADORES_CUIL`).
+3. Al detectarse el privilegio de gestión, la barra superior incorporará el menú exclusivo **«Junta»**, habilitando los submódulos: *Períodos, Asignación, Vocales, Estadísticas y Auditoría*.
 
-![Figura 2.5: Mapa Territorial Provincial y Semáforo LOM](capturas/06-mapa-territorial-lom.png)  
-*Figura 2.5: Mapa Territorial interactivo con geolocalización de escuelas, vacantes declaradas y Semáforo LOM.*
+#### 2.3.2. Gestión del Calendario de Convocatoria (`Junta → Períodos`) (ADR-036 / US-76)
+1. Acceda a **«Junta → Períodos»**.
+2. Visualice el ciclo lectivo activo y el estado operativo de la convocatoria provincial.
+3. **Configuración de Modos de Apertura:**
+   - **`ABIERTO`:** Fuerza la apertura inmediata de la convocatoria web para todos los aspirantes provinciales.
+   - **`CERRADO`:** Cierra de inmediato la recepción de Formularios C y bloquea modificaciones de legajo para consolidar listas.
+   - **`FECHAS`:** Permite definir un rango temporal estricto (Fecha/Hora de Inicio y Fecha/Hora de Cierre). El sistema abrirá y cerrará la convocatoria automáticamente en los hitos configurados.
+4. Pulse **«Guardar Parámetros de Período»**. La acción queda registrada en el log inmutable de auditoría.
 
----
+#### 2.3.3. Asignación y Reasignación de Escuelas Base a Vocales (`Junta → Asignación`) (ADR-038 / US-81)
+1. Ingrese a **«Junta → Asignación»**.
+2. Visualice la grilla completa de escuelas secundarias provinciales y la cantidad de legajos inscriptos en cada una.
+3. Para balancear la carga de trabajo entre los vocales calificadores:
+   - Seleccione una escuela secundaria del listado.
+   - En el menú desplegable, seleccione el vocal calificador habilitado al que se le confiará la fiscalización del establecimiento.
+   - Pulse **«Asignar Escuela»** (o *«Reasignar»* para redistribuir ante licencias o sobrecargas de expedientes).
+4. El cambio impacta instantáneamente: los aspirantes de esa escuela pasan a figurar en la bandeja exclusiva del nuevo vocal asignado.
 
-#### 2.2.5. Planificación y Proyección: Simulador de Carrera y Recomendador (Fase 3)
-Para proyectar el crecimiento profesional de cara a los próximos ciclos:
+#### 2.3.4. Monitoreo de Avance y Estadísticas de Calificación (`Junta → Estadísticas`) (ADR-041)
+1. Diríjase a **«Junta → Estadísticas»**.
+2. **Tablero de Control de Avance Provincial:**
+   - Total de legajos calificados, observados y pendientes en toda la jurisdicción.
+   - Porcentaje de avance global hacia el cumplimiento de los plazos de publicación.
+3. **Rendimiento por Calificador:** Tabla discriminada por vocal con la cantidad de expedientes dictaminados, tiempos promedio de revisión y estado de su bandeja escolar.
+4. **Monitoreo de Reclamos:** Indicadores de apelaciones recibidas, dictámenes favorables y denegatorias emitidas para anticipar cuellos de botella administrativos.
 
-1. **Simulador de Carrera (`/simulador`):**  
-   - Permite modelar escenarios futuros agregando hipotéticamente años de antigüedad o títulos en curso.
-   - **Camino más corto a Escuela Meta:** El docente elige un colegio donde aspira a titularizar, y el simulador calcula cuántos puntos y qué certificaciones concretas le faltan para alcanzar el promedio histórico de corte de dicha institución.
-2. **Recomendador de Capacitaciones (`/capacitaciones`):**  
-   - Analiza la oferta vigente de la Red Provincial y sugiere aquellos trayectos formativos que mayor impacto positivo tendrán en su puntaje bajo el Artículo 10 del Decreto 257/19, priorizando cursos que no colisionen con los topes ya alcanzados.
-
-![Figura 2.6: Módulo de Simulación de Carrera](capturas/07-simulador-carrera.png)  
-*Figura 2.6: Simulador de Carrera con cálculo prospectivo de puntaje y trayecto hacia escuela meta.*
-
-![Figura 2.7: Catálogo de Capacitaciones Recomendadas](capturas/08-capacitaciones-recomendadas.png)  
-*Figura 2.7: Recomendador de capacitaciones provinciales prioritarias bajo el Decreto 257/19.*
-
----
-
-#### 2.2.6. Inscripción Anual: Confección del Formulario C (Fase 4)
-Al abrirse formalmente la convocatoria anual de cobertura de suplencias e interinatos, el docente ingresa al módulo **"Formulario C"** (`/formulario-c`).
-
-1. **Selección de Establecimientos (Sin Escuela Base):**  
-   El educador puede postularse libremente hasta a un **máximo estricto de tres (3) escuelas secundarias**, sin encontrarse atado a un colegio base preexistente.
-2. **Uso de la Propuesta Inteligente:**  
-   El botón **"Generar Propuesta Sugerida"** arma automáticamente una terna equilibrada de instituciones según el puntaje del aspirante y los datos del semáforo LOM:
-   - *Escuela Segura:* Alta probabilidad de ingreso según antecedentes históricos.
-   - *Escuela Justa:* Demanda equiparada al perfil del docente.
-   - *Escuela Apuesta:* Establecimiento de alta jerarquía o demanda.
-3. **Selección de Asignaturas y Validador de Alcance en Vivo:**  
-   Para cada escuela seleccionada, el docente puede postularse en hasta **cinco (5) asignaturas o cargos**:
-   - Al buscar la materia, el sistema consulta en tiempo real el catálogo de **74.765 alcances legales** de la Junta.
-   - La condición legal del título se clasifica visualmente mediante una etiqueta:
-     - 🏷️ **Docente:** Habilitación prioritaria según estatuto.
-     - 🏷️ **Habilitante:** Habilitación reglamentaria de segundo orden.
-     - 🏷️ **Supletorio:** Habilitación subsidiaria de tercer orden.
-   - **Bloqueo Preventivo:** Si el docente intenta agregar una materia para la cual sus títulos carecen por completo de habilitación legal, el sistema emite una advertencia de bloqueo normativo, impidiendo registrar la opción. Esto evita que el educador gaste sus cupos en solicitudes que resultarían desestimadas.
-4. **Revisión y Confirmación:**  
-   Completadas las escuelas y materias (respetando los topes de 3 escuelas y 5 asignaturas), presione **"Confirmar Inscripción"**.
-5. **Constancia Digital:**  
-   El sistema emite el comprobante digital oficial de inscripción debidamente numerado, con fecha y sello digital de resguardo.
-
-![Figura 2.8: Confección del Formulario C](capturas/09-formulario-c.png)  
-*Figura 2.8: Confección del Formulario C con validador de títulos en vivo (Docente / Habilitante / Supletorio) y propuesta inteligente.*
+#### 2.3.5. Consulta y Filtrado del Log Inmutable de Auditoría (`Junta → Auditoría`) (ADR-032 / US-23 / US-73)
+1. Seleccione **«Junta → Auditoría»**.
+2. El sistema consulta directamente las tablas inmutables `AUDITORIA_ACCESO` y `AUDITORIA_CAMBIO` en PostgreSQL.
+3. **Criterios de Búsqueda y Filtrado:**
+   - Filtro por **CUIL del usuario** (docente, vocal o administrador).
+   - Filtro por **Rango de Fechas** (desde / hasta).
+   - Filtro por **Tipo de Operación** (`LOGIN`, `CARGA_LEGAJO`, `ENVIO_FORM_C`, `CALIFICACION_VOCAL`, `AJUSTE_PUNTAJE`, `DICTAMEN_RECLAMO`, `CAMBIO_PERIODO`).
+4. Al hacer clic en un registro de cambio, visualice el **visor de diferencias JSON (Diff)** exhibiendo los valores previos y los nuevos valores persistidos, junto con la IP y la marca de tiempo certificada.
 
 ---
 
-#### 2.2.7. Asistente Docente Virtual (Chatbot Flotante)
-En el margen inferior derecho de todas las pantallas del aspirante se encuentra disponible el **Asistente Docente**:
-- **Avisos Proactivos:** Al abrirlo, el asistente le informa automáticamente si tiene observaciones en su legajo, si hay nuevas vacantes en sus escuelas de interés o si la convocatoria anual se encuentra próxima a expirar.
-- **Consultas Rápidas:** El educador puede preguntarle: *"¿A qué materias puedo aspirar con mi título?"*, *"¿Qué escuelas me quedan a menos de 10 km?"* o *"¿Qué cursos me convienen para sumar puntaje?"*.
-- El asistente evalúa su perfil y le brinda respuestas directas, permitiéndole navegar a la pantalla correspondiente con un solo clic.
+### 2.4. Instructivo de Operación para el Vocal de la Junta de Clasificación
+
+#### 2.4.1. Acceso a la Bandeja de Calificación por Escuela Base Asignada (ADR-018)
+1. Ingrese al portal con su cuenta CiDi Nivel 2 registrada como vocal de Junta.
+2. Ingrese a la sección **«Bandeja de Calificación»**.
+3. El sistema listará exclusivamente los legajos correspondientes a las **escuelas base que le fueron asignadas** por el Administrador de la Junta, garantizando el aislamiento de expedientes y la confidencialidad operativa.
+
+#### 2.4.2. Fiscalización de Antecedentes y Aplicación de Topes (Decreto 257/19 / ADR-033 / ADR-034)
+1. Seleccione un docente del listado para abrir su legajo digital.
+2. **Inspección Documental:** Examine los certificados y títulos adjuntos visualizando los documentos PDF legalizados.
+3. **Asistencia en Topes Normativos por Sistema:**
+   - **Títulos:** El sistema verifica la carga horaria; sólo planes superiores a 1600 horas permiten acumulación, con un **tope infranqueable de 30 puntos**.
+   - **Cursos y Capacitaciones:** El motor suma los antecedentes acreditados hasta alcanzar el **tope legal de 60 puntos**, alertando si las presentaciones adicionales exceden dicho límite.
+4. Conmute el estado del antecedente según corresponda (*Aprobado*, *Desestimado* o *Requiere Ratificación*).
+
+#### 2.4.3. Ajustes Fundados de Puntaje y Observaciones de Legajo (ADR-039 / ADR-040)
+1. Si corresponde otorgar una bonificación reglamentaria especial o deducir puntaje por causales de estatuto, utilice el panel **«Ajuste de Puntaje»**.
+2. Indique el valor algebraico (+ o - puntos).
+3. **Justificación Obligatoria:** Ingrese el fundamento legal y administrativo en el campo de texto. El sistema no permite asentar ajustes numéricos sin una justificación expresa que quedará sellada para auditoría.
+4. Asigne el estado final del legajo: **Calificado** (si todo está en regla) u **Observado** (si median inconsistencias formales).
+
+#### 2.4.4. Tratamiento, Dictamen y Resolución de Reclamos Docentes (ADR-035)
+1. Durante la instancia recursiva posterior a la LOM provisoria, ingrese a **«Bandeja de Reclamos»**.
+2. Seleccione el reclamo interpuesto por el docente y revise la fundamentación presentada y las nuevas probanzas adjuntas.
+3. **Emisión de Dictamen Resolutivo:**
+   - Si el reclamo es procedente: seleccione **«Admitir Reclamo»**, consigne el nuevo puntaje rectificado y asiente la resolución fundada. El sistema actualizará de inmediato la base de datos oficial.
+   - Si el reclamo es improcedente: seleccione **«Rechazar Reclamo»** e ingrese los considerandos normativos de la desestimación.
+4. Firme digitalmente la resolución para notificar automáticamente al docente en su panel personal.
 
 ---
 
-### 2.3. Instructivo de Operación para el Vocal de la Junta de Clasificación
-
-El módulo de Junta (`/junta`) está destinado exclusivamente a los miembros evaluadores oficiales de la Junta de Clasificación Secundaria.
-
-```mermaid
-flowchart LR
-    V1[Acceso Institucional] --> V2[Bandeja de Escuelas Asignadas]
-    V2 --> V3[Cotejo de Legajo y Documentación]
-    V3 --> V4[Validación o Dictamen de Observación]
-    V4 --> V5[Emisión de Acta de Valoración]
-```
-
----
-
-#### 2.3.1. Acceso y Bandeja de Escuelas Asignadas
-1. El evaluador accede al módulo institucional con su usuario oficial.
-2. Al ingresar a `/junta`, el sistema aplica de manera automática el **aislamiento territorial de evaluación**:
-   - El vocal visualiza únicamente los establecimientos educativos que tiene asignados formalmente bajo su supervisión (por ejemplo, escuelas de Capital o una zona departamental determinada).
-   - No tiene acceso a escuelas de otros vocales, garantizando la organización interna del trabajo y evitando la doble tasación de legajos.
-
-![Figura 2.9: Bandeja de entrada del Vocal de Junta](capturas/10-junta-bandeja-vocal.png)  
-*Figura 2.9: Bandeja de entrada del Vocal de Junta con aislamiento territorial y nómina de escuelas bajo su supervisión.*
-
----
-
-#### 2.3.2. Revisión de Aspirantes y Fiscalización de Legajos (Fase 2)
-1. Seleccione una escuela de su lista asignada.
-2. El sistema exhibirá la nómina de aspirantes que han presentado documentación o postulado a dicha institución, junto con su estado de revisión.
-3. Al seleccionar un aspirante, se despliega su legajo digital completo:
-   - Se presentan los antecedentes clasificados por categoría (Títulos, Capacitaciones, Desempeño).
-   - Se cuenta con el visor documental integrado para examinar los certificados y diplomas digitalizados en alta resolución.
-
-![Figura 2.10: Nómina de aspirantes por escuela](capturas/11-junta-lista-aspirantes.png)  
-*Figura 2.10: Lista de aspirantes postulados a la escuela seleccionada con estado de revisión y badges de control.*
-
----
-
-#### 2.3.3. Dictamen, Validación y Emisión de Observaciones
-1. Por cada antecedente presentado por el docente:
-   - Si la documentación cumple estrictamente los requisitos legales y formales: presione **"Aceptar Antecedente"**. El sistema lo computará para el algoritmo del Decreto 257/19.
-   - Si el documento presenta defectos formales (ilegitimidad, copia incompleta, falta de carga horaria o temática no pertinente): presione **"Observar / Rechazar"**.
-2. **Registro de la Observación:**  
-   Se desplegará una ventana modal donde el vocal debe:
-   - Seleccionar una causal estandarizada de objeción (ej.: *"Falta sello institucional"*, *"Carga horaria insuficiente"*, *"Certificado ilegible"*).
-   - Añadir una observación explicativa para notificar al docente.
-3. Al confirmar, el sistema asienta el dictamen con la firma digital del vocal, actualizando automáticamente el estado del legajo y registrando la operación en la bitácora de auditoría inmutable del sistema.
-
-*(Nota: La convalidación y las causales de observación quedan registradas automáticamente con firma digital y se reflejan en el estado de cada aspirante, como se observa en la Figura 2.10).*
-
----
-
-#### 2.3.4. Emisión de Actas de Valoración Escolar (Fase 5)
-1. Una vez revisada la totalidad de los aspirantes de un establecimiento educativo, el vocal presiona el botón **"Generar Acta de Escuela"**.
-2. El sistema consolida la nómina ordenada de postulantes y genera el **Acta Oficial Digital**, debidamente sellada y foliada.
-3. Esta información impacta en las bases centrales de educación, sirviendo de base definitiva para que la Dirección General de Carrera Docente homologue y publique la **Lista de Orden de Mérito (LOM)** del ciclo lectivo.
-
-*(Nota: Al cerrar la nómina, el sistema consolida el estado final de las inscripciones de la escuela para su posterior homologación en la LOM).*
-
----
-
-### 2.4. Preguntas Frecuentes (FAQ) y Resolución de Problemas Comunes
+### 2.5. Preguntas Frecuentes (FAQ) y Resolución de Problemas Comunes
 
 #### FAQ 1: ¿Por qué el sistema me solicita Ciudadano Digital Nivel 2 para operar?
-- **Causa:** El portal GID exige obligatoriamente **Ciudadano Digital (CiDi) Nivel 2 (identidad verificada fehacientemente)** para resguardar la seguridad jurídica de los legajos y trámites de inscripción. Si el usuario cuenta únicamente con Nivel 1, el acceso se interrumpe preventivamente.
-- **Solución:** Descargue en su teléfono móvil la aplicación oficial de CiDi y complete la validación biométrica con Renaper (reconocimiento facial y escaneo del DNI). Si prefiere realizarlo de forma presencial, puede concurrir a cualquier Centro de Constatación de Identidad provincial o Centro de Participación Comunal (CPC). Una vez obtenido el Nivel 2, podrá acceder a GID de inmediato.
-
----
+**Respuesta:** La gestión de antecedentes docentes y la postulación a cargos públicos implican actos administrativos vinculantes con fe pública. CiDi Nivel 2 asegura la identidad digital fehaciente del docente o funcionario, evitando fraudes, suplantaciones de identidad y garantizando la validez jurídica de la postulación.
 
 #### FAQ 2: ¿Por qué no puedo confeccionar mi Formulario C inmediatamente después de subir mis certificados a Mi Legajo?
-- **Causa:** El régimen docente provincial funciona mediante un ciclo administrativo por etapas sucesivas. En la primera etapa usted actualiza sus antecedentes; luego de esa fecha, el sistema entra en un período interanual donde **no se permiten inscripciones**, debido a que la Junta de Clasificación debe examinar y tasar toda la documentación presentada para asignarle su **Puntaje Oficial**.
-- **Solución:** Debe aguardar a que la Junta concluya su labor de valoración. Una vez que se le notifique su puntaje oficial en el módulo *Mi Puntaje*, podrá utilizar las herramientas de análisis territorial y, al momento de decretarse la apertura formal de la convocatoria anual, ingresar a confeccionar su Formulario C conociendo con exactitud sus posibilidades reales.
+**Respuesta:** El régimen docente provincial opera mediante un ciclo administrativo secuencial. Durante la etapa de actualización de legajo, los documentos deben ser primero tasados y certificados por los vocales de la Junta de Clasificación. Una vez publicada la convocatoria oficial de inscripción (`ABIERTO`), el módulo de Formulario C se habilitará para seleccionar escuelas y materias.
 
----
-
-#### FAQ 3: ¿Por qué una materia me figura con advertencia y no me permite seleccionarla en el Formulario C?
-- **Causa:** El sistema incorpora un **Validador de Alcance de Títulos en tiempo real** vinculado al catálogo legal de la Junta (74.765 combinaciones). Si la asignatura aparece inhabilitada, significa que sus títulos acreditados en su legajo no otorgan alcance (Docente, Habilitante o Supletorio) para esa materia en particular.
-- **Solución:** Verifique en *Mi Legajo* si tiene asentados todos sus títulos habilitantes. Si posee un título afín que no fue cargado, deberá aguardar la próxima apertura de legajo para anexarlo. El bloqueo preventivo tiene como propósito evitar que usted gaste una de sus cinco materias permitidas en una postulación que la Junta rechazaría de plano por incompatibilidad reglamentaria.
-
----
+#### FAQ 3: ¿Por qué una materia me figura con advertencia al seleccionarla en el Formulario C? ¿Puedo postularme igual?
+**Respuesta:** Sí, puede postularse. El sistema no bloquea su postulación. La advertencia indica que su título no registra incumbencia previa en el catálogo provincial de alcances para esa asignatura. El sistema le permite confirmar la inscripción bajo la categoría *"Sin título habilitante"*, quedando sujeta a la revisión y dictamen de la Junta de Clasificación durante el período de valoración.
 
 #### FAQ 4: ¿Puedo inscribirme a más de tres (3) escuelas secundarias o a más de cinco (5) materias por escuela?
-- **Causa:** No. Las reglas de negocio de la Junta de Clasificación Secundaria fijan de manera estricta un tope máximo de tres (3) establecimientos educativos y hasta cinco (5) asignaturas o cargos por establecimiento.
-- **Solución:** El sistema bloquea de manera automática el agregado de un cuarto establecimiento o de una sexta materia. Le recomendamos utilizar el **Semáforo LOM** y la **Propuesta Inteligente** (Segura / Justa / Apuesta) para optimizar la elección de sus opciones disponibles.
+**Respuesta:** No. Las reglas de negocio ministeriales establecen de manera taxativa un límite máximo de tres (3) establecimientos secundarios por aspirante y hasta cinco (5) asignaturas o cargos en cada uno. El portal valida automáticamente estos máximos impidiendo selecciones que superen dichos límites.
 
----
+#### FAQ 5: ¿Por qué un curso realizado hace más de diez años figura desestimado en mi legajo?
+**Respuesta:** En estricto cumplimiento del Decreto Provincial Nº 257/19, los certificados de cursos, jornadas y capacitaciones poseen una validez reglamentaria de diez (10) años contados hacia atrás desde la fecha de cierre de la convocatoria. Superado ese decenio, el antecedente caduca a los fines del cómputo de puntaje en la grilla oficial.
 
-#### FAQ 5: Realicé un curso oficial en la Red Provincial pero no lo veo reflejado en Mi Legajo. ¿Qué debo hacer?
-- **Causa:** La sincronización automática con la base central del SIPEC se actualiza de forma periódica al cierre de las actas de cada trayecto formativo.
-- **Solución:** Si el curso culminó recientemente y el certificado oficial ya está disponible en formato digital, usted puede incorporarlo de forma manual en el formulario inferior de *Mi Legajo*, seleccionando *"Certificación de Capacitación"* y adjuntando el comprobante en formato PDF. La Junta lo evaluará en la etapa de tasación correspondiente.
+#### FAQ 6: ¿Cómo y cuándo puedo presentar un reclamo sobre mi puntaje asignado?
+**Respuesta:** Los reclamos únicamente pueden interponerse tras la publicación oficial de la **LOM Provisoria**, dentro de la ventana de días hábiles fijada por el calendario provincial. Debe ingresar a *«Mis Inscripciones»*, pulsar en *«Presentar Reclamo»*, indicar el rubro cuestionado, fundamentar los motivos y adjuntar la documentación respaldatoria.
 
----
+#### FAQ 7: ¿Por qué en algunas materias no visualizo mi percentil departamental en «Mis Puntajes»?
+**Respuesta:** Por aplicación del principio de privacidad diferencial ($k \ge 10$). Si en un departamento provincial y para una asignatura determinada existen menos de diez (10) aspirantes inscriptos, el cálculo de percentil se oculta preventivamente para resguardar la identidad y confidencialidad de los colegas.
 
-#### FAQ 6: ¿Qué representan los colores del semáforo en el Mapa Territorial?
-- **Causa:** El semáforo compara su puntaje oficial otorgado por la Junta con el promedio histórico de corte de la Lista de Orden de Mérito de cada colegio:
-  - 🟢 **Verde:** Su puntaje es superior al promedio histórico; sus probabilidades de inserción en esa escuela son elevadas.
-  - 🟡 **Amarillo:** Su puntaje es similar al histórico; existe competitividad equiparada con otros aspirantes.
-  - 🔴 **Rojo:** La escuela posee cortes históricos elevados que superan su puntaje actual; se considera una opción de alta exigencia o postulación de crecimiento futuro.
+#### FAQ 8 (Para Vocales): ¿Por qué en mi bandeja de Junta no veo aspirantes de determinados colegios?
+**Respuesta:** Cada vocal calificador visualiza exclusivamente los aspirantes postulados a las escuelas base que le han sido asignadas por el Administrador de la Junta (`Junta → Asignación`). Si requiere intervenir en otros colegios por suplencia o redistribución, el Administrador debe reasignarle dicho establecimiento desde su panel de gestión.
 
----
-
-#### FAQ 7: ¿Puedo modificar mi Formulario C una vez confirmado el envío?
-- **Causa:** Mientras el período de convocatoria esté abierto, usted puede editar sus escuelas y asignaturas seleccionadas. Una vez finalizado el cronograma de inscripción, el formulario se cierra definitivamente para permitir la emisión de actas y la consolidación de la LOM.
-- **Solución:** Mientras la convocatoria permanezca abierta, acceda a *Formulario C*, efectúe los cambios necesarios y presione nuevamente **"Confirmar Inscripción"**. El sistema registrará la actualización en la bitácora de auditoría y renovará su constancia digital.
-
----
-
-#### FAQ 8 (Para Vocales): ¿Por qué en mi bandeja de Junta no veo aspirantes de determinados departamentos o colegios?
-- **Causa:** La plataforma implementa un esquema de **aislamiento de roles por escuela asignada**. Cada vocal tiene configurada una lista cerrada de establecimientos educativos a su cargo según la distribución de zonas de la Junta.
-- **Solución:** Si a usted se le ha reasignado una nueva escuela o zona y no figura en su panel, el administrador del sistema debe actualizar la asignación territorial en los registros centrales del Ministerio.
----
-
+#### FAQ 9 (Para Administradores): ¿Cómo procedo si el Ministerio dispone una prórroga en las inscripciones?
+**Respuesta:** Ingrese a `Junta → Períodos`. Si el período está en modo `FECHAS`, modifique la *Fecha y Hora de Cierre* extendiendo el plazo convenido y guarde los cambios. Si prefiere control manual, puede mantener el estado en `ABIERTO` hasta que se ordene el cierre definitivo.
 ## 3. MANUAL DE INSTALACIÓN Y OPERACIÓN
 
 ### 3.1. Propósito y Audiencia
-- **Para qué:** Proporciona una guía técnica completa y explicada paso a paso para que cualquier administrador de sistemas pueda instalar la plataforma **Gestión Integral Docente (GID)** en un servidor desde cero, comprender qué ejecuta cada contenedor de Docker, interpretar el propósito de cada comando y verificar fehacientemente la conexión tanto con las bases de datos (PostgreSQL local y Oracle de la Junta) como con los sistemas externos provinciales (Ciudadano Digital, catálogo maestro de alcances y asistente).
+- **Para qué:** Proporciona una guía técnica completa y explicada paso a paso para que cualquier administrador de sistemas pueda instalar la plataforma **Gestión Integral Docente (GID)** en un servidor desde cero, comprender qué ejecuta cada contenedor de Docker, interpretar el propósito de cada comando y verificar fehacientemente la conexión tanto con las bases de datos (PostgreSQL local o Supabase y Oracle de la Junta) como con los sistemas externos provinciales (Ciudadano Digital, catálogo maestro de alcances y asistente).
 - **Para quién:** Administradores de servidores, ingenieros de infraestructura, equipos de DevOps provinciales, docentes evaluadores y futuros mantenedores de los sistemas informáticos del Gobierno de Córdoba.
 
 ---
@@ -564,263 +491,160 @@ Para que quien instale o audite el servidor pueda formarse una idea general clar
 ```mermaid
 graph TD
     subgraph red_publica ["Red Provincial / Internet (portal_public)"]
-        Usuario([Docente / Vocal]) -->|HTTPS / 443| LB[Reverse Proxy Provincial / DNS *.cba.gov.ar]
+        Usuario([Docente / Vocal / Admin]) -->|HTTPS / 443| LB[Reverse Proxy Provincial / DNS *.cba.gov.ar]
     end
 
     subgraph servidor_gobierno ["Servidor Host Docker (compose.yaml)"]
         LB -->|HTTP / Puerto 8080| NGINX["Contenedor 1: frontend<br/>(Nginx 1.28 Alpine Unprivileged)"]
         
         subgraph red_interna ["Red Privada Aislada (portal_internal — internal: true)"]
-            NGINX -->|Sirve SPA Estática| SPA[Bundle Angular Compilado]
-            NGINX -->|Reverse Proxy /api/* :3000| API["Contenedor 2: backend<br/>(Node.js 22 Alpine + Express)"]
-            API -->|TCP :5432| DB[("Contenedor 3: db<br/>(PostgreSQL 16 Alpine)")]
+            NGINX -->|Sirve SPA Estática| SPA[Bundle Angular 17 Compilado]
+            NGINX -->|Reverse Proxy /api/| NODE["Contenedor 2: backend<br/>(Node.js 22 LTS / Express)"]
+            
+            NODE -->|Pool TCP / Puerto 5432| PG["Contenedor 3: db<br/>(PostgreSQL 16 Alpine)"]
+            PG -->|Persistencia Volumen| VOL[(Volumen Docker: postgres_data)]
         end
-
-        VOL_DB[("Volumen Docker:<br/>portal_docente_db")] -->|/var/lib/postgresql/data| DB
-        VOL_DATA[("Volumen Docker:<br/>portal_docente_data")] -->|/app/.data| API
-        BIND_SQL[("Bind Mount Read-Only:<br/>01_alcance_titulo.sql")] -->|/data/alcance/| API
+        
+        NODE -->|Catálogo Montado Read-Only| DUMP[/data/alcance/01_alcance_titulo.sql/]
     end
 
-    subgraph infraestructura_provincial ["Sistemas Externos y Bases Centrales (vía red portal_egress)"]
-        API -->|HTTPS / OAuth2 / Cookies| CIDI[Ciudadano Digital: CiDi Test / Oficial]
-        API -->|Easy Connect TCP / 1521| ORACLE[(Base de Datos Junta: Oracle MT4D / MT4T)]
-        API -->|HTTPS / API REST| GROQ[Servicio LLM Externo: Groq API]
+    subgraph red_ministerio ["Red Ministerial de Educación (VPN / Red de Gobierno)"]
+        NODE -.->|Oracle Net / TCP 1521| ORA[(Oracle DB Junta: MT4D / MT4T)]
+        NODE -.->|HTTPS / REST| CIDI[Ciudadano Digital — CiDi Nivel 2]
+        NODE -.->|HTTPS / API| GROQ[Servicio LLM — Groq API]
     end
 ```
 
 #### 3.2.1. Detalle de los Tres Contenedores que Conforman el Sistema
 
-| Contenedor / Servicio | Imagen Base y Construcción | Usuario y Límites en Ejecución | Qué Hace Exactamente en el Servidor |
-| :--- | :--- | :--- | :--- |
-| **1. `frontend`** (`portal-docente-frontend`) | **Multi-stage build** (`web/Dockerfile`): Etapa 1 compila Angular 19 con `node:22.23.1-alpine3.23`; Etapa 2 copia únicamente los archivos estáticos compilados a `nginx:1.28.3-alpine3.23-slim`. | Usuario `nginx` (`UID 101`, no-root). Límite: `0.5 CPU`, `128 MB RAM`, raíz en solo lectura (`read_only: true`). | **1. Servidor Web SPA:** Entrega la interfaz gráfica (Angular compilado) al navegador del usuario y resuelve las rutas del cliente mediante `try_files`.<br/>**2. Puerta de Enlace Única (Reverse Proxy):** Es el **único contenedor que publica un puerto en el servidor (`8080`)**. Cuando el navegador solicita cualquier ruta `/api/*`, Nginx la reenvía internamente al contenedor `backend:3000` por la red privada, ocultando la API y la base de datos del exterior. |
-| **2. `backend`** (`portal-docente-backend`) | **Multi-stage build** (`server/Dockerfile`): Compila el código TypeScript a JavaScript en una etapa previa y genera una imagen limpia sobre `node:22.23.1-alpine3.23` solo con dependencias de producción (eliminando `npm`, `npx`, `yarn` y código fuente `.ts`). | Usuario `node` (`UID 1000`, no-root). Límite: `1.0 CPU`, `512 MB RAM`, raíz en solo lectura (`read_only: true`). Puerto interno `3000` (no expuesto al host). | **1. Motor de Negocio y API REST:** Ejecuta las reglas del Decreto 257/19, validación de Formulario C, mapa territorial, simulador y bandeja de Junta.<br/>**2. Inicializador de Esquema:** Al arrancar, se conecta al contenedor `db` y aplica automáticamente las migraciones SQL versionadas (`server/db/migraciones/`) para las tablas operativas y de auditoría inmutable.<br/>**3. Indexador en Memoria:** Parsea e indexa al inicio el archivo `01_alcance_titulo.sql` (74.765 alcances legales) para consultas instantáneas.<br/>**4. Conector con Sistemas Externos:** Se comunica con Oracle (puerto `1521`), Ciudadano Digital (CiDi) y el servicio LLM (Groq). |
-| **3. `db`** (`postgres:16-alpine`) | Imagen oficial `postgres:16-alpine` gestionada por el archivo `compose.yaml`. | Proceso `postgres` con `no-new-privileges:true`. Límite: `1.0 CPU`, `256 MB RAM`. Puerto `5432` **cerrado al host**. | **Base de Datos Transaccional y de Auditoría del Portal:** Aloja la base `portal_docente`, donde se persisten los legajos digitales (incluyendo los certificados PDF en formato binario `BYTEA`), los Formularios C confeccionados, las muestras de interés y las **tablas de auditoría inmutable (`auditoria_acceso` y `auditoria_cambio`)** protegidas por *triggers* que bloquean cualquier `UPDATE` o `DELETE`. |
+1. **Contenedor 1: `frontend` (`portal-docente-frontend:0.1.0`)**
+   - **Tecnología base:** Nginx 1.28 Alpine corriendo bajo usuario no privilegiado (`nginx`, UID 101) para máxima seguridad perimetral.
+   - **Qué ejecuta:** Sirve los archivos estáticos HTML5, JavaScript y CSS generados por la compilación de producción de Angular 17. Actúa asimismo como reverse proxy interno: intercepta las peticiones que comienzan con `/api/` y las redirige hacia el contenedor backend en `http://backend:3000/api/`.
 
-#### 3.2.2. Redes Virtuales y Volúmenes de Persistencia en Docker
-Para garantizar el aislamiento de seguridad (*defensa en profundidad*), `compose.yaml` crea tres redes virtuales y tres puntos de montaje:
-1. **`portal_docente_internal` (`internal: true`):** Red privada sin salida a Internet donde se comunican `frontend`, `backend` y `db`. El contenedor `db` vive **únicamente** en esta red, haciendo imposible que reciba conexiones desde fuera del servidor.
-2. **`portal_docente_public`:** Red asignada exclusivamente a `frontend` para publicar el puerto HTTP `8080` hacia el host o balanceador de carga provincial.
-3. **`portal_docente_egress`:** Red de salida asignada exclusivamente al `backend`. Es el canal que le permite a la API salir por la interfaz de red/VPN del servidor anfitrión para alcanzar la base **Oracle de la Junta (`10.250.11.53:1521`)**, los servicios web de **Ciudadano Digital (CiDi)** y la API de **Groq**.
-4. **Volúmenes de datos (`portal_docente_db`, `portal_docente_data` y Bind Mount de Alcance):**
-   - `portal_docente_db`: Volumen persistente de Docker donde PostgreSQL guarda los archivos físicos de las tablas (`/var/lib/postgresql/data`). Aunque los contenedores se apaguen o actualicen, los datos no se pierden.
-   - `/data/alcance/01_alcance_titulo.sql`: Montaje directo de solo lectura (*bind mount* `read_only: true`) que inyecta el dump maestro de títulos del host dentro del contenedor `backend`.
+2. **Contenedor 2: `backend` (`portal-docente-backend:0.1.0`)**
+   - **Tecnología base:** Node.js 22 LTS sobre Alpine Linux, ejecutando bajo usuario sin privilegios (`node`).
+   - **Qué ejecuta:** La API REST de la aplicación. Aloja los controladores de negocio, la validación de tokens JWT, el motor de reglas del Decreto 257/19 (topes de 30 y 60 pts, caducidad decenal), el motor de alcances de títulos, la resolución de roles (`ADMINISTRADORES_CUIL`, `VOCALES_CUIL`), la persistencia relacional en PostgreSQL y la interoperabilidad con Oracle de la Junta.
+
+3. **Contenedor 3: `db` (`postgres:16-alpine`)**
+   - **Tecnología base:** PostgreSQL 16 Alpine Oficial.
+   - **Qué ejecuta:** Motor relacional para la persistencia transaccional rápida del portal: legajos digitales, borradores de Formularios C, dictámenes de reclamos, y el log inmutable append-only de auditoría forense (`AUDITORIA_ACCESO` y `AUDITORIA_CAMBIO`). Los datos se resguardan en el volumen administrado `postgres_data`.
 
 ---
 
 ### 3.3. Requisitos de Hardware, Software y Red
 
 #### 3.3.1. Requisitos de Hardware del Servidor
-Para un entorno productivo provincial (dimensionado sobre el volumen real de **67.700 inscripciones anuales** y picos de concurrencia durante la apertura de convocatoria):
-- **Procesador (CPU):** Mínimo 4 vCPUs (Recomendado: 8 vCPUs arquitectura x86_64).
-- **Memoria RAM:** Mínimo 8 GB (Recomendado: 16 GB; los tres contenedores de GID consumen en conjunto menos de 900 MB bajo los límites estrictos del Compose, dejando amplio margen para caché de sistema operativo y buffers).
-- **Almacenamiento en Disco:** Mínimo 100 GB en disco de estado sólido (SSD / NVMe) para alojar imágenes Docker, el volumen de PostgreSQL con documentos PDF adjuntos y los respaldos diarios comprimidos.
+- **Procesador (CPU):** Mínimo 2 núcleos virtuales (vCPU) x86_64 o ARM64; recomendado 4 vCPU para concurrencia masiva en períodos de cierre de convocatoria.
+- **Memoria RAM:** Mínimo 4 GB disponibles; recomendado 8 GB para absorción fluida del catálogo de títulos en memoria y pool de conexiones.
+- **Almacenamiento en Disco:** Mínimo 20 GB de espacio disponible en partición SSD/NVMe (considerando sistema operativo, imágenes Docker, dump de títulos y volumen de base de datos).
 
 #### 3.3.2. Requisitos de Software
-- **Sistema Operativo Base:** Linux de servidor (Ubuntu Server 22.04/24.04 LTS, Debian 12 o RHEL 9).
-- **Motor de Contenedores:** Docker Engine `24.0+` y **Docker Compose V2** (`docker compose`) con soporte BuildKit activo.
-- **Utilidades de consola en el servidor:** `git`, `curl`, `jq` (para formatear salidas JSON de diagnóstico) y `openssl` o `node` (para generar claves aleatorias).
+- **Sistema Operativo Host:** Linux con kernel 5.4 o superior (Ubuntu Server 22.04 LTS / 24.04 LTS, Debian 12 o RHEL 9 recomendados).
+- **Motor Docker:** Docker Engine versión 24.0 o superior.
+- **Orquestador:** Docker Compose V2 (plugin integrado `docker compose`) versión 2.20 o superior.
+- **Utilidades del Host:** `git`, `curl`, `openssl`.
 
 #### 3.3.3. Requisitos de Red y Conectividad Gubernamental
-1. **Tráfico Entrante (Inbound):** Puerto `8080/TCP` en el host (o `443/HTTPS` en el Reverse Proxy provincial que redirige al puerto `8080` del servidor).
-2. **Tráfico Saliente (Outbound):**
-   - **Hacia Base de Datos Oracle de la Junta:** Conectividad TCP al puerto `1521` del servidor de base de datos ministerial (`10.250.11.53` para el servicio `mt4d`, y opcionalmente `10.250.11.60:1521/mt4t` para notificaciones). Si el servidor está fuera de la LAN del Ministerio, debe tener la VPN institucional conectada en el host.
-   - **Hacia Ciudadano Digital (CiDi):** Salida HTTPS (`443/TCP`) hacia `cidi.cba.gov.ar` y `cuentacidi.cba.gov.ar` (o `ciditest.cba.gov.ar` y `cuentaciditest.cba.gov.ar` en homologación).
-3. **Subdominio Oficial `*.cba.gov.ar` y Callback de CiDi:**
-   - Para utilizar autenticación real con CiDi (`AUTH_MODE=cidi`), el portal debe publicarse bajo un dominio `*.cba.gov.ar` (ya que la cookie de sesión de CiDi tiene alcance sobre ese dominio padre) y tener registrada en CiDi la URL de retorno `https://<dominio-del-portal>/api/auth/cidi/retorno`.
+- **Puerto 8080/TCP entrante:** Exposición pública o a través de balanceador de carga provincial.
+- **Salida TCP/1521 hacia Oracle de la Junta:** Conectividad IP autorizada hacia el servidor de base de datos de la Junta (`10.250.11.53`).
+- **Salida HTTPS/443 hacia CiDi:** Conectividad hacia las APIs y portales de Ciudadano Digital de la Provincia de Córdoba.
 
 ---
 
 ### 3.4. Instalación Paso a Paso en un Servidor y Explicación de Comandos Docker
 
-A continuación se detalla cómo un administrador instala el sistema desde cero en un servidor limpio y **qué hace exactamente cada comando ejecutado**.
-
 #### Paso 1: Verificar la Instalación de Docker y Clonar el Repositorio
-Conectarse por SSH al servidor, comprobar que el motor de Docker y Docker Compose V2 estén activos, y descargar el proyecto en `/opt/portal-docente`:
-
 ```bash
-# 1. Comprobar que el demonio de Docker (cliente y servidor) está corriendo
+# 1. Comprobar que el demonio de Docker está activo
 docker version
 
-# 2. Comprobar que el plugin Docker Compose V2 está disponible
+# 2. Comprobar que Docker Compose V2 está disponible
 docker compose version
 
-# 3. Clonar el repositorio oficial y posicionarse en la carpeta src/ (donde viven los archivos Compose)
+# 3. Clonar el repositorio y posicionarse en la carpeta src/
 cd /opt
 sudo git clone https://github.com/fabrivalseg/PF-24---Gestion-Docente-Secundaria.git portal-docente
 cd /opt/portal-docente/src
 ```
 
-#### Paso 2: Ubicar el Dump Maestro de Alcance de Títulos y Crear el Archivo `.env`
-El validador de alcance de títulos utiliza el catálogo oficial de la Junta (`01_alcance_titulo.sql`, ~29 MB con 74.765 filas). Se copia en una carpeta del servidor y luego se crea el archivo `.env` a partir de la plantilla `.env.example`:
-
+#### Paso 2: Ubicar el Dump de Alcance de Títulos y Configurar el Archivo `.env`
 ```bash
-# Crear directorio para el catálogo maestro y copiar el archivo SQL oficial
+# Crear directorio seguro para el catálogo de títulos
 sudo mkdir -p /opt/portal-docente/data/alcance
 sudo cp /ruta/origen/01_alcance_titulo.sql /opt/portal-docente/data/alcance/01_alcance_titulo.sql
 sudo chmod 644 /opt/portal-docente/data/alcance/01_alcance_titulo.sql
 
-# Crear el archivo de variables de entorno y restringir permisos de lectura solo al propietario
+# Crear el archivo .env desde la plantilla oficial y asegurar permisos estrictos
 cp .env.example .env
 chmod 600 .env
 ```
 
-Generar el secreto criptográfico para la firma de tokens JWT (`JWT_SECRET`) y editar el archivo `.env` (ver tabla completa de variables en la sección 3.6):
-
+Generar el secreto criptográfico para JWT:
 ```bash
-# Genera 48 bytes aleatorios codificados en base64url para usar en JWT_SECRET
 openssl rand -base64 48 | tr '+/' '-_' | tr -d '='
 ```
 
-En el archivo `/opt/portal-docente/src/.env` deben quedar definidos los parámetros de producción e integración oficial: `JWT_SECRET`, `POSTGRES_PASSWORD`, `AUTH_MODE=cidi`, `CIDI_ID_APP`, `CIDI_KEY_APP`, `CIDI_PASSWORD`, `INTEGRATION_MODE=prod`, `DB_USER`, `DB_PASSWORD`, `ORACLE_HOST=10.250.11.53`, `ORACLE_PORT=1521`, `ORACLE_SERVICE=mt4d` y `ALCANCE_SQL_PATH=/opt/portal-docente/data/alcance/01_alcance_titulo.sql`.
+Configurar los parámetros obligatorios en `/opt/portal-docente/src/.env`:
+- Asignar el secreto generado a `JWT_SECRET`.
+- Configurar `ADMINISTRADORES_CUIL` con los CUILs autorizados de la Junta (separados por comas).
+- Definir credenciales de base de datos PostgreSQL y parámetros Oracle / CiDi.
 
-#### Paso 3: Validar la Sintaxis y Interpolación de Docker Compose (`config`)
-Antes de construir o levantar contenedores, se verifica que el archivo `compose.yaml` y las variables del `.env` estén bien formados:
-
+#### Paso 3: Validar la Sintaxis de Docker Compose
 ```bash
-docker compose -f compose.yaml config
+# Valida la sintaxis del compose.yaml y comprueba que todas las variables obligatorias estén presentes
+docker compose config
 ```
-- **¿Qué hace este comando?**
-  - `-f compose.yaml`: Indica explícitamente que se utilice la definición de producción (`compose.yaml`).
-  - `config`: Lee `compose.yaml`, interpola todas las variables desde el archivo `.env` y valida las reglas de esquema. Si falta una variable obligatoria en producción (como `JWT_SECRET` o `POSTGRES_PASSWORD`, definidas con la sintaxis `${VARIABLE:?mensaje de error}`), **el comando falla inmediatamente mostrando qué variable falta**, evitando levantar un entorno mal configurado.
 
-#### Paso 4: Construir las Imágenes Productivas de los Contenedores (`build --pull`)
-Una vez validada la configuración, se compilan las imágenes de `frontend` y `backend`:
-
+#### Paso 4: Construir las Imágenes Productivas
 ```bash
-docker compose -f compose.yaml build --pull
+# Construye las imágenes locales descargando las capas base más recientes
+docker compose build --pull
 ```
-- **¿Qué hace este comando?**
-  - `build`: Ejecuta los *multi-stage builds* definidos en `server/Dockerfile` y `web/Dockerfile` apuntando al `target: production`. Compila TypeScript en el backend, compila el bundle SPA de Angular en el frontend, elimina herramientas de desarrollo y empaqueta las imágenes finales `portal-docente-backend:0.1.0` y `portal-docente-frontend:0.1.0`.
-  - `--pull`: Fuerza a Docker a consultar el registro oficial para asegurarse de contar con las últimas actualizaciones de seguridad de las imágenes base (`node:22.23.1-alpine3.23`, `nginx:1.28.3-alpine3.23-slim` y `postgres:16-alpine`) antes de compilar.
 
-#### Paso 5: Levantar el Sistema y Esperar las Sondas de Salud (`up -d --wait`)
-Se ponen en marcha los contenedores, redes y volúmenes en orden de dependencia:
-
+#### Paso 5: Levantar el Sistema y Esperar las Sondas de Salud
 ```bash
-docker compose -f compose.yaml up -d --wait
+# Levanta los contenedores en segundo plano y espera hasta que el backend pase su prueba de salud
+docker compose up -d --wait
 ```
-- **¿Qué hace este comando y qué ocurre por detrás paso a paso?**
-  - `up`: Crea las 3 redes (`portal_internal`, `portal_egress`, `portal_public`), inicializa los 2 volúmenes persistentes (`portal_docente_db`, `portal_docente_data`) y arranca los contenedores respetando la cadena `depends_on` con `condition: service_healthy`:
-    1. **Primero arranca `db` (PostgreSQL 16):** Inicializa el motor relacional y ejecuta su `healthcheck` (`pg_isready`) cada 10 segundos hasta que la base acepta conexiones.
-    2. **Segundo arranca `backend` (API Express):** Recién cuando `db` está `healthy`, inicia el contenedor `backend`. Al arrancar, ejecuta las migraciones SQL en PostgreSQL, carga en memoria las 74.765 filas de `01_alcance_titulo.sql`, se conecta al servidor Oracle de la Junta (`10.250.11.53:1521`) para precargar padrón, mapa LOM y publicaciones de vacantes, y habilita el endpoint `/api/health`.
-    3. **Tercero arranca `frontend` (Nginx):** Recién cuando el `backend` responde `200 OK` en `/api/health` y pasa a estado `healthy`, se inicia Nginx publicando el puerto `8080`.
-  - `-d` (*detached*): Ejecuta los contenedores en segundo plano como servicios del servidor, liberando la terminal.
-  - `--wait`: Hace que la consola espere sin devolver el control hasta que **los tres contenedores hayan superado sus respectivos `healthchecks` y estén en estado `Up (healthy)`**. Si algún servicio no logra conectar con su base de datos en el tiempo estipulado, el comando informa el error de inmediato.
 
 ---
 
-### 3.5. Verificación de Conectividad con la Base de Datos y Sistemas Externos
+### 3.5. Verificación de Conectividad con Bases de Datos y Sistemas Externos
 
-Una vez levantado el servidor, el administrador debe comprobar que los contenedores estén sanos y que el sistema se encuentre efectivamente conectado tanto a la **base de datos local (PostgreSQL)** como a la **base de datos de la Junta (Oracle)** y a los **sistemas externos**. A continuación se presentan las 4 verificaciones en orden.
-
-#### 3.5.1. Verificación 1: Prueba de Visibilidad de Red hacia Oracle y Sistemas Externos
-Para comprobar desde el propio motor de Docker que el servidor llega por red al puerto `1521` de la base de datos Oracle de la Junta (a través de la LAN ministerial o la VPN del host):
-
-```bash
-docker run --rm busybox:1.36 nc -zv -w 5 10.250.11.53 1521
-```
-- **Explicación del comando:**
-  - `docker run --rm busybox:1.36`: Levanta un micro-contenedor efímero con utilidades de red (`busybox`) que usa el mismo stack de red de Docker que el backend, y lo elimina automáticamente al terminar (`--rm`).
-  - `nc -zv -w 5 10.250.11.53 1521`: Ejecuta *Netcat* en modo escaneo sin enviar datos (`-z`), con salida detallada (`-v`) y un tiempo máximo de espera de 5 segundos (`-w 5`) contra la IP `10.250.11.53` y puerto `1521`.
-  - **Resultado esperado:** `10.250.11.53 (10.250.11.53:1521) open`.
-
-Para verificar que el servidor también tiene salida HTTPS hacia **Ciudadano Digital (CiDi)**:
-```bash
-curl -I -s --connect-timeout 5 https://cidi.cba.gov.ar | head -n 5
-```
-
-#### 3.5.2. Verificación 2: Estado de Contenedores y Diagnóstico Integral (`/api/health`)
-Primero se inspecciona el estado de los contenedores con Docker Compose:
-
-```bash
-docker compose -f compose.yaml ps
-```
-- **Explicación del comando:** Lista los contenedores activos del proyecto. Los tres servicios (`portal-docente-db-1`, `portal-docente-backend-1` y `portal-docente-frontend-1`) deben figurar con `STATUS: Up ... (healthy)` y solo `frontend` debe mostrar el mapeo de puerto `0.0.0.0:8080->8080/tcp`.
-
-A continuación, se consulta el endpoint de diagnóstico integral `/api/health` a través de Nginx:
-
+#### 3.5.1. Verificación 1: Diagnóstico Integral del Sistema (`/api/health`)
+Ejecutar desde el servidor o máquina autorizada:
 ```bash
 curl -s http://localhost:8080/api/health | jq .
 ```
-- **Explicación del comando:** Realiza una petición HTTP al puerto `8080` de Nginx, el cual la redirige internamente a `backend:3000/api/health`, y formatea la respuesta JSON con `jq`.
-
-**Respuesta real esperada y qué verifica cada bloque:**
-
+Respuesta esperada:
 ```json
 {
   "status": "ok",
   "version": "0.1.0",
-  "integrationMode": "prod",
-  "authMode": "cidi",
-  "inscripcionAbierta": true,
-  "alcance": {
-    "ready": true,
-    "filasCargadas": 74765,
-    "sourceObject": "ALCANCE_SQL_PATH"
+  "database": {
+    "postgres": "connected",
+    "oracle": "connected"
   },
-  "padron": {
-    "ready": true,
-    "empresasCargadas": 1042,
-    "catalogoFilas": 18540,
-    "sourceObjects": ["VT_EMPRESAS", "VT_CATALOGO_MAT"]
-  },
-  "mapa": {
-    "ready": true,
-    "escuelasLomCargadas": 890,
-    "filasLom": 67700,
-    "correccionesCoordenadas": 14,
-    "sourceObjects": ["VT_LOM_SECUNDARIA"]
-  },
-  "notificaciones": {
-    "ready": true,
-    "filasPublicaciones": 312,
-    "sourceObjects": ["VT_PUBLICACIONES_VACANTES"]
-  },
-  "persistencia": {
-    "tipo": "postgres",
-    "ready": true,
-    "escriturasPendientes": 0,
-    "ultimaEscritura": "2026-11-04T20:15:00.000Z",
-    "conError": false
-  },
-  "espejoJunta": {
-    "modo": "ensayo",
-    "sincronizaciones": 0,
-    "ultimaSincronizacion": null,
-    "conError": false
+  "cidi": "configured",
+  "catalog": {
+    "loaded": true,
+    "rules": 74765
   }
 }
 ```
 
-**Guía de interpretación del diagnóstico `/api/health`:**
-
-| Bloque / Campo en `/api/health` | Qué Base de Datos o Sistema Externo Verifica | Cómo Saber que Está Bien Conectado |
-| :--- | :--- | :--- |
-| **`persistencia`** | **Base de Datos Local PostgreSQL (`db`)** | `tipo: "postgres"`, `ready: true` y `conError: false`. Confirma que el `backend` se conectó a PostgreSQL, aplicó las migraciones y puede leer/escribir legajos, Formularios C y auditoría. |
-| **`integrationMode` + `padron` + `mapa` + `notificaciones`** | **Base de Datos Oracle de la Junta (`10.250.11.53:1521/mt4d`)** | `integrationMode: "prod"` y los tres bloques con `ready: true` y conteo de filas mayor a cero. Confirma que la API autenticó en Oracle y leyó las vistas reales de escuelas, oferta curricular, LOM histórica y vacantes. |
-| **`alcance`** | **Catálogo Maestro de Alcances (`01_alcance_titulo.sql`)** | `ready: true`, `sourceObject: "ALCANCE_SQL_PATH"` y `filasCargadas: 74765`. Confirma que el contenedor montó el archivo SQL del host y cargó las categorías Docente, Habilitante y Supletorio. |
-| **`authMode`** | **Ciudadano Digital (CiDi / CiDi Test)** | `authMode: "cidi"`. Confirma que se encuentra activa la pasarela oficial de identidad de Ciudadano Digital exigiendo Nivel 2. |
-| **`espejoJunta`** | **Escritura Espejo en Tablas de Junta (Oracle)** | Muestra el `modo` activo (`"off"`, `"ensayo"` u `"on"`), la cantidad de `sincronizaciones` realizadas y `conError: false`. |
-
-#### 3.5.3. Verificación 3: Inspección Directa sobre la Base de Datos PostgreSQL (`db`)
-Para comprobar directamente dentro del contenedor `db` que el esquema relacional y las tablas de auditoría inmutable fueron creadas correctamente:
-
+#### 3.5.2. Verificación 2: Inspección Directa sobre la Base de Datos PostgreSQL (`db`)
 ```bash
-docker compose -f compose.yaml exec db psql -U portal -d portal_docente -c "\dt"
+# Comprobar conectividad y tablas de auditoría
+docker compose exec -T db psql -U portal -d portal_docente -c "\dt"
 ```
-- **Explicación del comando:**
-  - `docker compose -f compose.yaml exec db`: Abre una ejecución interactiva dentro del contenedor `db` en marcha (sin necesidad de abrir puertos al exterior).
-  - `psql -U portal -d portal_docente -c "\dt"`: Invoca el cliente oficial de PostgreSQL con el usuario configurado y lista las tablas creadas por las migraciones (`portal_estado_docente`, `auditoria_acceso` y `auditoria_cambio`).
+Se listan las tablas operativas: `inscripciones`, `legajo_antecedentes`, `reclamos`, `auditoria_acceso`, `auditoria_cambio`.
 
-#### 3.5.4. Verificación 4: Prueba Transaccional de Escritura en las Tablas Oracle de la Junta
-Antes de pasar `ESCRITURA_JUNTA` a modo `"on"` en un entorno de prueba/preproducción del Ministerio, el administrador puede verificar que el contenedor `backend` tiene permisos sobre las nueve tablas de la Junta (ADR-029) ejecutando la herramienta de diagnóstico incluida en la imagen:
-
+#### 3.5.3. Verificación 3: Registro de Auditoría Inmutable
 ```bash
-docker compose -f compose.yaml exec -e JUNTA_PRUEBA_CUIL=20111111111 backend node server/dist/store/persistencia/probar-escritura-junta.js
+# Verificar los últimos eventos de auditoría registrados
+docker compose exec -T db psql -U portal -d portal_docente -c "SELECT id, accion, cuil, timestamp FROM auditoria_cambio ORDER BY id DESC LIMIT 5;"
 ```
-- **Explicación del comando:**
-  - Ejecuta dentro del contenedor `backend` el script compilado `probar-escritura-junta.js` pasándole un CUIL de prueba (`-e JUNTA_PRUEBA_CUIL=...`).
-  - El script abre una conexión contra el servidor Oracle de la Junta, comprueba que el servicio esté dentro de la lista blanca `JUNTA_BASES_PERMITIDAS` (`MT4D,MT4T`), simula la inserción espejo de un legajo y un Formulario C dentro de una transacción y **ejecuta un `ROLLBACK` automático al finalizar**, confirmando que la conectividad y los permisos `INSERT/UPDATE/DELETE` en Oracle funcionan sin dejar datos residuales.
 
 ---
 
@@ -830,299 +654,226 @@ El archivo `/opt/portal-docente/src/.env` gobierna el comportamiento de los cont
 
 | Variable | Valor Típico en Servidor Provincial | Requerida | Propósito y Consideraciones |
 | :--- | :--- | :---: | :--- |
-| `NODE_ENV` | `production` | Sí | Activa optimizaciones de Express y Angular. |
+| `NODE_ENV` | `production` | Sí | Activa optimizaciones de Node.js, Express y Angular. |
 | `FRONTEND_PORT` | `8080` | Sí | Puerto TCP público que publica el contenedor `frontend` (Nginx) en el host. |
 | `BACKEND_PORT` | `3000` | Sí | Puerto interno de Express accesible solo dentro de la red privada `portal_internal`. |
-| `CORS_ORIGIN` | `https://portaldocente.cba.gov.ar` | Sí | Origen público oficial permitido por CORS. Debe coincidir con el dominio público. |
+| `CORS_ORIGIN` | `https://portaldocente.cba.gov.ar` | Sí | Origen público oficial permitido por CORS. |
 | `JWT_SECRET` | *(cadena aleatoria de 48+ bytes)* | Sí | Clave criptográfica para firmas de sesión. Docker Compose aborta si está vacía. |
 | `JWT_EXPIRES_IN` | `8h` | Sí | Vigencia máxima de la sesión tras autenticar con CiDi. |
-| `AUTH_MODE` | `cidi` | Sí | Activa el ingreso oficial mediante Ciudadano Digital (CiDi / CiDi Test) con validación obligatoria de Nivel 2. |
+| `AUTH_MODE` | `cidi` o `mock` | Sí | `cidi` activa el ingreso oficial mediante Ciudadano Digital; `mock` habilita el entorno de pruebas local. |
 | `CIDI_ID_APP` | *(provisto por CiDi)* | Sí | Identificador de aplicación asignado por la Provincia. |
 | `CIDI_KEY_APP` | *(provisto por CiDi)* | Sí | Clave secreta institucional de la aplicación en CiDi. |
 | `CIDI_PASSWORD` | *(provisto por CiDi)* | Sí | Contraseña de aplicación en el servidor CiDi. |
-| `CIDI_API_URL` | `https://...` | No | URL del servicio web CiDi. Si se deja vacía, usa el entorno de homologación CiDi Test. |
-| `CIDI_LOGIN_URL` | `https://...` | No | URL de pasarela de login de CiDi. Si se deja vacía, usa el entorno de homologación CiDi Test. |
-| `VOCALES_CUIL` | *(lista separada por comas)* | No | CUILs adicionales habilitados como vocales si aún no figuran en `T_USUARIOS_JUNTA`. |
-| `INTEGRATION_MODE` | `prod` | Sí | Activa la integración productiva en tiempo real con la base de datos Oracle de la Junta de Clasificación. |
-| `DB_USER` | `USR_PORTAL_DOCENTE` | Sí | Usuario de base de datos Oracle para lectura de padrón, catálogo, mapa y LOM. |
+| `CIDI_API_URL` | `https://...` | No | URL del servicio web CiDi oficial o de homologación. |
+| `CIDI_LOGIN_URL` | `https://...` | No | URL de pasarela de login de CiDi. |
+| `ADMINISTRADORES_CUIL`| *(CUILs separados por coma)* | Sí | **Habilita el rol Administrador de la Junta / Usuario de Sistemas** (acceso a Períodos, Asignación, Estadísticas y Auditoría - ADR-038/ADR-041). |
+| `VOCALES_CUIL` | *(CUILs separados por coma)* | No | CUILs adicionales habilitados como vocales si no figuran en las tablas históricas. |
+| `RECLAMOS_HASTA` | `YYYY-MM-DDTHH:MM:SS` | No | Fecha y hora límite para la presentación de reclamos sobre la LOM provisoria (ADR-035). |
+| `INTEGRATION_MODE` | `prod`, `foto` o `mock` | Sí | `prod` conecta en vivo al Oracle de la Junta; `foto` usa dump local del lab; `mock` datos sintéticos. |
+| `DB_USER` | `USR_PORTAL_DOCENTE` | Sí | Usuario de base de datos Oracle para lectura de padrón y catálogo. |
 | `DB_PASSWORD` | *(contraseña segura)* | Sí | Contraseña del usuario Oracle. |
 | `ORACLE_HOST` | `10.250.11.53` | Sí | Dirección IP del servidor Oracle de la Junta. |
 | `ORACLE_PORT` | `1521` | Sí | Puerto TCP del Listener de Oracle. |
-| `ORACLE_SERVICE` | `mt4d` | Sí | Nombre del servicio de base de datos Oracle (`mt4d` / `mt4t`). |
-| `ALCANCE_SQL_PATH` | `/opt/portal-docente/data/alcance/01_alcance_titulo.sql` | Sí | Ruta absoluta del dump en el host. Docker lo monta como solo lectura en `/data/alcance/`. |
-| `PERSISTENCIA` | `postgres` | Sí | Almacena legajos, Formularios C y auditoría en el contenedor `db` (PostgreSQL). |
-| `POSTGRES_DB` | `portal_docente` | Sí | Nombre de la base de datos creada automáticamente en el contenedor `db`. |
-| `POSTGRES_USER` | `portal` | Sí | Usuario administrador de la base PostgreSQL del portal. |
+| `ORACLE_SERVICE` | `mt4d` | Sí | Nombre del servicio Oracle (`mt4d` / `mt4t`). |
+| `ALCANCE_SQL_PATH` | `/opt/portal-docente/data/alcance/01_alcance_titulo.sql` | Sí | Ruta absoluta del dump en el host para el catálogo de títulos. |
+| `PERSISTENCIA` | `postgres` | Sí | Persiste legajos, Formularios C, reclamos y auditoría en PostgreSQL. |
+| `DATABASE_URL` | *(cadena de conexión)* | No | Permite usar PostgreSQL externo o Supabase en lugar del contenedor local `db`. |
+| `POSTGRES_DB` | `portal_docente` | Sí | Nombre de la base de datos creada en el contenedor local `db`. |
+| `POSTGRES_USER` | `portal` | Sí | Usuario administrador de la base PostgreSQL local. |
 | `POSTGRES_PASSWORD`| *(contraseña segura)* | Sí | Contraseña de PostgreSQL (obligatoria en `compose.yaml`). |
 | `ESCRITURA_JUNTA` | `off`, `ensayo` u `on` | Sí | `off` desactiva copia; `ensayo` prueba escrituras en Oracle y hace rollback; `on` confirma. |
 | `JUNTA_BASES_PERMITIDAS`| `MT4D,MT4T` | Sí | Lista blanca de servicios Oracle donde se autoriza la escritura espejo. |
-| `INSCRIPCION_ABIERTA`| `true` o `false` | Sí | Habilita o cierra la ventana de presentación del Formulario C. |
-| `GROQ_API_KEY` | *(clave API opcional)* | No | Habilita el modelo LLM en el Asistente Virtual; si está vacía, usa el motor local determinístico. |
+| `INSCRIPCION_ABIERTA`| `true` o `false` | Sí | Habilita o cierra la ventana de presentación del Formulario C (modo manual). |
+| `GROQ_API_KEY` | *(clave API opcional)* | No | Clave de Groq para el modelo LLM del Asistente Virtual. |
 
 ---
 
 ### 3.7. Operación, Monitoreo y Comandos Docker de Mantenimiento
 
-Todas las tareas operativas cotidianas se ejecutan desde `/opt/portal-docente/src`. A continuación se detalla cada comando y su efecto sobre los contenedores:
-
-| Comando Docker | Explicación de lo que Ejecuta | Cuándo Utilizarlo |
-| :--- | :--- | :--- |
-| `docker compose -f compose.yaml ps` | Muestra el listado de contenedores del proyecto, su estado (`Up`, `Restarting`, `Exited`), el resultado de las sondas de salud (`healthy` / `unhealthy`) y los puertos expuestos. | Verificación rápida del estado del servidor. |
-| `docker stats --no-stream` | Toma una instantánea en vivo del consumo de CPU, memoria RAM (frente al límite configurado de `128M`/`512M`/`256M`), tráfico de red y lecturas/escrituras de disco de cada contenedor. | Monitoreo de uso de recursos durante picos de inscripción. |
-| `docker compose -f compose.yaml logs -f backend` | Muestra en tiempo real (`-f`, *follow*) la salida estándar del contenedor `backend` (arranque de adaptadores Oracle, peticiones HTTP y errores de integración). | Diagnóstico ante fallos de conexión con Oracle o CiDi. |
-| `docker compose -f compose.yaml logs -f frontend` | Muestra en tiempo real los registros de acceso y errores del proxy Nginx en el contenedor `frontend`. | Diagnóstico de tráfico web entrante o códigos HTTP 502/413. |
-| `docker compose -f compose.yaml restart backend` | Reinicia únicamente el contenedor de la API Node.js sin detener Nginx ni PostgreSQL. Al iniciar vuelve a cargar las vistas de Oracle. | Tras reconectar la VPN del host o ante un corte temporal con Oracle. |
-| `docker compose -f compose.yaml up -d --wait` | Compara el archivo `.env` y `compose.yaml` contra los contenedores en ejecución y **recrea únicamente aquellos cuya configuración haya cambiado**, esperando los health checks. | Tras modificar una variable en `.env` (ej.: cambiar `INSCRIPCION_ABIERTA`). |
-| `docker compose -f compose.yaml stop` | Envía la señal `SIGTERM` para detener ordenadamente los 3 contenedores respetando los tiempos de gracia (`stop_grace_period`), sin borrar contenedores ni volúmenes. | Mantenimiento programado del servidor físico. |
-| `docker compose -f compose.yaml start` | Vuelve a encender los contenedores previamente detenidos con `stop`. | Reanudación tras mantenimiento del servidor. |
-| `docker compose -f compose.yaml down` | Detiene y elimina los contenedores y las redes virtuales, pero **conserva intactos los volúmenes de datos (`portal_docente_db` y `portal_docente_data`)**. | Limpieza de contenedores antes de una actualización mayor de versión. |
-
 #### 3.7.1. Sondas de Salud Automatizadas (`HEALTHCHECK`)
-El archivo `compose.yaml` mantiene tres sondas automáticas que vigilan continuamente cada servicio:
-- **Contenedor `db` (PostgreSQL):** Ejecuta cada `10s` el comando `pg_isready -U $POSTGRES_USER -d $POSTGRES_DB` (con 5 reintentos).
-- **Contenedor `backend` (API Express):** Ejecuta cada `30s` (con un período de gracia inicial `start_period: 60s` para dar tiempo a la carga por red desde Oracle) una petición HTTP interna a `http://127.0.0.1:3000/api/health`.
-- **Contenedor `frontend` (Nginx):** Ejecuta cada `30s` el comando `wget --quiet --tries=1 --spider http://127.0.0.1:8080/healthz`.
-
-#### 3.7.2. Consulta de la Bitácora de Auditoría Inmutable en PostgreSQL
-Para auditar los ingresos al portal y las modificaciones sobre legajos, Formulario C o dictámenes de Junta, el administrador puede consultar las tablas `APPEND-ONLY` dentro del contenedor `db`:
-
+Tanto el contenedor `backend` como el contenedor `db` implementan pruebas de salud periódicas integradas:
 ```bash
-# 1. Consultar los últimos 20 eventos de acceso e inicio de sesión mediante Ciudadano Digital (CiDi)
-docker compose -f compose.yaml exec db psql -U portal -d portal_docente \
-  -c "SELECT id, fecha, cuil, rol, evento, resultado FROM auditoria_acceso ORDER BY id DESC LIMIT 20;"
-
-# 2. Consultar las últimas 20 modificaciones sobre legajos, Formulario C y revisiones de Junta
-docker compose -f compose.yaml exec db psql -U portal -d portal_docente \
-  -c "SELECT id, fecha, cuil_actor, rol_actor, ambito, metodo, ruta, estado_http FROM auditoria_cambio ORDER BY id DESC LIMIT 20;"
+# Ver estado de salud de todos los contenedores
+docker compose ps
 ```
-*(Nota técnica: Ambas tablas poseen triggers en PostgreSQL que rechazan cualquier sentencia `UPDATE` o `DELETE`, garantizando la trazabilidad forense de todo lo actuado).*
+Los tres servicios deben reportar estado `healthy` o `running`.
+
+#### 3.7.2. Monitoreo del Log Inmutable de Auditoría
+El sistema ofrece dos vías complementarias para monitorear los accesos y modificaciones:
+1. **Vía Interfaz Web (`Junta → Auditoría`):** Exclusiva para usuarios en `ADMINISTRADORES_CUIL`, con filtros combinados por CUIL, fecha y operación, y visor de diferencias JSON.
+2. **Vía Línea de Comandos (Consola del Servidor):**
+   ```bash
+   # Inspeccionar los últimos cambios registrados en tiempo real
+   docker compose exec -T db psql -U portal -d portal_docente -c "
+   SELECT timestamp, cuil, operacion, tabla_afectada, registro_id 
+   FROM auditoria_cambio 
+   ORDER BY timestamp DESC LIMIT 10;"
+   ```
 
 ---
 
 ### 3.8. Gestión de Backups y Restauración
 
 #### 3.8.1. Política de Copias de Seguridad
-- **Frecuencia:** Volcado automático diario a las 03:00 AM (y copias adicionales antes del cierre de convocatorias anuales).
-- **Alcance:**
-  1. Volumen de base de datos PostgreSQL (`portal_docente` en el contenedor `db`).
-  2. Archivo de configuración y secretos `/opt/portal-docente/src/.env`.
-  3. Catálogo maestro `/opt/portal-docente/data/alcance/01_alcance_titulo.sql`.
+- **Frecuencia:** Copia diaria automatizada mediante cron job a las 02:00 hs.
+- **Retención:** 30 días locales y replicación a almacenamiento de contingencia provincial.
+- **Inmutabilidad:** Las tablas de auditoría se respaldan con checksum SHA-256 para prevenir alteraciones.
 
 #### 3.8.2. Script Automatizado de Backup (`/opt/scripts/backup-portal.sh`)
 ```bash
 #!/bin/bash
-set -e
-
-BACKUP_DIR="/var/backups/portal-docente"
+set -euo pipefail
+BACKUP_DIR="/opt/backups/portal-docente"
 DATE=$(date +%Y%m%d_%H%M%S)
-mkdir -p "$BACKUP_DIR"
+mkdir -p "${BACKUP_DIR}"
 
-# 1. Volcado SQL en caliente desde el contenedor db comprimido con gzip
-# El flag -T desactiva la asignación de pseudo-TTY para que pueda correr en cron
-docker compose -f /opt/portal-docente/src/compose.yaml exec -T db \
-  pg_dump -U portal portal_docente | gzip > "$BACKUP_DIR/db_portal_${DATE}.sql.gz"
+# 1. Volcar la base de datos PostgreSQL completa
+docker compose -f /opt/portal-docente/src/compose.yaml exec -T db   pg_dump -U portal -d portal_docente -F c -b -v -f "/tmp/backup_${DATE}.dump"
 
-# 2. Resguardo del archivo de entorno (.env)
-cp /opt/portal-docente/src/.env "$BACKUP_DIR/env_${DATE}.bak"
-chmod 600 "$BACKUP_DIR/env_${DATE}.bak"
+# 2. Mover el dump al host y comprimir
+docker compose -f /opt/portal-docente/src/compose.yaml cp "db:/tmp/backup_${DATE}.dump" "${BACKUP_DIR}/"
+gzip "${BACKUP_DIR}/backup_${DATE}.dump"
 
-# 3. Política de retención: conservar los últimos 30 días
-find "$BACKUP_DIR" -type f -mtime +30 -delete
+# 3. Generar hash de integridad SHA-256
+sha256sum "${BACKUP_DIR}/backup_${DATE}.dump.gz" > "${BACKUP_DIR}/backup_${DATE}.dump.gz.sha256"
 
-echo "Backup completado exitosamente: $BACKUP_DIR/db_portal_${DATE}.sql.gz"
-```
-
-Dar permisos de ejecución y programar en `crontab`:
-```bash
-sudo chmod +x /opt/scripts/backup-portal.sh
-# Línea en crontab (ejecución diaria a las 03:00 AM):
-# 0 3 * * * /opt/scripts/backup-portal.sh >> /var/log/backup-portal.log 2>&1
+# 4. Eliminar copias con más de 30 días
+find "${BACKUP_DIR}" -type f -name "*.dump.gz" -mtime +30 -delete
 ```
 
 #### 3.8.3. Procedimiento de Restauración ante Contingencias
-1. Detener el contenedor `backend` para evitar escrituras durante la restauración:
-   ```bash
-   docker compose -f /opt/portal-docente/src/compose.yaml stop backend
-   ```
-2. Descomprimir e inyectar el respaldo en el contenedor `db`:
-   ```bash
-   gunzip -c /var/backups/portal-docente/db_portal_YYYYMMDD_HHMMSS.sql.gz | \
-     docker compose -f /opt/portal-docente/src/compose.yaml exec -T db psql -U portal -d portal_docente
-   ```
-3. Volver a iniciar el contenedor `backend` y comprobar `/api/health`:
-   ```bash
-   docker compose -f /opt/portal-docente/src/compose.yaml start backend
-   curl -s http://localhost:8080/api/health | jq .
-   ```
+```bash
+# Restaurar la base PostgreSQL desde un dump específico
+gunzip -c /opt/backups/portal-docente/backup_YYYYMMDD_HHMMSS.dump.gz > /tmp/restore.dump
+docker compose cp /tmp/restore.dump db:/tmp/restore.dump
+docker compose exec -T db pg_restore -U portal -d portal_docente -c -v /tmp/restore.dump
+```
 
 ---
 
 ### 3.9. Resolución de Incidentes Comunes de Infraestructura
 
-| Síntoma Observado | Causa Raíz Probable | Acción Correctiva Recomendada |
+| Síntoma / Error | Causa Probable | Comando o Procedimiento de Resolución |
 | :--- | :--- | :--- |
-| El contenedor `backend` queda en `unhealthy` o reiniciándose al hacer `up`. | El servidor no llega al puerto `1521` de Oracle o las credenciales `DB_USER` / `DB_PASSWORD` son incorrectas. | Ejecutar `docker compose -f compose.yaml logs backend`. Probar conectividad con `docker run --rm busybox:1.36 nc -zv -w 5 10.250.11.53 1521` y verificar tanto el enlace de red/VPN del servidor como las credenciales `DB_USER` y `DB_PASSWORD` en `.env`. |
-| `/api/health` muestra `persistencia.conError: true` o `db` no arranca. | Contraseña `POSTGRES_PASSWORD` cambiada sobre un volumen existente o falta de espacio en disco. | Revisar `docker compose -f compose.yaml logs db` y comprobar que `POSTGRES_PASSWORD` en `.env` coincida con el usuario con que se inicializó el volumen `portal_docente_db`. |
-| `/api/health` informa `"sourceObject": "VT_MAT_GRADO_X_TITULO"` en lugar de `"ALCANCE_SQL_PATH"`. | `ALCANCE_SQL_PATH` está vacío en `.env` o la ruta no existe en el servidor host. | Verificar que `/opt/portal-docente/data/alcance/01_alcance_titulo.sql` exista, definir `ALCANCE_SQL_PATH` en `.env` y recrear con `docker compose -f compose.yaml up -d --wait`. |
-| El ingreso con CiDi (`authMode: "cidi"`) falla al retornar al portal. | El portal no está publicado bajo un dominio `*.cba.gov.ar` o la URL de callback no está registrada en CiDi. | Publicar detrás del proxy oficial `*.cba.gov.ar` y registrar `https://<dominio>/api/auth/cidi/retorno` en CiDi. |
-| Error `Bind for 0.0.0.0:8080 failed: port is already allocated`. | Otro proceso en el servidor está ocupando el puerto `8080`. | Cambiar `FRONTEND_PORT=8085` en el archivo `.env` y ejecutar `docker compose -f compose.yaml up -d --wait`. |
+| **`JWT_SECRET es obligatorio`** | Falta definir `JWT_SECRET` en `.env`. | Generar secreto con `openssl rand -base64 48` y agregarlo al `.env`. |
+| **Contenedor `db` en estado `unhealthy`** | Fallo de conexión en socket PostgreSQL. | Revisar logs con `docker compose logs db --tail 50`. |
+| **Error `ORA-12170: TNS Connect timeout`** | Pérdida de conectividad con Oracle Junta. | Comprobar enlace de red y VPN: `nc -zv 10.250.11.53 1521`. |
+| **Error al cargar catálogo de títulos** | Archivo SQL no encontrado en la ruta indicada. | Verificar que `ALCANCE_SQL_PATH` apunte a un archivo accesible en el host. |
+| **Usuario sin menú Junta tras login** | CUIL no registrado en `ADMINISTRADORES_CUIL`. | Añadir el CUIL (11 dígitos) en `ADMINISTRADORES_CUIL` del `.env` y reiniciar backend. |
 
 ---
-
 ## 4. ANÁLISIS DE IMPACTO AMBIENTAL
 
 ### 4.1. Propósito y Alcance
-- **Para qué:** Evalúa y cuantifica el impacto ambiental derivado de la implementación de la plataforma **Gestión Integral Docente (GID)** sobre el volumen real de la convocatoria anual (**67.700 inscripciones registradas el último año**), contrastando el consumo energético de la infraestructura de software frente a los beneficios ecológicos y operativos de **dar continuidad y profundizar el proceso de despapelización** —tanto en el uso como en el posterior almacenamiento físico documental de docentes y vocales— y en la reducción de traslados presenciales.
+- **Para qué:** Evalúa y cuantifica el impacto ambiental derivado de la implementación de la plataforma **Gestión Integral Docente (GID)** sobre el volumen real de la convocatoria anual (**67.700 inscripciones registradas**), contrastando el consumo energético de la infraestructura de software frente a los beneficios ecológicos y operativos de **dar continuidad y profundizar el proceso de despapelización provincial** —reduciendo drásticamente tanto el uso diario de papel como la acumulación física documental a largo plazo en depósitos de la Junta— y la supresión masiva de traslados presenciales.
 - **Para quién:** Cátedra de Proyecto Final, autoridades educativas, comunidad académica y profesionales de ingeniería interesados en el diseño de software sostenible (*Green Computing*).
 
 ---
 
 ### 4.2. Estimación del Consumo Energético y Huella de Carbono (67.700 Inscripciones)
 
-Para evaluar el impacto directo del sistema sobre el medio ambiente, se modeló el ciclo de vida operativo del software considerando dos fuentes de consumo: la infraestructura de servidores gubernamentales (*frontend Nginx, backend Express y base de datos PostgreSQL*) y la carga inducida en los dispositivos de los usuarios finales (*docentes y vocales*).
+Para evaluar el impacto directo del sistema sobre el medio ambiente, se modeló el ciclo de vida operativo del software considerando dos fuentes de consumo: la infraestructura de servidores gubernamentales (*frontend Nginx, backend Node.js y base de datos PostgreSQL*) y la carga inducida en los dispositivos de los usuarios finales (*docentes, vocales y administradores*).
 
 #### 4.2.1. Cómputo e Infraestructura de Servidores
 El entorno productivo de GID opera sobre un servidor virtualizado en el Centro de Datos Provincial (o infraestructura Cloud) con dimensionamiento de 8 vCPUs y 16 GB de RAM:
 - **Potencia Media del Servidor Asignado:** Estimada en **200 W**.  
-  *(Fuente / Metodología de cálculo: Consumo promedio de un servidor virtualizado de 8 vCPUs de ~140 W multiplicado por el factor de eficiencia de infraestructura PUE [Power Usage Effectiveness] de 1,4 del centro de datos provincial, según estándares del Uptime Institute y The Green Grid).*
+  *(Consumo promedio de un servidor virtualizado de 8 vCPUs de ~140 W multiplicado por el factor de eficiencia de infraestructura PUE [Power Usage Effectiveness] de 1,4 del centro de datos provincial, según estándares del Uptime Institute y The Green Grid).*
 - **Régimen de Operación:** Continuo durante todo el año (24 horas al día, 365 días al año):  
-  $$\text{Consumo Anual de Cómputo} = 0{,}200\text{ kW} \times 24\text{ h/día} \times 365\text{ días} = \mathbf{1.752\text{ kWh/año}}$$  
-  *(Cálculo: $200\text{ W} / 1.000 = 0{,}2\text{ kW} \times 8.760\text{ horas anuales} = 1.752\text{ kWh}$).*
+  $$\text{Consumo Anual de Cómputo} = 0{,}200\text{ kW} \times 24\text{ h/día} \times 365\text{ días} = \mathbf{1.752\text{ kWh/año}}$$
 - **Factor de Emisión Eléctrica:** **$0{,}330\text{ kg CO}_2\text{e / kWh}$**.  
   *(Fuente oficial: Secretaría de Energía de la Nación y CAMMESA [Compañía Administradora del Mercado Mayorista Eléctrico], correspondiente al factor de emisión promedio de la matriz energética del Sistema Argentino de Interconexión - SADI).*
 - **Emisión Anual de la Infraestructura de Servidores:**  
-  $$\text{Huella Servidores} = 1.752\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 578{,}16\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}58\text{ t CO}_2\text{e/año}}$$  
-  *(Cálculo: Multiplicación directa del consumo eléctrico anual del servidor por el factor de intensidad de carbono del SADI).*
+  $$\text{Huella Servidores} = 1.752\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 578{,}16\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}58\text{ t CO}_2\text{e/año}}$$
 
 #### 4.2.2. Consumo en Dispositivos de Usuarios Finales (67.700 Inscripciones Anuales)
-En el último período anual se registraron **67.700 inscripciones** en el nivel secundario de la Provincia de Córdoba, cifra real muy cercana a la proyección preliminar de 60.000 usuarios planteada al inicio del proyecto:  
-*(Fuente / Justificación: Registros de la última convocatoria anual de la Junta de Clasificación Secundaria y Anuario Estadístico del Ministerio de Educación de la Provincia de Córdoba, que abarca tanto a educadores en actividad en las más de 850 escuelas medias provinciales como a graduados y aspirantes que se postulan a interinatos, suplencias y titularizaciones).*
-
-Con el nuevo portal, la interacción anual se estima en un promedio de **4 sesiones de 10 minutos (40 minutos totales al año por inscripción)** distribuidos entre actualización de legajo, consulta de puntaje, exploración de vacantes en mapa/simulador y confección del Formulario C:
-- **Potencia promedio por dispositivo (laptop / smartphone):** **15 W**.  
-  *(Fuente: Estándar de la Agencia Internacional de la Energía [IEA] para consumo mixto ponderado de dispositivos personales: smartphones 3-5 W, computadoras portátiles 20-30 W).*
+En la última convocatoria anual se registraron **67.700 inscripciones** en el nivel secundario de la Provincia de Córdoba:
+- **Tiempo de uso estimado:** Con el nuevo portal, la interacción anual se estima en un promedio de **4 sesiones de 10 minutos (40 minutos totales al año por inscripción)** distribuidos entre actualización de legajo, consulta de puntaje, exploración de vacantes en mapa/simulador y confección del Formulario C.
+- **Potencia promedio por dispositivo (laptop / smartphone):** **15 W** (Estándar de la Agencia Internacional de la Energía [IEA] para consumo mixto ponderado de dispositivos personales).
 - **Consumo energético por inscripción anual:**  
-  $$15\text{ W} \times \left(\frac{40}{60}\text{ h}\right) = \mathbf{0{,}010\text{ kWh/inscripción/año}}$$  
-  *(Cálculo: 15 vatios consumidos durante 0,667 horas al año).*
+  $$15\text{ W} \times \left(\frac{40}{60}\text{ h}\right) = \mathbf{0{,}010\text{ kWh/inscripción/año}}$$
 - **Consumo agregado para las 67.700 inscripciones:**  
   $$67.700 \times 0{,}010\text{ kWh} = \mathbf{677\text{ kWh/año}}$$
 - **Emisión derivada de los dispositivos:**  
-  $$677\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 223{,}41\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}22\text{ t CO}_2\text{e/año}}$$  
-  *(Cálculo: Consumo eléctrico de las 67.700 inscripciones multiplicado por el factor de CAMMESA).*
+  $$677\text{ kWh/año} \times 0{,}330\text{ kg CO}_2\text{e/kWh} = 223{,}41\text{ kg CO}_2\text{e/año} \approx \mathbf{0{,}22\text{ t CO}_2\text{e/año}}$$
 
 #### 4.2.3. Huella de Carbono Operativa Total del Sistema
-Sumando ambos componentes, el costo ambiental directo que demanda mantener la plataforma GID operativa para las **67.700 inscripciones** provinciales es:  
-$$\text{Huella Total GID} = 0{,}58\text{ t CO}_2\text{e} + 0{,}22\text{ t CO}_2\text{e} = \mathbf{0{,}80\text{ toneladas de CO}_2\text{e / año}} \quad (801{,}57\text{ kg CO}_2\text{e/año})$$
+Sumando los requerimientos energéticos de la infraestructura central y el uso de los usuarios:
+$$\text{Huella Anual Total GID} = 0{,}58\text{ t CO}_2\text{e (servidores)} + 0{,}22\text{ t CO}_2\text{e (clientes)} = \mathbf{0{,}80\text{ t CO}_2\text{e/año}}$$
+
+Un costo ambiental sumamente reducido para dar soporte a todo el padrón docente provincial de nivel medio durante los 365 días del año.
 
 ---
 
 ### 4.3. Alternativas de Diseño Evaluadas y Prácticas de Ingeniería Verde
 
-Durante la concepción y desarrollo del proyecto, el equipo adoptó principios de **Ingeniería de Software Sostenible (Green Software Engineering)** orientados a minimizar el desperdicio de ciclos de CPU, memoria y transferencia de red:
+Para garantizar que el software consuma la menor cantidad de energía posible, se aplicaron prácticas de *Green Computing* en toda la arquitectura:
 
-```mermaid
-flowchart TD
-    subgraph practicas ["Prácticas de Diseño Verde en GID"]
-        P1[Monolito Modular Ligero en Contenedores Alpine]
-        P2[Caché en Memoria de Catálogos Masivos: 74k alcances]
-        P3[Compilación SPA con Compresión y Cero Cómputo Ocioso]
-        P4[Cierre de Procesos y Supresión de Polling Continuo]
-    end
-
-    subgraph reduccion ["Impacto Técnico Obtenido"]
-        P1 --> R1[Menor consumo de RAM: -85% vs microservicios]
-        P2 --> R2[Eliminación del 90% de consultas SQL repetitivas]
-        P3 --> R3[Mínimo tráfico de red y menor procesamiento en servidor]
-        P4 --> R4[Bases de datos en reposo sin saturación de I/O]
-    end
-```
-
-1. **Monolito Modular vs Microservicios Distribuidos (ADR-004 y ADR-021):**
-   - *Alternativa evaluada:* Desplegar un clúster de microservicios independientes (Autenticación, Legajo, LOM, Mapas, Formulario C), cada uno con un contenedor Node.js y capa de red intermedia.
-   - *Decisión y beneficio ambiental:* Se descartó por el elevado costo energético derivado de mantener múltiples runtimes en memoria de manera ociosa. La adopción de un **Monolito Modular** en un único contenedor ligero (`node:22-alpine`) redujo la memoria base de **2.400 MB (estimada en microservicios) a tan solo 350 MB**  
-     *(Fuente / Medición: Telemetría de Docker `docker stats` en reposo: API monolito modular ocupa 85 MB base + 150 MB buffers vs 5 contenedores independientes de ~450 MB c/u)*, lo que representa un **~85% de reducción de memoria física requerida** y suprime la sobrecarga de CPU en serialización JSON interred.
-2. **Caché en Memoria de Catálogos de Alta Densidad (ADR-009 y ADR-015):**
-   - El catálogo legal de la Junta consta de **74.765 alcances de títulos**  
-     *(Fuente: Conteo exacto de registros maestros en el archivo oficial `01_alcance_titulo.sql` del Ministerio)* y más de **1.000 establecimientos educativos**.
-   - En lugar de ejecutar consultas relacionales a la base de datos de la Junta por cada búsqueda de materia en el Formulario C, el servidor realiza un parseo optimizado en estructuras binarias indexadas al iniciar (`parse-titulos-alcances-sql`). Esto suprimió más del **90% de las consultas SQL recurrentes**, evitando el sobrecalentamiento y la saturación de I/O de los clústeres de base de datos corporativos de la Provincia.
-3. **Optimización de Empaquetado Frontend (SPA sin cómputo redundante):**
-   - Se descartó el renderizado dinámico en servidor (SSR) continuo en producción en favor de un empaquetado optimizado servido como archivos estáticos mediante Nginx no privilegiado con compresión precalculada. El servidor web atiende las solicitudes estáticas con un consumo de CPU inferior al 1%, delegando la renderización de vistas al cliente.
-4. **Supresión de Tareas de Sondeo (Polling) y Triggers Reactivos:**
-   - La arquitectura evita completamente los scripts de sondeo continuo en segundo plano (*polling*). Las sincronizaciones entre PostgreSQL y las tablas de la Junta se disparan de forma estrictamente reactiva ante la confirmación efectiva de un trámite por parte del usuario.
+1. **Contenedorización Minimalista sobre Alpine Linux:**
+   - Reducción drástica del tamaño de las imágenes Docker (backend ~180 MB y frontend ~25 MB frente a imágenes estándar de Node/Ubuntu de más de 1 GB).
+   - Menor transferencia de red en despliegues y menor consumo de memoria RAM y CPU en el servidor.
+2. **Arquitectura SPA (Single Page Application) con Caché Estático:**
+   - La aplicación Angular se compila en archivos estáticos que Nginx sirve directamente.
+   - El navegador del usuario descarga los recursos una sola vez y los almacena en caché local, evitando solicitudes redundantes al servidor.
+3. **Indexación en Memoria del Catálogo de Títulos:**
+   - La tabla de más de 74.000 combinaciones de incumbencias se estructura en memoria al iniciar el backend.
+   - Cada validación de alcance en el Formulario C se resuelve en microsegundos sin generar lecturas continuas a disco ni sobrecargar el motor de base de datos.
+4. **Persistencia Híbrida Eficiente y Log Append-Only:**
+   - PostgreSQL opera con inserciones directas y consultas indexadas por CUIL, evitando escaneos secuenciales costosos.
 
 ---
 
 ### 4.4. Beneficios Ambientales Directos: Continuidad de la Despapelización, Almacenamiento Físico y Reducción de Traslados
 
-El impacto ambiental positivo de GID no parte de la premisa irreal de que el sistema educativo provincial careciera por completo de herramientas digitales o de que esta plataforma venga a "inaugurar desde cero" la eliminación total del papel. Por el contrario, el Ministerio de Educación y la Junta de Clasificación ya habían iniciado un camino previo de digitalización parcial; el valor de **GID consiste en dar continuidad, profundizar y consolidar ese proceso de despapelización**, atacando los puntos ciegos donde el papel seguía utilizándose y acumulándose tanto en el trabajo interno de los **vocales de Junta** como en los **documentos que imprimían los propios docentes**.
+El impacto ambiental positivo de GID no parte de la premisa irreal de que el sistema provincial careciera por completo de antecedentes digitales. Por el contrario, la Provincia de Córdoba viene desarrollando un proceso progresivo de modernización y expediente digital; el aporte fundamental de **GID consiste en dar continuidad, profundizar y consolidar definitivamente la despapelización del régimen docente**, atacando dos problemáticas ambientales y logísticas clave: el **uso diario de papel** y la **acumulación física documental a largo plazo**.
 
-#### 4.4.1. Continuidad de la Despapelización y el Problema del Almacenamiento Posterior del Papel
+#### 4.4.1. Continuidad de la Despapelización y Supresión del Almacenamiento Físico Acumulativo
 
-Un aspecto central que suele omitirse al analizar el uso de papel en la administración pública es que **el problema ambiental y logístico del papel no termina cuando se imprime la hoja, sino que se agrava en su etapa posterior: el guarda y almacenamiento físico a largo plazo**:
+1. **Reducción del Uso Diario de Papel en Docentes y Funcionarios:**
+   - **En el aspirante:** Históricamente, aun mediando formularios web preliminares, la falta de comprobantes digitales seguros o de validación de alcances preventiva impulsaba a los docentes a imprimir borradores de resguardo, copias de analíticos, listados de escuelas para cruces manuales y grillas del Decreto 257/19 para calcular sus puntajes a mano. Con GID, el comprobante PDF firmado con hash inmutable, el validador en tiempo real y el desglose transparente de grilla eliminan por completo la necesidad de impresiones preventivas.
+   - **En los vocales de Junta:** En los procesos de fiscalización, los evaluadores utilizaban planillas impresas de cotejo, minutas de observación y borradores de actas. La incorporación de la bandeja digital con visor documental integrado (*Lupa*), dictámenes tipificados y log inmutable de auditoría erradica el circuito de papel interno en las vocalías.
 
-1. **El Costo Oculto del Almacenamiento Físico Post-Trámite:**
-   - Por normativas de responsabilidad administrativa y plazos legales de guarda documental, toda constancia impresa, planilla de control de vocalía, recurso de reconsideración en papel o copia física de antecedente objetado no puede desecharse tras la convocatoria: debe **foliarse, encarpetarse, rotularse en cajas y almacenarse durante años en depósitos y archivos físicos de la Junta**.
-   - Con una escala de **67.700 inscripciones anuales**, incluso un remanente pequeño de hojas impresas por trámite genera cientos de miles de folios cada año que se acumulan de forma pasiva sobre los de ciclos anteriores. Mantener esos archivos físicos conlleva una huella ambiental y edilicia permanente: ocupación de metros cuadrados de oficinas públicas, fabricación de estanterías metálicas y cajas de cartón, consumo eléctrico continuo en iluminación, ventilación y control de humedad, y la aplicación periódica de productos químicos de fumigación y desinsectación para evitar el biodeterioro del papel o riesgos de incendio.
-2. **Mejores Herramientas para Evitar los Documentos que Imprimían los Propios Docentes:**
-   - Aun cuando existían formularios web preliminares, la falta de herramientas de validación preventiva y de comprobantes con trazabilidad clara hacía que **los propios docentes imprimieran numerosos documentos por su cuenta**:
-     - Impresión por duplicado de pantallas y borradores del Formulario C como resguardo personal ante el temor a reclamos o pérdidas de datos.
-     - Impresión de listados extensos del padrón de escuelas y grillas de códigos de asignaturas para cruzar manualmente a qué materias les daba alcance su título.
-     - Impresión de grillas del Decreto 257/19 para calcular a mano su puntaje estimado y copias en papel de certificados o resoluciones para llevar a consultas y reclamos de revisión de LOM.
-   - GID elimina la necesidad de estas impresiones domésticas y particulares brindando al docente el **comprobante digital PDF sellado e inmutable**, el **Validador de Alcance de Títulos en vivo**, el **desglose transparente del puntaje artículo por artículo**, el **Mapa Territorial con Semáforo LOM** y el **Simulador de Carrera**.
-3. **Más y Mejores Herramientas Digitales para los Vocales de la Junta:**
-   - En la operatoria de evaluación, los vocales carecían de una bandeja integrada con visor y trazabilidad forense, lo que derivaba en la impresión de **planillas internas de control de aspirantes por escuela, hojas de ruta para tildar antecedentes revisados, minutas de dictámenes de rechazo y borradores de actas escolares** que luego engrosaban los armarios de la Junta.
-   - GID incorpora la **Bandeja de Vocal con aislamiento jurisdiccional**, el visor documental integrado (*Lupa*) para inspeccionar certificados PDF en pantalla sin imprimirlos, el registro digital de dictámenes con motivo tipificado obligatorio y la **bitácora de auditoría inmutable (`APPEND-ONLY` en PostgreSQL)**. De este modo, todo el respaldo legal que antes requería archivo en papel queda resguardado en pocos megabytes dentro de volúmenes digitales auditables.
-
-**Cuantificación del Ahorro Incremental de Papel y Espacio de Archivo (sobre 67.700 Inscripciones):**
-- En el proceso histórico íntegramente físico (~25 hojas por carpeta), las 67.700 inscripciones habrían demandado $1.692.500\text{ hojas anuales}$ ($3.385\text{ resmas}$).
-- Evaluando de forma realista y conservadora **únicamente el remanente de papel que GID viene a erradicar en esta nueva etapa de continuidad de la despapelización** —estimado en un promedio de **5 hojas por inscripción** entre comprobantes/borradores que imprimía el propio docente y planillas/actas operativas de los vocales—:
-  $$67.700\text{ inscripciones} \times 5\text{ hojas} = \mathbf{338.500\text{ hojas de papel al año}} \quad (\approx 677\text{ resmas de 500 hojas})$$
-
-**Impacto en Almacenamiento Físico y Recursos Naturales Preservados por este Avance:**
-- **Volumen físico de archivo evitado: ~34 metros lineales de estanterías y ~1,7 toneladas de papel por año.**  
-  *(Cálculo de almacenamiento: 1 resma de 500 hojas de 80 g/m² tiene un espesor de ~5 cm y pesa ~2,5 kg. Las 677 resmas anuales equivalen a una columna compacta de papel de **$33{,}85\text{ metros de altura}$** [el equivalente a un edificio de 11 pisos de hojas apiladas cada año] y **$1.692{,}5\text{ kg}$** de carga física que dejan de archivarse, conservarse y fumigarse en dependencias del Ministerio).*
-- **Árboles preservados: ~40 árboles maduros al año** en esta etapa incremental *(sobre un total de ~199 árboles/año considerando el ciclo completo de despapelización frente al legajo histórico de 25 hojas)*.  
-  *(Fuente / Coeficiente: Environmental Paper Network [EPN] y TAPPI: 1 árbol adulto rinde 17 resmas = **8.500 hojas por árbol**. Cálculo incremental: $338.500 / 8.500 = \mathbf{39{,}82\text{ árboles}}$).*
-- **Ahorro hídrico: 3.385.000 litros de agua potable al año** *(~16,9 millones de litros/año frente al proceso histórico total)*.  
-  *(Fuente / Coeficiente: Water Footprint Network [UNESCO-IHE]: ~10 litros de agua en el ciclo de vida por cada hoja de 80 g. Cálculo incremental: $338.500\text{ hojas} \times 10\text{ L} = \mathbf{3.385.000\text{ litros}}$).*
-- **Emisiones de ciclo de vida del papel evitadas: 1.692,5 kg CO₂e / año ($\approx 1{,}69\text{ t CO}_2\text{e/año}$)** *(sobre $8{,}46\text{ t CO}_2\text{e/año}$ respecto al proceso histórico completo)*.  
-  *(Fuente / Coeficiente: Modelo WARM [Waste Reduction Model] de la EPA: **$0{,}005\text{ kg CO}_2\text{e por hoja}$** incluyendo pulpa, blanqueo, transporte, energía de impresión, tóner y disposición final. Cálculo: $338.500 \times 0{,}005 = \mathbf{1.692{,}5\text{ kg CO}_2\text{e}}$).*
-
----
+2. **Mitigación Crítica del Almacenamiento y Archivo Físico a Largo Plazo:**
+   - El mayor impacto ambiental del papel en la administración pública suele invisibilizarse: **el almacenamiento documental posterior**. Por imperio legal de los plazos de guarda administrativa, los expedientes, actas y constancias en papel no pueden eliminarse al término del ciclo; deben encuadernarse, rotularse en cajas y **archivarse físicamente durante años en depósitos del Ministerio y de la Junta**.
+   - Con un volumen de **67.700 trámites anuales**, cada ciclo sin digitalización integral generaba toneladas de expedientes físicos que se sumaban acumulativamente a los depósitos existentes.
+   - Mantener esos archivos físicos conlleva una severa huella ambiental permanente:
+     - Ocupación extensiva de metros cuadrados en dependencias públicas.
+     - Fabricación continua de biblioratos, cajas de archivo y estanterías metálicas.
+     - Consumo eléctrico permanente en iluminación, ventilación forzada y climatización para control de humedad.
+     - Aplicación periódica de insecticidas y productos químicos de fumigación para prevenir el biodeterioro del papel y el riesgo de incendio.
+   - **Beneficio Estructural:** Al persistir los legajos, dictámenes, inscripciones y auditoría en esquemas relacionales seguros (PostgreSQL / Supabase y Oracle), GID frena el crecimiento acumulativo del archivo físico papel, transformando cientos de biblioratos anuales en apenas unos pocos megabytes de almacenamiento digital.
 
 #### 4.4.2. Reducción Masiva de Emisiones por Transporte (Traslados y Reclamos Evitados)
-Sobre el universo de **67.700 inscripciones anuales**, al no contarse previamente con un validador de alcance de títulos en tiempo real, ni con un desglose analítico del Decreto 257/19 ni presentación digital de reclamos con seguimiento, miles de docentes del interior provincial debían trasladarse hacia Córdoba Capital o cabeceras de inspección para realizar consultas, subsanar observaciones o interponer reclamos presenciales por puntajes de LOM:
-- **Inscripciones de docentes que evitaban o reducen traslados:** Estimadas conservadoramente en **25.000 desplazamientos anuales del interior provincial** *(equivalentes al ~37% de las 67.700 inscripciones anuales)*.  
-  *(Fuente / Justificación: Distribución geográfica del Ministerio de Educación: el interior provincial concentra más del 45% de los establecimientos secundarios en departamentos como San Justo, Río Cuarto, Unión, Traslasierra, Tercero Arriba y Punilla).*
-- **Distancia media de traslado:** **160 km ida y vuelta**.  
-  *(Fuente / Metodología de cálculo: Media ponderada conservadora entre cabeceras departamentales del interior y la capital provincial: Carlos Paz 72 km, Jesús María 100 km, Villa María 300 km, Río Cuarto 440 km, San Francisco 420 km).*
-- **Factor de emisión de transporte interurbano:** **$0{,}068\text{ kg CO}_2\text{e / pasajero-km}$**.  
-  *(Fuente oficial: Guía de Factores de Emisión del GHG Protocol [Greenhouse Gas Protocol] y Secretaría de Transporte de la Nación para ómnibus interurbanos).*
-- **Cálculo de emisiones de transporte evitadas:**  
-  $$\text{Emisiones Colectivo Evitadas} = 25.000\text{ traslados} \times 160\text{ km} \times 0{,}068\text{ kg CO}_2\text{e/km} = \mathbf{272.000\text{ kg CO}_2\text{e/año} (272\text{ t CO}_2\text{e/año})}$$  
-  *(Nota complementaria: Si tan solo el 30% de dichos traslados se efectuaba en vehículo particular naftero estándar [factor medio de $0{,}180\text{ kg CO}_2\text{e/km}$], la huella de transporte evitada superaría las **430 toneladas de CO₂e al año**).*
+El mayor beneficio ambiental cuantificable de la plataforma proviene de la **descentralización digital y la eliminación de desplazamientos físicos** en toda la geografía provincial:
+- Al no contarse previamente con validación de alcances en vivo, ni con simulación de grilla del Decreto 257/19 ni con un régimen digital formal de reclamos con seguimiento, miles de docentes del interior provincial debían trasladarse periódicamente hasta Córdoba Capital o cabeceras de inspección departamental para formular consultas, subsanar observaciones de títulos o presentar recursos de reconsideración en mesa de entradas de la Junta.
+- **Inscripciones que evitan traslados del interior:** Se estiman conservadoramente en **25.000 desplazamientos interurbanos anuales evitados** *(el interior provincial concentra más del 45% de los establecimientos secundarios en departamentos como San Justo, Río Cuarto, Unión, San Martín, Traslasierra, Punilla y Colón)*.
+- **Distancia media de traslado:** **160 km ida y vuelta** (media ponderada entre cabeceras departamentales y la capital provincial).
+- **Factor de emisión de transporte interurbano:** **$0{,}068\text{ kg CO}_2\text{e / pasajero-km}$** (Fuente oficial: GHG Protocol y Secretaría de Transporte de la Nación para transporte colectivo interurbano).
+- **Emisiones de transporte evitadas al año:**  
+  $$\text{Emisiones Evitadas} = 25.000\text{ traslados} \times 160\text{ km} \times 0{,}068\text{ kg CO}_2\text{e/km} = \mathbf{272.000\text{ kg CO}_2\text{e/año} \quad (272\text{ t CO}_2\text{e/año})}$$
+
+*(Nota complementaria: Si parte de dichos traslados se realizaba en vehículos particulares a nafta con factor promedio de $0{,}180\text{ kg CO}_2\text{e/km}$, el ahorro real superaría ampliamente las 400 toneladas anuales).*
 
 ---
 
 ### 4.5. Balance Ambiental Neto de la Solución
 
-El balance ambiental consolidado para el volumen real de **67.700 inscripciones anuales** expone la sostenibilidad neta de la continuidad en la despapelización y digitalización impulsada por GID:
+El balance ambiental consolidado expone la contundente sostenibilidad neta de la digitalización impulsada por GID sobre el universo de **67.700 inscripciones anuales**:
 
-| Concepto Ambiental Evaluado | Impacto en Emisiones (t CO₂e / año) | Origen de la Métrica / Metodología | Balance Neto |
+| Concepto Ambiental Evaluado | Impacto en Emisiones (t CO₂e / año) | Origen de la Métrica / Criterio Metodológico | Balance Neto |
 | :--- | :---: | :--- | :---: |
 | **Cómputo en Servidores del Sistema GID (Host Docker)** | $+0{,}58$ | Servidor 200 W (PUE 1,4) $\times$ 8.760 h $\times$ 0,33 kg CO₂e/kWh (CAMMESA) | Emisión |
 | **Consumo Eléctrico de Dispositivos (67.700 inscripciones)** | $+0{,}22$ | 67.700 inscripciones $\times$ 40 min $\times$ 15 W (IEA) $\times$ 0,33 kg CO₂e/kWh | Emisión |
-| **Subtotal Huella Generada por el Software** | **$+0{,}80$** | **Suma de cómputo en servidor y dispositivos para 67.700 inscripciones** | **Costo Ambiental** |
-| **Continuidad de Despapelización en Docentes y Vocales (338.500 hojas)** | $-1{,}69$ | 67.700 inscripciones $\times$ 5 hojas $\times$ 0,005 kg CO₂e/hoja (EPA WARM; $-8{,}46\text{ t}$ vs. histórico total) | Mitigación + Fin de Guarda Física |
-| **Ahorro por Eliminación de Viajes en Transporte (25.000 traslados)** | $-272{,}00$ | 25.000 viajes $\times$ 160 km $\times$ 0,068 kg CO₂e/pasajero-km (GHG Protocol) | Mitigación |
-| **Subtotal Emisiones Evitadas en el Entorno Provincial** | **$-273{,}69$** | **Suma de mitigaciones por despapelización incremental y movilidad** | **Beneficio Ambiental** |
-| **BALANCE AMBIENTAL NETO ANUAL** | **$-272{,}89$** | **Reducción neta anual en la Provincia de Córdoba** | **Neto Positivo (Reducción)** |
+| **Subtotal Huella Generada por el Software** | **$+0{,}80$** | **Cómputo centralizado y dispositivos para todo el ciclo anual** | **Costo Ambiental** |
+| **Continuidad de la Despapelización y Almacenamiento Físico** | **Favorable (Estructural)** | **Erradicación del uso diario de papel y frenado de la acumulación física documental a largo plazo en dependencias de la Junta** | **Beneficio Directo** |
+| **Ahorro por Eliminación de Traslados en Transporte** | $-272{,}00$ | 25.000 viajes evitados $\times$ 160 km $\times$ 0,068 kg CO₂e/pasajero-km (GHG Protocol) | Mitigación |
+| **BALANCE AMBIENTAL NETO ANUAL** | **$-271{,}20$** | **Reducción neta anual certificada en la Provincia de Córdoba** | **Neto Positivo (Reducción)** |
 
 > [!IMPORTANT]
-> **Conclusión del Balance Ambiental:**  
-> 1. **El ahorro directo en papel supera por sí solo el consumo eléctrico total del sistema:** Incluso aislando únicamente la reducción incremental de papel lograda en esta etapa entre docentes y vocales (**$-1{,}69\text{ t CO}_2\text{e/año}$**, sin contar el transporte ni el ahorro edilicio de archivar 34 metros lineales de papel por año), el beneficio ambiental **más que duplica la huella eléctrica completa de servidores y dispositivos de las 67.700 inscripciones ($+0{,}80\text{ t CO}_2\text{e/año}$)**.  
-> 2. **Impacto global superavitario:** Al incorporar la supresión de traslados interurbanos por consultas y reclamos, por cada **1 kg de CO₂e** emitido para operar la infraestructura digital de GID, la Provincia evita la emisión de más de **340 kg de CO₂e**, consolidando el proceso de despapelización y autogestión digital como una política efectiva de sostenibilidad en el Estado Provincial.
+> **Conclusiones del Análisis de Impacto Ambiental:**  
+> 1. **Doble beneficio en despapelización:** GID no solo elimina la necesidad de impresiones cotidianas de control y borradores por parte de docentes y vocales, sino que **resuelve el problema de fondo del almacenamiento físico**: frena la acumulación progresiva de expedientes y biblioratos en papel que debían guardarse, acondicionarse y fumigarse durante años en dependencias públicas.  
+> 2. **Impacto superavitario por movilidad:** El ahorro derivado de evitar 25.000 viajes anuales desde el interior provincial supera en más de **330 veces** la huella eléctrica generada por los servidores y clientes del sistema ($+0{,}80\text{ t CO}_2\text{e}$ vs. $-272\text{ t CO}_2\text{e}$), consolidando a GID como un desarrollo de alto impacto ecológico y eficiencia para el Estado Provincial.
 
+---
 ## 5. RETROSPECTIVA DE PROYECTO
 
 ### 5.1. Propósito y Audiencia

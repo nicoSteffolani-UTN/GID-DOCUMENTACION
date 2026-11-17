@@ -113,3 +113,17 @@ orden «Las que más me convienen» que el navegador recuerda.
 - Tests: `formulario-c.estrategia.test.ts`, `decisiones.service.test.ts`, `__tests__/formulario-c-estrategia.test.ts`,
   `__tests__/decisiones.test.ts`, `zona-util.spec.ts`
 - API: [`docs/api/openapi.yaml`](../api/openapi.yaml)
+
+## Addendum 2026-11-06: se retiran «Armá tu inscripción» y la revisión
+
+Por pedido del JTP, al docente ya no se le muestra si su título habilita una materia, y la propuesta de escuelas perdía sentido sin
+decir por qué sugería cada una. Se eliminan la propuesta y la revisión de la inscripción (pantalla, `/api/formulario-c/propuesta`,
+`/api/formulario-c/revision` y `EstrategiaFormularioC`), y con ellas el nivel por escuela de esa pantalla. Las otras ayudas de este
+ADR siguen vigentes. El selector de zona lo sigue usando el simulador.
+
+## Addendum 2026-11-14: se retira el ajuste de vacantes
+
+Con la consulta de vacantes como el sistema original (addendum del 14/11 en ADR-020), la pantalla ya no muestra cuánto le
+conviene cada vacante («Segura», «Apuesta»…) ni el resumen, porque comparaba con el promedio general de la escuela y no con la
+materia, y mezclaba datos que el original no muestra. Se eliminan el punto 4 de la decisión, `GET /api/simulador/ajuste-vacantes` y
+`getAjusteVacantes` / `nivelEscuela` de `decisiones.service.ts`. Sigue vigente el impacto de los antecedentes pendientes.

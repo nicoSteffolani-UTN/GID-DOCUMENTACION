@@ -71,7 +71,7 @@ Formulario C del lab: **"VACANTES APEX" 2018**. Los promedios del semáforo son 
 ## tuPuntaje del aspirante (contra quién se compara el promedio)
 
 - Con `INTEGRATION_MODE=prod`, la valoración del docente viene de
-  `VT_PSX_PUNTAJES_X_EMPLEADO` (ADR-010) y se expone como `tuPuntaje` (= max de sus filas).
+  `VT_PSX_PUNTAJES_X_EMPLEADO` (ADR-010; desde el 14/11/2026, `T_PUNTAJES_JD`, ver su addendum) y se expone como `tuPuntaje` (= max de sus filas).
 - Como el CUIL demo (`20123456789`) no figura en esas 136 filas del lab, `container.ts`
   resuelve la LOM del mapa con el compuesto **`LomConRespaldoDemo`**: usa el adapter Oracle
   cuando el CUIL tiene valoración y, si no, cae al fixture `puntaje.mock.json`

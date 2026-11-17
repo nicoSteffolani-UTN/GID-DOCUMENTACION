@@ -126,7 +126,7 @@
 ### Épica E13: Gestión de Reclamos, Historial LOM y Analítica
 65. [US-65 — Presentación digital de reclamos de revisión de LOM o antecedentes por el aspirante](./US-65-presentacion-digital-reclamos-revision-lom.md) *(5 SP - P2)*
 66. [US-66 — Bandeja de resolución formal de reclamos para Vocales de la Junta](./US-66-bandeja-resolucion-formal-reclamos-vocal.md) *(5 SP - P2)*
-67. [US-67 — Consulta de historial de inscripciones, postulaciones y resultados de LOM de ciclos anteriores](./US-67-consulta-historial-inscripciones-lom-ciclos-anteriores.md) *(3 SP - P3)*
+67. [US-67 — ~~Consulta de historial de inscripciones y LOM de ciclos anteriores~~ *(Desestimada en demo)*](./US-67-consulta-historial-inscripciones-lom-ciclos-anteriores.md) *(0 SP - Desestimada en demo)*
 68. [US-68 — Visualización de métricas y percentiles anonimizados de competitividad regional](./US-68-visualizacion-metricas-percentiles-competitividad-regional.md) *(5 SP - P3)*
 69. [US-69 — Exportación de reportes operativos de gestión para Vocales de la Junta](./US-69-exportacion-reportes-operativos-gestion-vocales.md) *(3 SP - P3)*
 
@@ -139,7 +139,7 @@
 
 ### Sin Épica: Transversales, Operación e Interoperabilidad
 75. [US-75 — Conmutación transparente de modo de integración (Oracle Lab Productivo vs. Modo Mock) y rótulos de transparencia](./US-75-conmutacion-modo-integracion-oracle-mock-rotulos.md) *(5 SP - P1)*
-76. [US-76 — Parametrización administrativa de ventana de convocatoria anual y ciclo lectivo](./US-76-parametrizacion-ventana-convocatoria-ciclo-lectivo.md) *(3 SP - P2)*
+76. [US-76 — Parametrización administrativa de períodos de convocatoria anual desde el portal](./US-76-parametrizacion-ventana-convocatoria-ciclo-lectivo.md) *(3 SP - P2)*
 77. [US-77 — Monitoreo de salud operativa y diagnóstico de conectividad a bases de datos (`/api/health`)](./US-77-monitoreo-salud-operativa-conectividad-health.md) *(2 SP - P1)*
 78. [US-78 — Resiliencia y degradación elegante ante intermitencias de servicios externos o VPN](./US-78-resiliencia-degradacion-elegante-servicios-externos.md) *(5 SP - P1)*
 79. [US-79 — Diseño adaptable (Responsive) y criterios de accesibilidad web para docentes y vocales](./US-79-diseno-adaptable-responsive-accesibilidad-web.md) *(5 SP - P2)*

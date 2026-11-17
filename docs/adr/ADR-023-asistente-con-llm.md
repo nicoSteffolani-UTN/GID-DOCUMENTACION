@@ -49,7 +49,23 @@ Sumar un **modelo de lenguaje como intérprete** del texto libre, sin cambiar d�
 - Las preguntas conceptuales se limitan a los temas de la lista (se amplía con plantillas); las de datos las cubre el agente, que puede equivocarse en la interpretación aunque no en las cifras.
 - Una pregunta de datos usa entre 2 y 4 llamadas al modelo: con el plan gratuito de Groq el límite por minuto se agota con pocos usuarios simultáneos.
 
+## Addendum (07/11/2026): preguntas fijas, trayectoria y reclamos
+
+- **Preguntas frecuentes sin modelo:** las explicaciones solo llegaban si el modelo las elegía, así que sin clave de Groq no existían. Ahora hay un intent `explicar`: un botón o una regla piden el tema y el texto es siempre el mismo. El modelo sigue resolviendo lo que se escribe distinto.
+- **Temas nuevos:** puntaje estimado, reclamos, reportes y cursos. Se sacan alcance de título e intereses.
+- **Consultas nuevas:** `consultar_trayectoria` (la constancia de Mi perfil) y `consultar_reclamos`. La trayectoria es la única respuesta asíncrona de las reglas, porque consulta al lab: pasa por `responderConLlm` y, si el lab no responde, lo avisa.
+- **Menú:** las opciones traen `grupo` y después de una respuesta se ofrecen pocas, con «Ver todas las opciones».
+- **Se saca:** «Mis intereses», el filtro de vacantes por intereses y el aviso de cada escuela marcada; también la competencia en las materias y el aviso de materias que los títulos no habilitan. Los intereses siguen en Alertas de vacantes y en el mapa.
+- **Aviso nuevo:** cuando la Junta resuelve un reclamo.
+- **Nombre:** el saludo usa el nombre de pila aunque CiDi lo mande en mayúsculas o con el apellido primero.
+
+## Addendum (15/11/2026): modelos de respaldo, contexto y carga guiada
+
+- **Modelos de respaldo:** `GROQ_MODEL` acepta una lista separada por comas, en orden de preferencia (por defecto `openai/gpt-oss-120b,openai/gpt-oss-20b,llama-3.3-70b-versatile`). Si uno responde 429 por cuota, el asistente pasa al siguiente y no vuelve a insistir con el agotado hasta que pase el tiempo indicado. Atenúa la limitación del plan gratuito de Groq.
+- **Contexto del docente:** el agente conoce lo que el docente ya hizo (legajo, inscripción, puntaje) y explica cómo funciona cada pantalla con textos fijos; sigue sin recibir CUIL ni nombre.
+- **Carga guiada de antecedentes (`cargar_antecedente`):** el asistente pregunta dato por dato con las mismas validaciones que el formulario, deja vacíos los opcionales y se puede cancelar. No guarda nada: al terminar abre el legajo con el formulario precargado (`navegar.estado`, sin pasar los datos por la URL). El servidor descarta los valores que no son de la categoría aunque los mande el cliente.
+
 ## Referencias
 
-- Código: `src/server/src/modules/asistente/asistente.llm.ts`, `asistente.service.ts` (`responderConLlm`)
+- Código: `src/server/src/modules/asistente/asistente.llm.ts`, `asistente.service.ts` (`responderConLlm`), `asistente.carga.ts`
 - Configuración: `GROQ_API_KEY`, `GROQ_MODEL` (`src/.env.example`)

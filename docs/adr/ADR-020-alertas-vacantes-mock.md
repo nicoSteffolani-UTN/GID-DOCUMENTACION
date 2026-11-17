@@ -1,7 +1,7 @@
 # ADR-020: Alertas de vacantes (PD-24)
 
-**Estado:** Aceptado (fuente actualizada: `T_PUBLICACIONES` vía `VT_PUBLI_EMPRE_MAT_ASPIRANTES` · mock por defecto)  
-**Actualizado:** 2026-09-28
+**Estado:** Aceptado (fuente: `T_PUBLICACIONES` directo desde el addendum del 14/11; desde ADR-026 el lab es el default y el mock, la alternativa)  
+**Actualizado:** 2026-11-14
 
 ## Contexto
 
@@ -96,12 +96,65 @@ asignatura/cargo y sitio de revista).
   se completan desde `T_PUBLICACIONES` + `T_PSX_TURNOS_CONVOCATORIAS_TTT`.
 - `ORACLE_NOTIF_CONNECT` permite que **sólo las alertas** lean de otra base mientras el
   resto del portal sigue en el lab general (MT4D). Desde 2026-09-30 su **default es MT4T**
-  (`10.250.11.60:1521/mt4t`): la misma consulta devuelve 4 publicaciones del año en MT4T
+  (`<host-de-MT4T>:1521/mt4t`): la misma consulta devuelve 4 publicaciones del año en MT4T
   y 0 en MT4D, por lo que antes las alertas solo se veían en PC con el override en su
   `.env` local. Con `ORACLE_NOTIF_CONNECT=` vacío se vuelve a MT4D.
 
 Pendiente: revisar el mapa, que también usa `T_PUBLICACIONES` para vacantes
 históricas, y decidir si debe ocultarlas.
+
+## Addendum (14/11/2026): consulta como el sistema original y alertas solo de primera y única
+
+**Contexto.** La Junta confirmó (reunión del 13/11) que la «Consulta de vacantes» del sistema original (CiDi → Junta de
+Clasificación Secundaria → Gestionar Vacantes) no tiene botón de postular ni de inscribirse: solo muestra los datos, y la
+inscripción a la vacante es presencial en la escuela. Además, en el año puede haber ~2.000 vacantes. Tipos de
+convocatoria (Instructivo Administrativo 2025 de nivel secundario):
+
+| `NRO_PUBLICACION` | Convocatoria | Quién se puede inscribir |
+|---|---|---|
+| 1 | Primera convocatoria (titularidades) | Los de la LOM de esa escuela (más reubicación, concentración, acrecentamiento, traslados, cambio de cátedra y reingreso, con prioridad) |
+| 2 | Segunda convocatoria (titularidades) | Si la primera no se cubre: todos los inscriptos en la convocatoria, aunque no estén en esa escuela |
+| 3 | Convocatoria única (suplencias y algunos interinatos) | Cualquiera; prioridad para quien ya trabaja en esa escuela |
+
+Cada vacante se publica 3 días hábiles y la escuela recibe la inscripción hasta la primera hora hábil del día siguiente
+al cierre. Lo que no se cubre se designa por fuera del padrón y no aparece en el sistema.
+
+**Decisión.**
+
+1. **Fuente: `EDUCAR.T_PUBLICACIONES` directo** (MT4T), una fila por vacante. Se deja la vista
+   `VT_PUBLI_EMPRE_MAT_ASPIRANTES`, que arma una columna con nombre y DNI de los postulantes. Nunca se leen
+   `T_PUBLICACIONES_ASPIRANTE` ni columnas de usuario; el adaptador rechaza esas fuentes aunque se configuren en
+   `ORACLE_NOTIF_PUBLICACIONES_OBJECT` (default nuevo: `EDUCAR.T_PUBLICACIONES`).
+2. **Filtro:** año en curso, `FEC_BAJA_LOGICA IS NULL`, secundario (`ID_TIPO_NIVEL` '2' o '02'),
+   `NVL(PERTENECE_PIT,'N') <> 'S'` (el PIT está fuera de alcance) y `NRO_PUBLICACION IN (1,2,3)` (los nulos no se
+   muestran). Nombres con el criterio de la vista: escuela de `VT_EMPRESAS_GEDUC_PUBL_X_NIV`; materia o cargo de
+   `T_MATERIAS_JUNTA` ∪ `T_GRADOS_JUNTA` (agrupamiento 08, nivel 13, nivel Junta 2, `ACTIVO_DESIGNACION` S o D).
+   Departamento, localidad y barrio de `GEDUC.VT_EMP_EMPRESAS_DOM`; turno de `T_PSX_TURNOS_CONVOCATORIAS_TTT`
+   ('1' y '02' se comparan por número); horarios de `T_PUBLICACIONES_HORARIO` («Miércoles 12:40 a 15:00», de lunes a
+   domingo). La observación (dirección y horario de presentación) va tal como viene.
+3. **Consulta filtrada y paginada en el servidor.** `GET /api/notificaciones/vacantes` recibe escuela, departamento,
+   localidad, situación de revista, convocatoria y asignatura/cargo, más página y tamaño (20 por defecto, máximo 100), y
+   devuelve el total y los valores de los filtros. Nunca se mandan todas las vacantes al front.
+4. **Vista por defecto: las escuelas del Formulario C.** Desde ahí se cambia a «Todas las escuelas». Sin Formulario C
+   arranca en todas, con un aviso.
+5. **Alertas (campanita y «Mis alertas»): solo primera convocatoria y única.** La segunda se ve en la consulta pero no avisa:
+   la busca el docente. Una vacante es alerta si está abierta, es de primera o única, cumple la situación de revista y la
+   convocatoria elegidas (si eligió) y coincide con cualquiera de sus intereses (escuela, materia o cargo, departamento,
+   localidad o barrio). Sin nada programado no hay alertas; antes la campanita contaba todas las abiertas.
+6. **Programar las alertas** reusa las preferencias de aviso: se suman departamentos, situación de revista y
+   convocatoria (primera o única), y se pueden pausar y reanudar sin perder lo elegido. Migración `017_aviso_programado.sql`
+   (017 porque la 015 y la 016 son del historial de revisión).
+7. **Sin botones de acción sobre la vacante:** se saca «Agregar a mi inscripción anual». Quedan «Ver en el mapa» y, en
+   las alertas, «Marcar como leída» y «Eliminar».
+8. **Foto del lab:** guarda las filas con convocatoria, departamento, horarios y observación (datos de escuelas). Una
+   foto tomada antes no trae la convocatoria y no muestra vacantes: hay que volver a tomarla.
+
+**Consecuencias.**
+
+- Smoke: conteos por convocatoria y situación de revista, y cuántas se excluyen por PIT o sin convocatoria. En MT4T al
+  14/11: 14 publicaciones de secundario del año, 5 del PIT, 9 se muestran (5 de primera, 4 únicas, ninguna de segunda).
+- Duda abierta: «programar» se tomó como elegir qué avisar y pausar. Si la Junta quería un horario o una frecuencia de
+  aviso (p. ej. un resumen diario), queda para otra iteración.
 
 ## Referencias
 

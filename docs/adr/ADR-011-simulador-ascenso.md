@@ -14,7 +14,7 @@ Instancia 1/2 piden un simulador de obtención de puntaje / posición en la LOM,
 ## Decisión
 
 1. Exponer `GET /api/simulador/ascenso` (rol `aspirante`; se mantiene la ruta por compatibilidad).
-2. Fixture `fixtures/simulador-lom.mock.json` con cursos y `puntosEstimados`.
+2. Cursos con `puntosEstimados` de la tabla `curso_sipec` (los tres que más suman; semilla `fixtures/capacitaciones-sugeridas.json`).
 3. Puerto `AscensoSimuladorPort.getSimulacion(cuil)` → puntaje actual + escenarios (base, delta, proyectado).
 4. UI en `/simulador` con banner: datos mock, no es orden oficial.
 

@@ -20,21 +20,30 @@ Decisiones técnicas del portal G24. Nombre: `ADR-<NNN>-<titulo-corto>.md`.
 | 014 | [ADR-014-roles-aspirante-vocal-p2.md](./ADR-014-roles-aspirante-vocal-p2.md) | Roles P2 — US-05 / US-06 |
 | 015 | [ADR-015-padron-oracle-lab.md](./ADR-015-padron-oracle-lab.md) | Padrón + catálogo Form C Oracle lab |
 | 016 | [ADR-016-mapa-vacantes-oracle-lab.md](./ADR-016-mapa-vacantes-oracle-lab.md) | Mapa vacantes Oracle lab |
-| 017 | [ADR-017-sge-legajo-oracle-lab-pendiente.md](./ADR-017-sge-legajo-oracle-lab-pendiente.md) | SGE legajo — bloqueado lab (pendiente JTP) |
-| 018 | [ADR-018-vocal-junta-oracle-lab-pendiente.md](./ADR-018-vocal-junta-oracle-lab-pendiente.md) | Vocal × escuela — bloqueado lab (pendiente JTP) |
+| 017 | [ADR-017-sge-legajo-oracle-lab-pendiente.md](./ADR-017-sge-legajo-oracle-lab-pendiente.md) | SGE legajo: antecedentes ya validados por la Junta desde el lab (addendum 15/10) |
+| 018 | [ADR-018-vocal-junta-oracle-lab-pendiente.md](./ADR-018-vocal-junta-oracle-lab-pendiente.md) | Vocal × escuela — la Junta asigna a mano; reparto provisorio en el portal |
 | 019 | [ADR-019-lom-secundaria-mapa-oracle-lab.md](./ADR-019-lom-secundaria-mapa-oracle-lab.md) | Promedio LOM secundaria (top 5 docentes por escuela, solo `T_DETALLES_INSC_JD`) — semáforo mapa (datos históricos) |
-| 020 | [ADR-020-alertas-vacantes-mock.md](./ADR-020-alertas-vacantes-mock.md) | Alertas de vacantes (mock demo; en prod `T_PUBLICACIONES` vía `VT_PUBLI_EMPRE_MAT_ASPIRANTES`) |
+| 020 | [ADR-020-alertas-vacantes-mock.md](./ADR-020-alertas-vacantes-mock.md) | Vacantes desde `T_PUBLICACIONES` directo, como la consulta del sistema original: filtros y paginación en el servidor, alertas solo de 1ra y única (addendum 14/11) |
 | 021 | [ADR-021-contenedores-docker.md](./ADR-021-contenedores-docker.md) | Contenerización con Docker y Docker Compose |
 | 022 | [ADR-022-asistente-docente-propio.md](./ADR-022-asistente-docente-propio.md) | Asistente docente (chatbot) propio del portal |
 | 023 | [ADR-023-asistente-con-llm.md](./ADR-023-asistente-con-llm.md) | Asistente docente con modelo de lenguaje (Groq) como intérprete del texto libre |
 | 024 | [ADR-024-simulador-carrera-docente.md](./ADR-024-simulador-carrera-docente.md) | Simulador de carrera docente: cursos, años y títulos hacia las escuelas a las que llega |
-| 025 | [ADR-025-ayudas-para-decidir.md](./ADR-025-ayudas-para-decidir.md) | Ayudas para decidir: propuesta y revisión del Formulario C, antecedentes pendientes, vacantes que convienen y radio de viaje |
-| 026 | [ADR-026-datos-lab-por-defecto.md](./ADR-026-datos-lab-por-defecto.md) | Datos del lab Oracle por defecto; mock como alternativa |
+| 025 | [ADR-025-ayudas-para-decidir.md](./ADR-025-ayudas-para-decidir.md) | Ayudas para decidir: propuesta y revisión del Formulario C, antecedentes pendientes y radio de viaje (la propuesta, la revisión y el ajuste de vacantes se retiraron) |
+| 026 | [ADR-026-datos-lab-por-defecto.md](./ADR-026-datos-lab-por-defecto.md) | Datos del lab Oracle por defecto; sin modo de datos de ejemplo desde el 05/11 (addendum) |
 | 027 | [ADR-027-valoracion-decreto-257-19.md](./ADR-027-valoracion-decreto-257-19.md) | Valoración de títulos y antecedentes según el Dto. 257/19 (reemplaza el baremo provisorio) |
-| 028 | [ADR-028-persistencia-postgresql.md](./ADR-028-persistencia-postgresql.md) | Persistencia de los datos del portal en PostgreSQL detrás de una interfaz (lab Oracle de solo lectura) |
+| 028 | [ADR-028-persistencia-postgresql.md](./ADR-028-persistencia-postgresql.md) | Persistencia de los datos del portal en PostgreSQL detrás de una interfaz (lab Oracle de solo lectura); catálogos de referencia en la base (addendum 04/11) |
 | 029 | [ADR-029-escritura-tablas-junta.md](./ADR-029-escritura-tablas-junta.md) | Escritura en las tablas de la Junta en desarrollo y prueba (espejo del legajo y del Formulario C, lista cerrada) |
 | 030 | [ADR-030-antiguedad-docente-perfil.md](./ADR-030-antiguedad-docente-perfil.md) | Antigüedad docente, cargos vigentes y trayectoria en el perfil (PEOPLENET.M4CBA_VW_CONC_DIR + M4CBA_VW_CONSE_CAR) |
 | 031 | [ADR-031-ingreso-cidi.md](./ADR-031-ingreso-cidi.md) | Ingreso con Ciudadano Digital (nivel 2, rol de vocal y cierre por inactividad) |
-| 032 | [ADR-032-auditoria-accesos-cambios.md](./ADR-032-auditoria-accesos-cambios.md) | Auditoría de accesos y cambios en PostgreSQL, solo agregar registros |
+| 032 | [ADR-032-auditoria-accesos-cambios.md](./ADR-032-auditoria-accesos-cambios.md) | Auditoría de accesos y cambios en PostgreSQL, solo agregar registros; detalle legible de cada cambio (addendum 13/11) |
+| 033 | [ADR-033-valoracion-titulo-vocal.md](./ADR-033-valoracion-titulo-vocal.md) | Valoración del título por el vocal: seis casos de la Junta, sugerencia y reemplazo en el puntaje |
+| 034 | [ADR-034-correccion-antecedentes-vocal.md](./ADR-034-correccion-antecedentes-vocal.md) | Corrección de antecedentes por el vocal: solo datos, con motivo y visible para el docente |
+| 035 | [ADR-035-reclamos-docente.md](./ADR-035-reclamos-docente.md) | Reclamos del docente |
+| 036 | [ADR-036-periodos-convocatoria.md](./ADR-036-periodos-convocatoria.md) | Períodos de la convocatoria desde el portal |
+| 037 | [ADR-037-comparacion-inscriptos.md](./ADR-037-comparacion-inscriptos.md) | Comparación con los inscriptos en «Mis puntajes»: por materia y departamento, k ≥ 10; addendum 15/11: LOM recortada de cada escuela con nombres, como el original |
+| 038 | [ADR-038-administrador-junta.md](./ADR-038-administrador-junta.md) | Administrador de la Junta: períodos y asignación manual de escuelas base |
+| 039 | [ADR-039-ajustes-puntaje-vocal.md](./ADR-039-ajustes-puntaje-vocal.md) | Ajustes del puntaje tras la reunión con el vocal: acumulación, cursos, caducidad y antigüedad |
+| 040 | [ADR-040-historial-revision.md](./ADR-040-historial-revision.md) | Historial de revisión del legajo: registro de eventos por aspirante, solo agregar, con lo anterior reconstruido |
+| 041 | [ADR-041-vocales-estadisticas-administrador.md](./ADR-041-vocales-estadisticas-administrador.md) | Alta y baja de vocales, estadísticas por vocal y consulta de la auditoría, para el administrador de la Junta |
 
 Origen: Instancia 2 — Sprint 0 (G24). Mantener alineados con la tabla ADR del documento de entrega y con `SCM.md`.

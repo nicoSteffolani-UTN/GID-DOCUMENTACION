@@ -14,7 +14,7 @@ Instancia 2 US-07 exige validar si el título del aspirante habilita la postulac
 2. **Dump ministerial (sin Oracle live):** `INTEGRATION_MODE=sql` + `ALCANCE_SQL_PATH` al archivo `TITULOS_ALCANCES` (fuera del repo). Adapter `SqlFileAlcanceAdapter`.
 3. **Lab / prod Oracle:** `INTEGRATION_MODE=prod` + VPN + TNS (canónico) o Easy Connect.
    - Canónico: `TNS_ADMIN` (carpeta con `tnsnames.ora`), `DB_USER`, `DB_PASSWORD`, `DB_ALIAS` (`MT4D` / `MT4T`).
-   - Alternativa: `ORACLE_HOST` + `ORACLE_PORT` + `ORACLE_SERVICE` + `ORACLE_USER` / `ORACLE_PASSWORD` (p. ej. `10.250.11.53:1521/mt4d`).
+   - Alternativa: `ORACLE_HOST` + `ORACLE_PORT` + `ORACLE_SERVICE` + `ORACLE_USER` / `ORACLE_PASSWORD` (p. ej. `<host-de-MT4D>:1521/mt4d`).
    - Adapter `OracleAlcanceAdapter` lee al arrancar (`initIntegrations`) la vista lab `VT_MAT_GRADO_X_TITULO` (configurable con `ORACLE_ALCANCE_OBJECT`). El dump `TITULOS_ALCANCES` no existe como tabla en MT4D EDUCAR.
 4. **Comportamiento MVP:** ~~bloquear postulación si el título no habilita el ítem~~. Reemplazado por el addendum del 2026-09-28: se advierte y el aspirante puede inscribirse igual.
 5. Abstracción en servicio `ValidadorService` para cambiar fuente sin tocar Form C. Matching de título normalizado (acentos, punto final).
@@ -62,6 +62,17 @@ igual evalúa esas inscripciones (sin título habilitante). Instancia 2 ya conte
 **Consecuencias:** la UI marca esos ítems como «sin título habilitante» (chip y constancia impresa). El endpoint
 `POST /api/validador/habilitacion` no cambia.
 
+## Addendum — títulos escritos distinto (2026-11-05)
+
+La Junta y el alcance escriben distinto el mismo título: «Profesor de Educación Física» y «Profesor en Educación Física
+(R Regl…)». Si el nombre no aparece igual, se busca sin resolución, ciclo ni palabras de enlace y valen todas las variantes.
+En el contraste de ADR-033 esto llevó la coincidencia con la Junta del 54,7% al 67,9%.
+
+## Addendum — nivel del alcance (2026-11-05)
+
+El alcance conserva el nivel que trae la columna `ALCANCE` y el nombre de la materia. `AlcanceFila.nivel` le gana al nivel
+que se deduce del nombre del título. La sugerencia y la decisión del vocal están en ADR-033.
+
 ## Addendum — tres competencias y alcance híbrido (2026-10-02)
 
 **Problema.** En el dump `TITULOS_ALCANCES` (PDF ministerial convertido a SQL) la columna `ALCANCE` trae tres
@@ -94,3 +105,14 @@ archivo, hay sentencias partidas en varias líneas (el parser lee una por línea
 
 **Consecuencias.** El puntaje estimado distingue las tres competencias. El dump no se versiona: cada integrante
 define su ruta local en `src/.env`. Sin el dump, en `prod` toda materia habilitada figura como «título habilitante».
+
+## Addendum 2026-11-06: el docente no ve la competencia en la inscripción
+
+Por pedido del JTP, en la pantalla de inscripción y en su constancia se saca todo lo que diga si el título habilita: competencia,
+solapas del catálogo y avisos. Cada ítem dice solo si es asignatura o cargo. El servidor sigue calculando `habilitado` y
+`tipoCompetencia`: el vocal los sigue viendo y el catálogo los usa para ordenar, sin decirlo. Se puede inscribir igual en cualquier
+materia, como antes (ver el cambio de #49). El resto de los módulos se ajusta aparte.
+
+## Addendum (15/11/2026): catálogo de títulos más amplio que el alcance
+
+El catálogo que ve el docente al cargar títulos suma los títulos vigentes de `T_TITULOS` que no tienen alcance en `VT_MAT_GRADO_X_TITULO`, sin habilitar ninguna materia; también existe el título «Otro» sin código. Ninguno de los dos habilita nada en el Formulario C: el aviso de alcance los trata como cualquier título que no habilita. Detalle en ADR-017 (addendum del 15/11/2026).

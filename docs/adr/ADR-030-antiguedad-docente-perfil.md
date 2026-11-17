@@ -76,3 +76,31 @@ en el lab (smoke por `SCO_ID_HR` sobre vistas con columnas de fecha de fin):
 - (−) La duración por escuela va de la primera alta a la última baja sin descontar huecos; la antigüedad oficial sigue siendo
   el total de Meta4.
 - (−) Algunas escuelas viejas o de otros niveles no tienen nombre en `CENTRO_TRAB` ni en el padrón: se muestra el código.
+
+## Addendum 2026-11-05 — constancia de servicios validada con datos reales
+
+**Relevamiento.** `EDUCAR.VT_CONTANCIAS_SERVICIO` es la constancia oficial. Su definición lee `PEOPLENET.M4CBA_VW_CONSE_PUB`, con `FEC_INICIO` y `FEC_FIN` (un fin en un año futuro es vigente) y el filtro `ID_GRADO IS NOT NULL AND HORAS <> 0`. Contraste con 40 docentes de Media:
+
+- La trayectoria usaba `DT_START` y `DT_END`, las fechas del registro en Meta4: solo 771 de 1.307 períodos de la constancia (59%) coincidían. Con `FEC_INICIO` y `FEC_FIN`, 1.240 (95%). Se pasa a esas fechas.
+- `M4CBA_VW_CONSE_PUB` con ese filtro reproduce las 1.307 filas de la constancia.
+- `ANTIG_DOCENTE` también trae `Adm.`, que no es antigüedad docente y se mostraba como tal. El total ahora solo toma `Doc.`. En 38 de 40 docentes coincide con la fila `Antiguedad` de la constancia.
+- `SCO_ID_HR IN ('1'||dni, '2'||dni)` podía mezclar personas: 3 DNI de 71.227 están en dos claves. El prefijo del CUIL decide en 20 (→ 1) y 27 (→ 2), verificado en 184 casos sin excepción; con 23 y 24 se buscan las dos.
+
+**Decisión.**
+
+- `AntiguedadDocentePort.getConstanciaServicios(cuil)`: la constancia completa, para el vocal, con `ORACLE_CONSTANCIA_OBJECT`. Separa cargos y horas, zona, ausentismos, reconocimientos de servicios y la antigüedad que informa la constancia. `GET /api/junta/aspirantes/:cuil/constancia-servicios`, solo para el vocal de la escuela base.
+- La trayectoria del perfil sigue en `M4CBA_VW_CONSE_CAR`, porque su código de escuela coincide con todos los cargos vigentes (66 de 66; `STD_ID_LEG_ENT` de la constancia, 61), pero con las fechas oficiales.
+
+**Consecuencias.** El docente ve su trayectoria por escuela y el vocal la constancia detallada; salen de vistas distintas de Meta4 y `M4CBA_VW_CONSE_CAR` trae más períodos que la constancia. Ausentismos y reconocimientos usan `FEC_CERT_SERV` y `DT_END`, porque no traen `FEC_INICIO`.
+
+## Addendum (06/11/2026): el docente ve su constancia completa
+
+**Contexto.** La trayectoria del perfil mostraba solo escuelas, períodos y cargos, mientras que el vocal veía horas, materia, curso, acto, movimiento, zona, ausentismos y reconocimientos.
+
+**Decisión.**
+
+- `GET /api/perfil/constancia-servicios` devuelve la constancia de `M4CBA_VW_CONSE_PUB` del docente logueado: el CUIL sale del token. Reemplaza en pantalla a la lista de `M4CBA_VW_CONSE_CAR`, que sigue alimentando el resumen de antigüedad del perfil.
+- Docente y vocal usan las mismas tablas (`app-constancia-tablas`), con filtros por texto, estado, escuela y situación de revista. Lo vigente va primero.
+- «Imprimir trayectoria» genera un reporte con lo que dejan los filtros. Sin filtros sale la constancia completa; con filtros, solo los cargos filtrados y la lista de filtros aplicados, porque zona, ausentismos y reconocimientos no se filtran.
+
+**Consecuencias.** La pantalla y el resumen de antigüedad salen de vistas distintas, así que los números pueden no coincidir exactamente (ver la nota de arriba sobre la cantidad de períodos). El filtro por escuela usa el nombre, porque el código de la constancia no siempre coincide con el padrón. El docente ve sus propios ausentismos, que antes solo veía el vocal.

@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GID — Presentación del Circuito y Arquitectura de Negocio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Paleta Identidad Gobierno de Córdoba / GID */
+      --cba-azul-gob: #003366;
+      --cba-azul-profundo: #042547;
+      --cba-cielo: #0786c7;
+      --cba-cielo-suave: #e0f2fe;
+      --cba-naranja: #e65100;
+      --cba-naranja-hover: #f57c00;
+      --cba-naranja-suave: #fff3e0;
+      
+      /* Neutros y Superficies */
+      --bg-deck: #0b1523;
+      --bg-slide: #ffffff;
+      --border-slide: #e2e8f0;
+      --text-dark: #0f172a;
+      --text-muted: #475569;
+      --text-light: #94a3b8;
+      
+      /* Roles */
+      --role-admin: #d97706;
+      --role-admin-bg: #fef3c7;
+      --role-docente: #0284c7;
+      --role-docente-bg: #e0f2fe;
+      --role-vocal: #7c3aed;
+      --role-vocal-bg: #ede9fe;
+      --role-sistema: #059669;
+      --role-sistema-bg: #d1fae5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+      background: var(--bg-deck);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Barra Superior de Control */
+    .deck-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      background: rgba(4, 37, 71, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+      z-index: 100;
+      color: #ffffff;
+    }
+
+    .deck-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .deck-brand span {
+      color: #38bdf8;
+    }
+
+    .deck-progress-container {
+      flex: 1;
+      max-width: 400px;
+      margin: 0 1.5rem;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .deck-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cba-cielo), var(--cba-naranja));
+      width: 0%;
+      transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .slide-counter {
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 600;
+      min-width: 65px;
+      text-align: center;
+    }
+
+    .btn-deck {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-deck:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #ffffff;
+    }
+
+    /* Contenedor del Slide (Relación 16:9) */
+    .deck-stage {
+      width: 94vw;
+      max-width: 1320px;
+      aspect-ratio: 16 / 9;
+      position: relative;
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Diapositiva Individual */
+    .slide {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-slide);
+      border-radius: 16px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.3);
+      padding: 3rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.97) translateY(12px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Franja Decorativa Superior del Slide */
+    .slide-accent-strip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--cba-azul-gob) 0%, var(--cba-cielo) 60%, var(--cba-naranja) 100%);
+    }
+
+    /* Encabezado del Slide */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 1rem;
+    }
+
+    .slide-tag {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--cba-cielo);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .slide-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--cba-azul-profundo);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .slide-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      font-weight: 400;
+    }
+
+    .slide-role-chip {
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    /* Contenido Principal de Diapositiva */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Footer del Slide */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.25rem;
+      border-top: 1px solid #f1f5f9;
+      font-size: 0.78rem;
+      color: var(--text-light);
+    }
+
+    .slide-footer strong {
+      color: var(--cba-azul-gob);
+    }
+
+    /* Botones de Navegación Flotantes en Pantalla */
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 50;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .nav-arrow:hover {
+      background: var(--cba-naranja);
+      border-color: var(--cba-naranja);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-arrow.prev { left: 1rem; }
+    .nav-arrow.next { right: 1rem; }
+
+    /* Estilos Específicos: Slide 1 (Portada) */
+    .cover-slide {
+      background: radial-gradient(circle at 80% 20%, rgba(7, 134, 199, 0.15) 0%, transparent 60%), #ffffff;
+      justify-content: space-between;
+    }
+
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #f0f9ff;
+      border: 1.5px solid #bae6fd;
+      color: var(--cba-cielo);
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .cover-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 900;
+      color: var(--cba-azul-profundo);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .cover-title span {
+      background: linear-gradient(135deg, var(--cba-cielo) 0%, var(--cba-azul-gob) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-desc {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 820px;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+    }
+
+    .cover-meta-item h4 {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-light);
+      margin-bottom: 0.35rem;
+    }
+
+    .cover-meta-item p {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--cba-azul-gob);
+    }
+
+    /* Grillas y Componentes de Contenido */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .grid-3col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      height: 100%;
+      align-items: stretch;
+    }
+
+    .deck-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+      position: relative;
+    }
+
+    .deck-card.highlight {
+      border-color: var(--cba-cielo);
+      background: #f8fbff;
+    }
+
+    .deck-card h3 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--cba-azul-gob);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .deck-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .deck-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.35rem;
+    }
+
+    .deck-card ul li {
+      font-size: 0.84rem;
+      color: var(--text-dark);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .deck-card ul li::before {
+      content: "✔";
+      color: var(--cba-cielo);
+      font-weight: 900;
+      font-size: 0.8rem;
+      margin-top: 0.15rem;
+    }
+
+    .card-stat-box {
+      margin-top: auto;
+      background: #ffffff;
+      border: 1px solid #dbe4ef;
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-stat-box strong {
+      color: var(--cba-azul-gob);
+    }
+
+    /* Diagrama de Pipeline Secuencial en Slide 3 */
+    .pipeline-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      height: 100%;
+      position: relative;
+    }
+
+    .pipeline-node {
+      flex: 1;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .pipeline-node:hover {
+      border-color: var(--cba-cielo);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 51, 102, 0.08);
+    }
+
+    .pipeline-node-num {
+      font-size: 0.72rem;
+      font-weight: 900;
+      color: var(--cba-cielo);
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .pipeline-node-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--cba-azul-gob);
+      line-height: 1.25;
+    }
+
+    .pipeline-node-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .pipeline-arrow {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      font-weight: 900;
+      padding: 0 0.15rem;
+    }
+
+    /* Mini Ayuda Teclado */
+    .deck-shortcuts {
+      position: fixed;
+      bottom: 12px;
+      color: #64748b;
+      font-size: 0.72rem;
+      letter-spacing: 0.03em;
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .deck-shortcuts kbd {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      color: #cbd5e1;
+      font-family: inherit;
+    }
+
+    /* Responsive scaling */
+    @media (max-width: 1024px) {
+      .deck-stage {
+        aspect-ratio: auto;
+        min-height: 85vh;
+      }
+      .slide {
+        padding: 2rem;
+        position: relative;
+        display: none;
+      }
+      .slide.active {
+        display: flex;
+      }
+      .grid-2col, .grid-3col, .pipeline-wrapper {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+      }
+      .pipeline-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior de Control y Progreso -->
+  <div class="deck-top-bar">
+    <div class="deck-brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#38bdf8">
+        <path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4zm-1 6h2v2h-2V8zm0 4h2v6h-2v-6z"/>
+      </svg>
+      GID • <span>Gestión Integral Docente</span>
+    </div>
+
+    <div class="deck-progress-container">
+      <div class="deck-progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="deck-controls">
+      <span class="slide-counter" id="slideCounter">1 / 8</span>
+      <button class="btn-deck" onclick="prevSlide()" title="Anterior (Flecha Izq)">◀</button>
+      <button class="btn-deck" onclick="nextSlide()" title="Siguiente (Flecha Der)">▶</button>
+      <button class="btn-deck" onclick="toggleFullscreen()" title="Pantalla Completa (F)">⛶</button>
+    </div>
+  </div>
+
+  <!-- Flechas Laterales de Navegación -->
+  <button class="nav-arrow prev" onclick="prevSlide()" title="Diapositiva Anterior">◀</button>
+  <button class="nav-arrow next" onclick="nextSlide()" title="Siguiente Diapositiva">▶</button>
+
+  <!-- Escenario de Diapositivas (16:9) -->
+  <div class="deck-stage" id="deckStage">
+
+    <!-- SLIDE 1: PORTADA INSTITUCIONAL -->
+    <div class="slide cover-slide active" data-slide="1">
+      <div class="slide-accent-strip"></div>
+      <div>
+        <div class="cover-badge">
+          <span>🏛️</span> Gobierno de la Provincia de Córdoba • Ministerio de Educación
+        </div>
+        <h1 class="cover-title">
+          Sistema de Gestión<br>
+          <span>Integral Docente (GID)</span>
+        </h1>
+        <p class="cover-desc">
+          Presentación del circuito integral de procesos de negocio, roles operativos y arquitectura normativa (Decreto 257/19) para la valoración de títulos, antecedentes y orden de mérito en nivel secundario.
+        </p>
+      </div>
+
+      <div class="cover-meta-grid">
+        <div class="cover-meta-item">
+          <h4>Cátedra</h4>
+          <p>Proyecto Final (5K3)</p>
+        </div>
+        <div class="cover-meta-item">
+          <h4>Equipo</h4>
+          <p>Grupo 24 — UTN FRC</p>
+        </div>
+        <div class="cover-meta-item">
+          <h4>Instancia</h4>
+          <p>Defensa de Regularidad</p>
+        </div>
+        <div class="cover-meta-item">
+          <h4>Ciclo Objetivo</h4>
+          <p>Convocatoria 2026</p>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Junta de Clasificación Secundaria • Córdoba</div>
+        <div>Usa las flechas <strong>[← / →]</strong> o la barra para navegar</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: ACTORES Y ROLES DEL SISTEMA -->
+    <div class="slide" data-slide="2">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Ecosistema Humano y Operativo</div>
+          <h2 class="slide-title">Actores y Perfiles de Usuario</h2>
+          <p class="slide-subtitle">Distribución de responsabilidades y accesos según el modelo de seguridad del sistema</p>
+        </div>
+        <div class="slide-role-chip" style="background: #f1f5f9; color: var(--cba-azul-gob);">
+          👥 3 Perfiles Clave
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-3col">
+          
+          <div class="deck-card">
+            <span class="slide-role-chip" style="background: var(--role-admin-bg); color: var(--role-admin); width: fit-content;">
+              ⚙️ Administrador / Sistemas
+            </span>
+            <h3>Gobierno y Parametría</h3>
+            <p>Responsable técnico y operativo de la Junta de Clasificación.</p>
+            <ul>
+              <li>Parametriza fechas de convocatoria (ABIERTO / CERRADO / FECHAS).</li>
+              <li>Asigna escuelas base y distribuye la carga entre vocales.</li>
+              <li>Monitorea avance global y audita el log inmutable de accesos y cambios.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>🛡️</span> Módulos: <strong>Períodos, Asignación, Auditoría</strong>
+            </div>
+          </div>
+
+          <div class="deck-card highlight">
+            <span class="slide-role-chip" style="background: var(--role-docente-bg); color: var(--role-docente); width: fit-content;">
+              🎓 Docente Postulante
+            </span>
+            <h3>Autogestión y Transparencia</h3>
+            <p>Postulante a cargos interinos y suplentes en nivel secundario.</p>
+            <ul>
+              <li>Autenticación segura federada con CiDi (Nivel 2).</li>
+              <li>Consulta de alcances de títulos sin bloqueos artificiales.</li>
+              <li>Carga antecedentes con validación de caducidad y simula su grilla.</li>
+              <li>Visualiza LOM provisoria/definitiva y deduce reclamos fundados.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📱</span> Módulos: <strong>Mis Títulos, Inscripción, Mis Puntajes</strong>
+            </div>
+          </div>
+
+          <div class="deck-card">
+            <span class="slide-role-chip" style="background: var(--role-vocal-bg); color: var(--role-vocal); width: fit-content;">
+              ⚖️ Vocal de Junta
+            </span>
+            <h3>Fiscalización y Valoración</h3>
+            <p>Miembro calificador oficial de la Junta de Clasificación.</p>
+            <ul>
+              <li>Bandeja de expedientes asignada por escuela base.</li>
+              <li>Auditoría de probanzas aplicando topes de ley (Decreto 257/19).</li>
+              <li>Ajustes de puntaje y correcciones con justificación obligatoria.</li>
+              <li>Tratamiento y dictamen resolutivo de reclamos docentes.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📑</span> Módulos: <strong>Bandeja de Calificación, Reclamos</strong>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Control de Acceso basado en Roles (RBAC) y CUIL administrativo</div>
+        <div>Instancia 2 • Sprint 0</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: EL FLUJO COMPLETO EN PIPELINE -->
+    <div class="slide" data-slide="3">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Visión Macro del Negocio</div>
+          <h2 class="slide-title">Circuito de Convocatoria de Punta a Punta</h2>
+          <p class="slide-subtitle">Secuencia cronológica de las 6 etapas del proceso oficial de clasificación docente</p>
+        </div>
+        <div class="slide-role-chip" style="background: var(--cba-cielo-suave); color: var(--cba-cielo);">
+          ⏱️ Flujo Secuencial
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="pipeline-wrapper">
+          
+          <div class="pipeline-node">
+            <span class="pipeline-node-num">01</span>
+            <div class="pipeline-node-title">Apertura Web</div>
+            <p class="pipeline-node-desc">Admin configura fechas y asigna escuelas a vocales.</p>
+          </div>
+
+          <div class="pipeline-arrow">➔</div>
+
+          <div class="pipeline-node" style="border-color: var(--cba-cielo);">
+            <span class="pipeline-node-num">02</span>
+            <div class="pipeline-node-title">Inscripción Docente</div>
+            <p class="pipeline-node-desc">Docente valida alcances, sube antecedentes y simula grilla.</p>
+          </div>
+
+          <div class="pipeline-arrow">➔</div>
+
+          <div class="pipeline-node">
+            <span class="pipeline-node-num">03</span>
+            <div class="pipeline-node-title">Valoración Vocal</div>
+            <p class="pipeline-node-desc">Vocal revisa probanzas y aplica topes Decreto 257/19.</p>
+          </div>
+
+          <div class="pipeline-arrow">➔</div>
+
+          <div class="pipeline-node">
+            <span class="pipeline-node-num">04</span>
+            <div class="pipeline-node-title">LOM Provisoria</div>
+            <p class="pipeline-node-desc">Publicación de listas preliminares y desglose de puntaje.</p>
+          </div>
+
+          <div class="pipeline-arrow">➔</div>
+
+          <div class="pipeline-node">
+            <span class="pipeline-node-num">05</span>
+            <div class="pipeline-node-title">Reclamos</div>
+            <p class="pipeline-node-desc">Docente apela con adjuntos; vocal emite resolución.</p>
+          </div>
+
+          <div class="pipeline-arrow">➔</div>
+
+          <div class="pipeline-node" style="border-color: #10b981; background: #f0fdf4;">
+            <span class="pipeline-node-num" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">06</span>
+            <div class="pipeline-node-title">LOM Definitiva</div>
+            <p class="pipeline-node-desc">Orden oficial vinculante, percentiles y ranking escolar.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>Motor de Reglas Decreto 257/19 integrado de forma continua</div>
+        <div>Trazabilidad transversal en base de datos</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: FASE 1 Y 2 (APERTURA E INSCRIPCIÓN) -->
+    <div class="slide" data-slide="4">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Etapa Inicial del Proceso</div>
+          <h2 class="slide-title">1. Apertura y 2. Autogestión Docente</h2>
+          <p class="slide-subtitle">Preparación de la convocatoria y experiencia de postulación sin fricción</p>
+        </div>
+        <div class="slide-role-chip" style="background: var(--role-docente-bg); color: var(--role-docente);">
+          🎓 Docente & ⚙️ Administrador
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2col">
+          
+          <div class="deck-card">
+            <span class="slide-role-chip" style="background: var(--role-admin-bg); color: var(--role-admin); width: fit-content;">
+              Fase 1 • Gobierno
+            </span>
+            <h3>Gestión de Períodos y Escuelas</h3>
+            <p>Control centralizado de la ventana temporal de la convocatoria.</p>
+            <ul>
+              <li><strong>Estados dinámicos:</strong> Período ABIERTO, CERRADO o programado por FECHAS (US-76).</li>
+              <li><strong>Balanceo de carga:</strong> Asignación granular de escuelas base a los vocales de Junta (US-81).</li>
+              <li><strong>Cierre automático:</strong> Congelamiento de envíos al término del plazo para consolidar listas.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>🎯</span> Garantiza equidad operativa y orden administrativo
+            </div>
+          </div>
+
+          <div class="deck-card highlight">
+            <span class="slide-role-chip" style="background: var(--role-docente-bg); color: var(--role-docente); width: fit-content;">
+              Fase 2 • Experiencia Docente
+            </span>
+            <h3>Inscripción con Asistencia Inteligente</h3>
+            <p>Proceso ágil con validaciones automáticas y feedback en vivo.</p>
+            <ul>
+              <li><strong>Flujo no bloqueante (US-09):</strong> Si el título no registra incumbencia cargada, advierte pero permite postular bajo "Sin título habilitante".</li>
+              <li><strong>Filtro de caducidad:</strong> Descarte automático de antecedentes con más de 10 años al cierre (Decreto 257/19).</li>
+              <li><strong>Previsualización (US-10):</strong> Desglose en tiempo real de títulos, antigüedad y cursos antes de confirmar el envío.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📄</span> Cero trámites presenciales; 100% digital vía CiDi
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>ADR-009 (Alcance no bloqueante) • ADR-027 (Decreto 257/19) • ADR-036 (Períodos web)</div>
+        <div>Gestión Integral Docente</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: FASE 3 (VALORACIÓN EN JUNTA) -->
+    <div class="slide" data-slide="5">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Etapa Central de Fiscalización</div>
+          <h2 class="slide-title">3. Valoración y Calificación en Junta</h2>
+          <p class="slide-subtitle">Auditoría experta de antecedentes con estricto apego al marco legal</p>
+        </div>
+        <div class="slide-role-chip" style="background: var(--role-vocal-bg); color: var(--role-vocal);">
+          ⚖️ Vocal Calificador
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2col">
+          
+          <div class="deck-card">
+            <h3>Bandeja de Entrada por Escuela Base</h3>
+            <p>Organización segmentada del trabajo de calificación de legajos.</p>
+            <ul>
+              <li>Acceso exclusivo a los docentes inscriptos en su escuela asignada (ADR-018).</li>
+              <li>Visualización sincronizada de datos de SGE, títulos y probanzas adjuntas.</li>
+              <li>Gestión de estados del legajo: <em>Pendiente, En Revisión, Calificado, Observado</em>.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📁</span> Aislamiento de expedientes para evitar solapamientos
+            </div>
+          </div>
+
+          <div class="deck-card highlight">
+            <h3>Aplicación de Topes (Decreto 257/19)</h3>
+            <p>Motor de reglas que asiste al vocal y bloquea excesos de puntaje.</p>
+            <ul>
+              <li><strong>Acumulación de títulos:</strong> Tope máximo de <strong>30 puntos</strong> (requiere verificación de carga horaria >1600 h).</li>
+              <li><strong>Cursos y capacitaciones:</strong> Tope máximo acumulable de <strong>60 puntos</strong>.</li>
+              <li><strong>Ajustes fundados (ADR-039):</strong> El vocal puede sumar/restar puntos especiales dejando justificación obligatoria para auditoría.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>⚖️</span> Trazabilidad total de cada dictamen emitido
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>ADR-033 (Valoración títulos) • ADR-034 (Corrección antecedentes) • ADR-039 (Ajustes de puntaje)</div>
+        <div>Transparencia y Seguridad Jurídica</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: FASE 4 Y 5 (PROVISORIA Y RECLAMOS) -->
+    <div class="slide" data-slide="6">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Garantía del Debido Proceso</div>
+          <h2 class="slide-title">4. LOM Provisoria y 5. Régimen de Reclamos</h2>
+          <p class="slide-subtitle">Publicidad de resultados y canal formal de apelación administrativa</p>
+        </div>
+        <div class="slide-role-chip" style="background: var(--cba-cielo-suave); color: var(--cba-cielo);">
+          📢 Publicidad & ✍️ Instancia Recursiva
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2col">
+          
+          <div class="deck-card">
+            <span class="slide-role-chip" style="background: var(--role-sistema-bg); color: var(--role-sistema); width: fit-content;">
+              Etapa 4 • Publicación
+            </span>
+            <h3>LOM Provisoria con Desglose</h3>
+            <p>Exposición pública preliminar para control de los postulantes.</p>
+            <ul>
+              <li>Cálculo automatizado integrando antigüedad, títulos y antecedentes aprobados.</li>
+              <li>Desglose detallado de ítems otorgados vs. descartados o topados.</li>
+              <li>Disponibilidad de la ventana reglamentaria de días hábiles para impugnaciones.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📢</span> Publicación transparente y accesible en línea
+            </div>
+          </div>
+
+          <div class="deck-card highlight">
+            <span class="slide-role-chip" style="background: var(--role-vocal-bg); color: var(--role-vocal); width: fit-content;">
+              Etapa 5 • Resolución
+            </span>
+            <h3>Tratamiento Digital de Reclamos</h3>
+            <p>Canal formalizado para resolver disconformidades de puntaje (ADR-035).</p>
+            <ul>
+              <li><strong>Presentación docente:</strong> Selección del concepto observado, fundamentación y carga de nueva probanza documental.</li>
+              <li><strong>Dictamen del vocal:</strong> Análisis del expediente con opción de <em>Admitir</em> (rectifica puntaje) o <em>Rechazar</em> (resolución fundada).</li>
+              <li><strong>Notificación:</strong> El docente recibe la resolución formal en su panel personal.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>🤝</span> Erradica reclamos informales o extravíos de papel
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>ADR-035 (Módulo de Reclamos) • Decreto 257/19 • Procedimiento Administrativo Córdoba</div>
+        <div>Gestión Integral Docente</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: FASE 6 (LOM DEFINITIVA Y COMPETITIVIDAD) -->
+    <div class="slide" data-slide="7">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Resultados Finales y Analítica</div>
+          <h2 class="slide-title">6. LOM Definitiva y Competitividad</h2>
+          <p class="slide-subtitle">Orden de mérito vinculante y analítica avanzada para la toma de decisiones</p>
+        </div>
+        <div class="slide-role-chip" style="background: #ecfdf5; color: #047857;">
+          🏆 Lista Oficial Vinculante
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2col">
+          
+          <div class="deck-card">
+            <h3>LOM Oficial Definitiva (US-16)</h3>
+            <p>Listado formal e inalterable para la cobertura de suplencias e interinatos.</p>
+            <ul>
+              <li>Generación definitiva por escuela, asignatura y zona geográfica.</li>
+              <li>Resolución de empates según criterios reglamentarios vigentes.</li>
+              <li>Publicación oficial abierta para consulta de directivos y supervisores.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>🏛️</span> Instrumento legal base para las asambleas docentes
+            </div>
+          </div>
+
+          <div class="deck-card highlight">
+            <h3>Métricas de Competitividad (US-68)</h3>
+            <p>Analítica personalizada en «Mis puntajes» con resguardo ético (ADR-037).</p>
+            <ul>
+              <li><strong>Percentiles departamentales:</strong> Ubicación estadística del docente dentro de su región y disciplina mediante <code>PERCENTILE_CONT</code>.</li>
+              <li><strong>Privacidad diferencial ($k \ge 10$):</strong> Si una asignatura tiene menos de 10 inscriptos en el departamento, se omite el percentil para proteger la identidad.</li>
+              <li><strong>Ranking escolar:</strong> Visualización pública de los primeros 12 puestos de la escuela base para proyectar posibilidades reales de designación.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📊</span> Información estratégica para el desarrollo profesional
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>ADR-037 (Comparación de inscriptos y snippet LOM) • Oracle MT4D • Privacidad $k$-anonymity</div>
+        <div>Gestión Integral Docente</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: GOBERNANZA Y AUDITORÍA (SISTEMAS) -->
+    <div class="slide" data-slide="8">
+      <div class="slide-accent-strip"></div>
+      <div class="slide-header">
+        <div>
+          <div class="slide-tag">Seguridad y Fiscalización Integral</div>
+          <h2 class="slide-title">Gobernanza, Seguridad y Auditoría</h2>
+          <p class="slide-subtitle">Monitoreo operativo y trazabilidad inmutable de cada acción en el sistema</p>
+        </div>
+        <div class="slide-role-chip" style="background: var(--role-admin-bg); color: var(--role-admin);">
+          🛡️ Seguridad & Control
+        </div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2col">
+          
+          <div class="deck-card">
+            <h3>Auditoría Inmutable (US-23 / US-73)</h3>
+            <p>Log forense persistido en PostgreSQL para máxima transparencia (ADR-032).</p>
+            <ul>
+              <li><strong>AUDITORIA_ACCESO:</strong> Registra cada inicio de sesión, IP, agente y rol utilizado.</li>
+              <li><strong>AUDITORIA_CAMBIO:</strong> Guarda el estado anterior y nuevo (JSON diff) de cada modificación en títulos, puntajes o dictámenes.</li>
+              <li><strong>Panel exclusivo del Administrador:</strong> Búsqueda y filtrado multicriterio por CUIL, fecha, tipo de operación y vocal interviniente (ADR-041).</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>🔒</span> Respaldado en esquema relacional seguro en Supabase
+            </div>
+          </div>
+
+          <div class="deck-card highlight">
+            <h3>Tablero de Control de Gestión (ADR-041)</h3>
+            <p>Métricas en tiempo real para la conducción de la Junta.</p>
+            <ul>
+              <li><strong>Avance de revisión:</strong> Porcentaje de legajos calificados vs. pendientes en toda la provincia.</li>
+              <li><strong>Rendimiento por vocal:</strong> Distribución de expedientes dictaminados por calificador.</li>
+              <li><strong>Monitoreo de reclamos:</strong> Cantidad de apelaciones abiertas, admitidas y denegadas para anticipar cuellos de botella.</li>
+            </ul>
+            <div class="card-stat-box">
+              <span>📈</span> Gestión basada en evidencia y datos en tiempo real
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <div>ADR-032 (Auditoría PostgreSQL) • ADR-038 (Admin Junta) • ADR-041 (Vocales y estadísticas)</div>
+        <div>UTN FRC • Proyecto Final 5K3 Grupo 24</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Ayuda de Teclado Flotante -->
+  <div class="deck-shortcuts">
+    <span><kbd>←</kbd> <kbd>→</kbd> Navegar diapositivas</span>
+    <span><kbd>Espacio</kbd> Avanzar</span>
+    <span><kbd>F</kbd> Pantalla completa</span>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = document.querySelectorAll('.slide').length;
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const slides = document.querySelectorAll('.slide');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        if (idx + 1 === currentSlide) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+
+      // Actualizar contador y barra
+      slideCounter.textContent = `${currentSlide} / ${totalSlides}`;
+      const progressPercent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function goToSlide(num) {
+      if (num >= 1 && num <= totalSlides) {
+        currentSlide = num;
+        updateSlide();
+      }
+    }
+
+    // Atajos de teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'Home') {
+        goToSlide(1);
+      } else if (e.key === 'End') {
+        goToSlide(totalSlides);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      }
+    });
+
+    // Pantalla completa
+    function toggleFullscreen() {
+      const stage = document.body;
+      if (!document.fullscreenElement) {
+        if (stage.requestFullscreen) {
+          stage.requestFullscreen();
+        } else if (stage.webkitRequestFullscreen) {
+          stage.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Inicializar estado
+    updateSlide();
+  </script>
+</body>
+</html>
